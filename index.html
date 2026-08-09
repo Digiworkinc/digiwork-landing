@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digiwork Inc - Cyber-Creative Intelligence</title>
+    <title>Digiwork Inc - Creative Digital Studio</title>
     
     <!-- Google Fonts: Sora -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -133,18 +133,32 @@
                 </div>
                 
                 <!-- Desktop Menu -->
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-8">
-                        <a href="#about" class="hover:text-brand-neon transition-colors px-3 py-2 text-sm font-medium">About</a>
-                        <a href="#services" class="hover:text-brand-neon transition-colors px-3 py-2 text-sm font-medium">Services</a>
-                        <a href="#showcase" class="hover:text-brand-neon transition-colors px-3 py-2 text-sm font-medium">Showcase</a>
-                        <a href="#contact" class="bg-brand-neon hover:bg-purple-700 text-white px-5 py-2 rounded-full text-sm font-medium transition-all shadow-[0_0_10px_rgba(138,43,226,0.4)] hover:shadow-[0_0_20px_rgba(138,43,226,0.6)]">Hubungi Kami</a>
+                <div class="hidden md:flex items-center">
+                    <div class="ml-10 flex items-baseline space-x-6">
+                        <a href="#about" class="hover:text-brand-neon transition-colors px-3 py-2 text-sm font-medium" data-i18n="nav_about">About</a>
+                        <a href="#services" class="hover:text-brand-neon transition-colors px-3 py-2 text-sm font-medium" data-i18n="nav_services">Services</a>
+                        <a href="#showcase" class="hover:text-brand-neon transition-colors px-3 py-2 text-sm font-medium" data-i18n="nav_showcase">Showcase</a>
+                        <a href="#contact" class="bg-brand-neon hover:bg-purple-700 text-white px-5 py-2 rounded-full text-sm font-medium transition-all shadow-[0_0_10px_rgba(138,43,226,0.4)] hover:shadow-[0_0_20px_rgba(138,43,226,0.6)]" data-i18n="nav_contact">Hubungi Kami</a>
+                    </div>
+                    <!-- Desktop Language Selector -->
+                    <div class="ml-6 border-l border-white/20 pl-6">
+                        <select class="language-selector bg-black/40 border border-white/20 text-white text-sm rounded-lg focus:ring-brand-neon focus:border-brand-neon block p-1.5 outline-none cursor-pointer">
+                            <option value="id">🇮🇩 ID</option>
+                            <option value="en">🇬🇧 EN</option>
+                            <option value="ja">🇯🇵 JP</option>
+                        </select>
                     </div>
                 </div>
 
                 <!-- Mobile menu button -->
-                <div class="md:hidden flex items-center">
-                    <button id="mobile-menu-btn" class="text-gray-300 hover:text-white focus:outline-none p-2">
+                <div class="md:hidden flex items-center gap-4">
+                    <!-- Mobile Language Selector -->
+                    <select class="language-selector bg-black/40 border border-white/20 text-white text-sm rounded-lg focus:ring-brand-neon focus:border-brand-neon block p-1 outline-none cursor-pointer">
+                        <option value="id">ID</option>
+                        <option value="en">EN</option>
+                        <option value="ja">JP</option>
+                    </select>
+                    <button id="mobile-menu-btn" class="text-gray-300 hover:text-white focus:outline-none p-1">
                         <i class="ph ph-list text-2xl"></i>
                     </button>
                 </div>
@@ -154,10 +168,10 @@
         <!-- Mobile Menu Panel -->
         <div id="mobile-menu" class="hidden md:hidden glass-panel mx-4 mt-2 rounded-xl overflow-hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="#about" class="block hover:bg-brand-neon/20 px-3 py-2 rounded-md text-base font-medium">About</a>
-                <a href="#services" class="block hover:bg-brand-neon/20 px-3 py-2 rounded-md text-base font-medium">Services</a>
-                <a href="#showcase" class="block hover:bg-brand-neon/20 px-3 py-2 rounded-md text-base font-medium">Showcase</a>
-                <a href="#contact" class="block text-brand-neon font-bold px-3 py-2 rounded-md text-base">Hubungi Kami</a>
+                <a href="#about" class="block hover:bg-brand-neon/20 px-3 py-2 rounded-md text-base font-medium" data-i18n="nav_about">About</a>
+                <a href="#services" class="block hover:bg-brand-neon/20 px-3 py-2 rounded-md text-base font-medium" data-i18n="nav_services">Services</a>
+                <a href="#showcase" class="block hover:bg-brand-neon/20 px-3 py-2 rounded-md text-base font-medium" data-i18n="nav_showcase">Showcase</a>
+                <a href="#contact" class="block text-brand-neon font-bold px-3 py-2 rounded-md text-base" data-i18n="nav_contact">Hubungi Kami</a>
             </div>
         </div>
     </nav>
@@ -170,31 +184,31 @@
             <div class="text-center z-10 max-w-4xl mx-auto">
                 <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel mb-8 border border-brand-neon/30 text-brand-light text-sm font-medium animate-pulse">
                     <span class="w-2 h-2 rounded-full bg-brand-neon"></span>
-                    Cyber-Creative Intelligence
+                    <span data-i18n="hero_badge">Creative Digital Studio</span>
                 </div>
                 
                 <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
-                    <span class="block">Kreativitas</span>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-neon to-purple-400 neon-text">Tanpa Batas</span>
+                    <span class="block text-4xl md:text-5xl mb-2" data-i18n="hero_title_1">We turn imagination into</span>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-neon to-purple-400 neon-text" data-i18n="hero_title_2">Digital Experiences</span>
                 </h1>
                 
-                <p class="mt-4 text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-                    Menjembatani desain kreatif dan keunggulan teknologi. Kami membangun masa depan digital untuk gereja, institusi pendidikan, dan bisnis Anda.
+                <p class="mt-4 text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed" data-i18n="hero_desc">
+                    Sebagai studio digital strategis, kami mengintegrasikan estetika desain visual dengan keunggulan rekayasa teknologi untuk menciptakan produk, sistem, dan identitas digital skala industri.
                 </p>
                 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
                     <a href="#services" class="inline-flex items-center justify-center gap-2 bg-brand-neon text-white px-8 py-4 rounded-full font-bold transition-all hover:bg-purple-600 hover:scale-105 shadow-[0_0_20px_rgba(138,43,226,0.4)]">
-                        Eksplorasi Layanan <i class="ph ph-arrow-right font-bold"></i>
+                        <span data-i18n="hero_btn_1">Eksplorasi Layanan</span> <i class="ph ph-arrow-right font-bold"></i>
                     </a>
                     <a href="#showcase" class="inline-flex items-center justify-center gap-2 glass-panel hover:bg-white/5 text-white px-8 py-4 rounded-full font-bold transition-all hover:scale-105 border border-white/10 hover:border-brand-neon/50">
-                        Lihat Portofolio
+                        <span data-i18n="hero_btn_2">Lihat Portofolio</span>
                     </a>
                 </div>
             </div>
 
             <!-- Scroll indicator -->
             <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50 animate-bounce">
-                <span class="text-xs uppercase tracking-widest">Scroll</span>
+                <span class="text-xs uppercase tracking-widest" data-i18n="hero_scroll">Scroll</span>
                 <i class="ph ph-arrow-down text-xl"></i>
             </div>
         </section>
@@ -207,16 +221,16 @@
                     <div class="reveal">
                         <h2 class="text-3xl md:text-4xl font-bold mb-6 flex items-center gap-3">
                             <i class="ph-fill ph-info text-brand-neon"></i>
-                            Tentang Digiwork
+                            <span data-i18n="about_title">Tentang Digiwork</span>
                         </h2>
                         <div class="glass-panel p-8 rounded-3xl relative overflow-hidden group">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-brand-neon/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-brand-neon/20 transition-all duration-500"></div>
                             
-                            <p class="text-gray-300 leading-relaxed mb-6 text-lg">
-                                Didirikan pada tahun <span class="text-brand-neon font-bold">2009</span> oleh <strong class="text-white">Eleazar Agung Nugroho</strong>, Digiwork Inc lahir dari visi untuk mengintegrasikan nilai-nilai kristiani dengan transformasi digital modern.
+                            <p class="text-gray-300 leading-relaxed mb-6 text-lg" data-i18n="about_p1">
+                                Berawal dari passion seorang desainer dan developer, kini Digiwork Inc telah bertransformasi menjadi sebuah <strong>Creative Digital Studio</strong> profesional yang dipimpin oleh <strong class="text-white">Eleazar Agung Nugroho</strong> sejak tahun <span class="text-brand-neon font-bold">2009</span>.
                             </p>
-                            <p class="text-gray-400 leading-relaxed">
-                                Kami bukan sekadar agensi; kami adalah mitra strategis Anda dalam membangun ekosistem digital yang bermakna, profesional, dan berdampak luas.
+                            <p class="text-gray-400 leading-relaxed" data-i18n="about_p2">
+                                Memadukan seni desain visual dengan logika teknologi mutakhir, kami bukan sekadar penyedia jasa lepas, melainkan mitra strategis untuk membangun dan mengelola ekosistem digital bisnis Anda.
                             </p>
                         </div>
                     </div>
@@ -224,19 +238,19 @@
                     <div class="space-y-8 reveal" style="transition-delay: 200ms;">
                         <div class="glass-panel p-8 rounded-3xl border-l-4 border-l-brand-neon hover:translate-x-2 transition-transform duration-300">
                             <h3 class="text-2xl font-bold mb-3 flex items-center gap-2">
-                                <i class="ph-fill ph-eye text-brand-neon"></i> Visi
+                                <i class="ph-fill ph-eye text-brand-neon"></i> <span data-i18n="vision_title">Visi</span>
                             </h3>
-                            <p class="text-gray-300">Menjadi pelopor inovasi digital yang berpusat pada nilai kebenaran, memberdayakan komunitas dan bisnis menuju keunggulan teknologi global.</p>
+                            <p class="text-gray-300" data-i18n="vision_desc">Menjadi pelopor inovasi digital yang berpusat pada nilai kebenaran, memberdayakan komunitas dan bisnis menuju keunggulan teknologi global.</p>
                         </div>
                         
                         <div class="glass-panel p-8 rounded-3xl border-l-4 border-l-purple-400 hover:translate-x-2 transition-transform duration-300">
                             <h3 class="text-2xl font-bold mb-3 flex items-center gap-2">
-                                <i class="ph-fill ph-rocket-launch text-purple-400"></i> Misi
+                                <i class="ph-fill ph-rocket-launch text-purple-400"></i> <span data-i18n="mission_title">Misi</span>
                             </h3>
                             <ul class="text-gray-300 space-y-2 list-disc list-inside marker:text-brand-neon">
-                                <li>Menyediakan solusi desain kreatif berkualitas tinggi.</li>
-                                <li>Membangun infrastruktur web yang andal dan aman.</li>
-                                <li>Mendukung transformasi digital UMKM dan institusi rohani.</li>
+                                <li data-i18n="mission_1">Menyediakan solusi desain kreatif berkualitas tinggi.</li>
+                                <li data-i18n="mission_2">Membangun infrastruktur web yang andal dan aman.</li>
+                                <li data-i18n="mission_3">Mendukung transformasi digital UMKM dan institusi rohani.</li>
                             </ul>
                         </div>
                     </div>
@@ -248,100 +262,55 @@
         <section id="services" class="py-24 relative bg-brand-dark/50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16 reveal">
-                    <h2 class="text-sm font-bold tracking-widest text-brand-neon uppercase mb-2">Layanan Kami</h2>
-                    <h3 class="text-4xl md:text-5xl font-bold">Solusi Digital Komprehensif</h3>
+                    <h2 class="text-sm font-bold tracking-widest text-brand-neon uppercase mb-2" data-i18n="srv_subtitle">Tiga Pilar Studio</h2>
+                    <h3 class="text-4xl md:text-5xl font-bold" data-i18n="srv_title">Layanan Digital Terpadu</h3>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    
-                    <div class="glass-panel p-6 rounded-2xl hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(138,43,226,0.15)] transition-all duration-300 group reveal">
-                        <div class="w-12 h-12 rounded-xl bg-brand-dark border border-brand-neon/30 flex items-center justify-center mb-4 group-hover:bg-brand-neon group-hover:text-white transition-colors text-brand-neon text-2xl">
-                            <i class="ph ph-shopping-cart"></i>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- CREATE -->
+                    <div class="glass-panel p-8 rounded-3xl hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(138,43,226,0.15)] transition-all duration-300 group reveal border-t-4 border-t-purple-400">
+                        <div class="w-16 h-16 rounded-2xl bg-brand-dark border border-brand-neon/30 flex items-center justify-center mb-6 group-hover:bg-brand-neon group-hover:text-white transition-colors text-brand-neon text-4xl">
+                            <i class="ph ph-palette"></i>
                         </div>
-                        <h4 class="text-xl font-bold mb-2">E-Commerce</h4>
-                        <p class="text-gray-400 text-sm">Platform penjualan online modern dengan pengalaman belanja yang mulus.</p>
+                        <h4 class="text-3xl font-bold mb-4 tracking-widest text-white">CREATE</h4>
+                        <p class="text-gray-400 text-sm mb-8 leading-relaxed" data-i18n="srv_create_desc">Merancang identitas visual dan karya seni digital yang memukau untuk mengkomunikasikan pesan brand Anda dengan kuat.</p>
+                        <ul class="space-y-4 text-gray-300 font-medium">
+                            <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-brand-neon text-xl"></i> Branding</li>
+                            <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-brand-neon text-xl"></i> Graphic Design</li>
+                            <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-brand-neon text-xl"></i> Illustration</li>
+                            <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-brand-neon text-xl"></i> Motion</li>
+                        </ul>
                     </div>
 
-                    <div class="glass-panel p-6 rounded-2xl hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(138,43,226,0.15)] transition-all duration-300 group reveal" style="transition-delay: 50ms;">
-                        <div class="w-12 h-12 rounded-xl bg-brand-dark border border-brand-neon/30 flex items-center justify-center mb-4 group-hover:bg-brand-neon group-hover:text-white transition-colors text-brand-neon text-2xl">
-                            <i class="ph ph-books"></i>
+                    <!-- DEVELOP -->
+                    <div class="glass-panel p-8 rounded-3xl hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(138,43,226,0.15)] transition-all duration-300 group reveal border-t-4 border-t-blue-500" style="transition-delay: 100ms;">
+                        <div class="w-16 h-16 rounded-2xl bg-brand-dark border border-blue-500/30 flex items-center justify-center mb-6 group-hover:bg-blue-500 group-hover:text-white transition-colors text-blue-500 text-4xl">
+                            <i class="ph ph-laptop"></i>
                         </div>
-                        <h4 class="text-xl font-bold mb-2">Online Library</h4>
-                        <p class="text-gray-400 text-sm">Sistem manajemen perpustakaan digital untuk institusi pendidikan.</p>
+                        <h4 class="text-3xl font-bold mb-4 tracking-widest text-white">DEVELOP</h4>
+                        <p class="text-gray-400 text-sm mb-8 leading-relaxed" data-i18n="srv_dev_desc">Membangun arsitektur digital dan sistem fungsional yang stabil, aman, serta mudah dikembangkan (scalable).</p>
+                        <ul class="space-y-4 text-gray-300 font-medium">
+                            <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-blue-500 text-xl"></i> Website</li>
+                            <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-blue-500 text-xl"></i> Web Application</li>
+                            <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-blue-500 text-xl"></i> E-Commerce</li>
+                            <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-blue-500 text-xl"></i> Digital System</li>
+                        </ul>
                     </div>
 
-                    <div class="glass-panel p-6 rounded-2xl hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(138,43,226,0.15)] transition-all duration-300 group reveal" style="transition-delay: 100ms;">
-                        <div class="w-12 h-12 rounded-xl bg-brand-dark border border-brand-neon/30 flex items-center justify-center mb-4 group-hover:bg-brand-neon group-hover:text-white transition-colors text-brand-neon text-2xl">
-                            <i class="ph ph-browser"></i>
+                    <!-- DIGITALIZE -->
+                    <div class="glass-panel p-8 rounded-3xl hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(138,43,226,0.15)] transition-all duration-300 group reveal border-t-4 border-t-pink-500" style="transition-delay: 200ms;">
+                        <div class="w-16 h-16 rounded-2xl bg-brand-dark border border-pink-500/30 flex items-center justify-center mb-6 group-hover:bg-pink-500 group-hover:text-white transition-colors text-pink-500 text-4xl">
+                            <i class="ph ph-rocket-launch"></i>
                         </div>
-                        <h4 class="text-xl font-bold mb-2">Web Apps</h4>
-                        <p class="text-gray-400 text-sm">Aplikasi berbasis web kustom untuk kebutuhan operasional bisnis Anda.</p>
+                        <h4 class="text-3xl font-bold mb-4 tracking-widest text-white">DIGITALIZE</h4>
+                        <p class="text-gray-400 text-sm mb-8 leading-relaxed" data-i18n="srv_dig_desc">Mentransformasikan bisnis Anda menuju otomatisasi modern dengan eksekusi dan pemasaran digital yang terarah.</p>
+                        <ul class="space-y-4 text-gray-300 font-medium">
+                            <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-pink-500 text-xl"></i> Digital Products</li>
+                            <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-pink-500 text-xl"></i> Online Business</li>
+                            <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-pink-500 text-xl"></i> Automation</li>
+                            <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-pink-500 text-xl"></i> Digital Marketing</li>
+                        </ul>
                     </div>
-
-                    <div class="glass-panel p-6 rounded-2xl hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(138,43,226,0.15)] transition-all duration-300 group reveal" style="transition-delay: 150ms;">
-                        <div class="w-12 h-12 rounded-xl bg-brand-dark border border-brand-neon/30 flex items-center justify-center mb-4 group-hover:bg-brand-neon group-hover:text-white transition-colors text-brand-neon text-2xl">
-                            <i class="ph ph-bezier-curve"></i>
-                        </div>
-                        <h4 class="text-xl font-bold mb-2">Branding</h4>
-                        <p class="text-gray-400 text-sm">Identitas visual yang kuat untuk membedakan merek Anda di pasaran.</p>
-                    </div>
-
-                    <div class="glass-panel p-6 rounded-2xl hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(138,43,226,0.15)] transition-all duration-300 group reveal" style="transition-delay: 200ms;">
-                        <div class="w-12 h-12 rounded-xl bg-brand-dark border border-brand-neon/30 flex items-center justify-center mb-4 group-hover:bg-brand-neon group-hover:text-white transition-colors text-brand-neon text-2xl">
-                            <i class="ph ph-film-strip"></i>
-                        </div>
-                        <h4 class="text-xl font-bold mb-2">Motion Graphics</h4>
-                        <p class="text-gray-400 text-sm">Animasi visual dinamis untuk kampanye pemasaran yang menarik.</p>
-                    </div>
-
-                    <div class="glass-panel p-6 rounded-2xl hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(138,43,226,0.15)] transition-all duration-300 group reveal" style="transition-delay: 250ms;">
-                        <div class="w-12 h-12 rounded-xl bg-brand-dark border border-brand-neon/30 flex items-center justify-center mb-4 group-hover:bg-brand-neon group-hover:text-white transition-colors text-brand-neon text-2xl">
-                            <i class="ph ph-share-network"></i>
-                        </div>
-                        <h4 class="text-xl font-bold mb-2">Social Media</h4>
-                        <p class="text-gray-400 text-sm">Manajemen dan strategi konten untuk platform media sosial.</p>
-                    </div>
-
-                    <div class="glass-panel p-6 rounded-2xl hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(138,43,226,0.15)] transition-all duration-300 group reveal" style="transition-delay: 300ms;">
-                        <div class="w-12 h-12 rounded-xl bg-brand-dark border border-brand-neon/30 flex items-center justify-center mb-4 group-hover:bg-brand-neon group-hover:text-white transition-colors text-brand-neon text-2xl">
-                            <i class="ph ph-device-mobile"></i>
-                        </div>
-                        <h4 class="text-xl font-bold mb-2">UI/UX Design</h4>
-                        <p class="text-gray-400 text-sm">Antarmuka intuitif dan pengalaman pengguna yang memanjakan.</p>
-                    </div>
-
-                    <div class="glass-panel p-6 rounded-2xl hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(138,43,226,0.15)] transition-all duration-300 group reveal" style="transition-delay: 350ms;">
-                        <div class="w-12 h-12 rounded-xl bg-brand-dark border border-brand-neon/30 flex items-center justify-center mb-4 group-hover:bg-brand-neon group-hover:text-white transition-colors text-brand-neon text-2xl">
-                            <i class="ph ph-speaker-hifi"></i>
-                        </div>
-                        <h4 class="text-xl font-bold mb-2">Audio Production</h4>
-                        <p class="text-gray-400 text-sm">Penyuntingan suara dan musik untuk kebutuhan multimedia.</p>
-                    </div>
-                    
-                    <div class="glass-panel p-6 rounded-2xl hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(138,43,226,0.15)] transition-all duration-300 group reveal" style="transition-delay: 400ms;">
-                        <div class="w-12 h-12 rounded-xl bg-brand-dark border border-brand-neon/30 flex items-center justify-center mb-4 group-hover:bg-brand-neon group-hover:text-white transition-colors text-brand-neon text-2xl">
-                            <i class="ph ph-code"></i>
-                        </div>
-                        <h4 class="text-xl font-bold mb-2">API Integration</h4>
-                        <p class="text-gray-400 text-sm">Konektivitas sistem cerdas untuk efisiensi alur kerja.</p>
-                    </div>
-
-                    <div class="glass-panel p-6 rounded-2xl hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(138,43,226,0.15)] transition-all duration-300 group reveal" style="transition-delay: 450ms;">
-                        <div class="w-12 h-12 rounded-xl bg-brand-dark border border-brand-neon/30 flex items-center justify-center mb-4 group-hover:bg-brand-neon group-hover:text-white transition-colors text-brand-neon text-2xl">
-                            <i class="ph ph-database"></i>
-                        </div>
-                        <h4 class="text-xl font-bold mb-2">Cloud Hosting</h4>
-                        <p class="text-gray-400 text-sm">Penyimpanan dan server yang aman untuk aplikasi Anda.</p>
-                    </div>
-
-                    <div class="glass-panel p-6 rounded-2xl hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(138,43,226,0.15)] transition-all duration-300 group reveal lg:col-span-2 xl:col-span-2" style="transition-delay: 500ms;">
-                        <div class="w-12 h-12 rounded-xl bg-brand-dark border border-brand-neon/30 flex items-center justify-center mb-4 group-hover:bg-brand-neon group-hover:text-white transition-colors text-brand-neon text-2xl">
-                            <i class="ph ph-robot"></i>
-                        </div>
-                        <h4 class="text-xl font-bold mb-2">AI Implementation</h4>
-                        <p class="text-gray-400 text-sm">Pemanfaatan kecerdasan buatan untuk otomatisasi dan analisis cerdas bagi bisnis Anda, memaksimalkan efisiensi operasional.</p>
-                    </div>
-
                 </div>
             </div>
         </section>
@@ -349,7 +318,7 @@
         <!-- Expertise / Tools -->
         <section class="py-16 border-y border-white/5 bg-black/20 overflow-hidden">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <p class="text-center text-sm font-medium text-gray-500 mb-8 uppercase tracking-widest">Alat & Teknologi yang Kami Kuasai</p>
+                <p class="text-center text-sm font-medium text-gray-500 mb-8 uppercase tracking-widest" data-i18n="tools_title">Alat & Teknologi yang Kami Kuasai</p>
                 
                 <div class="flex space-x-12 animate-[scroll_20s_linear_infinite] w-max opacity-60 hover:opacity-100 transition-opacity">
                     <!-- Set 1 -->
@@ -374,11 +343,11 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 reveal">
                     <div>
-                        <h2 class="text-sm font-bold tracking-widest text-brand-neon uppercase mb-2">Portofolio & Showcase</h2>
-                        <h3 class="text-4xl md:text-5xl font-bold">Karya Digital Kami</h3>
+                        <h2 class="text-sm font-bold tracking-widest text-brand-neon uppercase mb-2" data-i18n="swc_subtitle">Portofolio & Showcase</h2>
+                        <h3 class="text-4xl md:text-5xl font-bold" data-i18n="swc_title">Karya Digital Kami</h3>
                     </div>
                     <a href="https://digiwork.web.id/showcase/" target="_blank" rel="noopener noreferrer" class="mt-4 md:mt-0 inline-flex items-center gap-2 bg-brand-neon/20 hover:bg-brand-neon border border-brand-neon/50 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all shadow-[0_0_15px_rgba(138,43,226,0.3)]">
-                        <span>Buka Full Showcase</span>
+                        <span data-i18n="swc_btn">Buka Full Showcase</span>
                         <i class="ph ph-arrow-square-out text-lg"></i>
                     </a>
                 </div>
@@ -391,8 +360,8 @@
                                 <i class="ph-fill ph-globe"></i>
                             </div>
                             <div>
-                                <h4 class="text-2xl font-bold text-white">Website & Web App Showcase</h4>
-                                <p class="text-gray-400 text-sm">Pengembangan situs web modern, responsif, dan performa tinggi</p>
+                                <h4 class="text-2xl font-bold text-white" data-i18n="swc_web_title">Website & Web App Showcase</h4>
+                                <p class="text-gray-400 text-sm" data-i18n="swc_web_desc">Pengembangan situs web modern, responsif, dan performa tinggi</p>
                             </div>
                         </div>
                     </div>
@@ -408,13 +377,13 @@
                             </div>
                             <div class="p-6">
                                 <h5 class="text-xl font-bold mb-2 group-hover:text-brand-light transition-colors">Griya Bugar</h5>
-                                <p class="text-gray-300 text-sm mb-6 line-clamp-3">Platform reservasi layanan pijat dan kebugaran dengan sistem booking online.</p>
+                                <p class="text-gray-300 text-sm mb-6 line-clamp-3" data-i18n="swc_desc_griyabugar">Platform reservasi layanan pijat dan kebugaran dengan sistem booking online.</p>
                                 <div class="flex items-center justify-between pt-4 border-t border-white/10">
                                     <div class="flex gap-2 text-xs text-gray-400 font-mono">
                                         <span>Web App</span>
                                     </div>
                                     <a href="https://digiwork.web.id/griyabugar/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-neon hover:text-white transition-colors bg-brand-neon/10 hover:bg-brand-neon px-3 py-1.5 rounded-lg border border-brand-neon/30">
-                                        Preview Live <i class="ph ph-arrow-square-out"></i>
+                                        <span data-i18n="swc_preview">Preview Live</span> <i class="ph ph-arrow-square-out"></i>
                                     </a>
                                 </div>
                             </div>
@@ -430,13 +399,13 @@
                             </div>
                             <div class="p-6">
                                 <h5 class="text-xl font-bold mb-2 group-hover:text-brand-light transition-colors">Career Kickstart</h5>
-                                <p class="text-gray-300 text-sm mb-6 line-clamp-3">Portal pengembangan karir komprehensif untuk para pencari kerja (job seeker).</p>
+                                <p class="text-gray-300 text-sm mb-6 line-clamp-3" data-i18n="swc_desc_career">Portal pengembangan karir komprehensif untuk para pencari kerja (job seeker).</p>
                                 <div class="flex items-center justify-between pt-4 border-t border-white/10">
                                     <div class="flex gap-2 text-xs text-gray-400 font-mono">
                                         <span>E-Learning</span>
                                     </div>
                                     <a href="https://digiwork.web.id/careerkickstart/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-neon hover:text-white transition-colors bg-brand-neon/10 hover:bg-brand-neon px-3 py-1.5 rounded-lg border border-brand-neon/30">
-                                        Preview Live <i class="ph ph-arrow-square-out"></i>
+                                        <span data-i18n="swc_preview">Preview Live</span> <i class="ph ph-arrow-square-out"></i>
                                     </a>
                                 </div>
                             </div>
@@ -452,13 +421,13 @@
                             </div>
                             <div class="p-6">
                                 <h5 class="text-xl font-bold mb-2 group-hover:text-brand-light transition-colors">Kinibalu Resort</h5>
-                                <p class="text-gray-300 text-sm mb-6 line-clamp-3">Sistem reservasi kamar eksklusif untuk resort premium terintegrasi.</p>
+                                <p class="text-gray-300 text-sm mb-6 line-clamp-3" data-i18n="swc_desc_resort">Sistem reservasi kamar eksklusif untuk resort premium terintegrasi.</p>
                                 <div class="flex items-center justify-between pt-4 border-t border-white/10">
                                     <div class="flex gap-2 text-xs text-gray-400 font-mono">
                                         <span>Booking</span>
                                     </div>
                                     <a href="https://digiwork.web.id/kinibaluresort/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-neon hover:text-white transition-colors bg-brand-neon/10 hover:bg-brand-neon px-3 py-1.5 rounded-lg border border-brand-neon/30">
-                                        Preview Live <i class="ph ph-arrow-square-out"></i>
+                                        <span data-i18n="swc_preview">Preview Live</span> <i class="ph ph-arrow-square-out"></i>
                                     </a>
                                 </div>
                             </div>
@@ -474,13 +443,13 @@
                             </div>
                             <div class="p-6">
                                 <h5 class="text-xl font-bold mb-2 group-hover:text-brand-light transition-colors">Mebel Order</h5>
-                                <p class="text-gray-300 text-sm mb-6 line-clamp-3">Platform e-commerce kustom untuk kustomisasi dan pemesanan furnitur.</p>
+                                <p class="text-gray-300 text-sm mb-6 line-clamp-3" data-i18n="swc_desc_mebel">Platform e-commerce kustom untuk kustomisasi dan pemesanan furnitur.</p>
                                 <div class="flex items-center justify-between pt-4 border-t border-white/10">
                                     <div class="flex gap-2 text-xs text-gray-400 font-mono">
                                         <span>E-Commerce</span>
                                     </div>
                                     <a href="https://digiwork.web.id/mebelorder/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-neon hover:text-white transition-colors bg-brand-neon/10 hover:bg-brand-neon px-3 py-1.5 rounded-lg border border-brand-neon/30">
-                                        Preview Live <i class="ph ph-arrow-square-out"></i>
+                                        <span data-i18n="swc_preview">Preview Live</span> <i class="ph ph-arrow-square-out"></i>
                                     </a>
                                 </div>
                             </div>
@@ -496,13 +465,13 @@
                             </div>
                             <div class="p-6">
                                 <h5 class="text-xl font-bold mb-2 group-hover:text-brand-light transition-colors">Sambal Sistem</h5>
-                                <p class="text-gray-300 text-sm mb-6 line-clamp-3">Aplikasi web manajemen rantai pasok cerdas khusus untuk bisnis kuliner.</p>
+                                <p class="text-gray-300 text-sm mb-6 line-clamp-3" data-i18n="swc_desc_sambal">Aplikasi web manajemen rantai pasok cerdas khusus untuk bisnis kuliner.</p>
                                 <div class="flex items-center justify-between pt-4 border-t border-white/10">
                                     <div class="flex gap-2 text-xs text-gray-400 font-mono">
                                         <span>Inventory</span>
                                     </div>
                                     <a href="https://digiwork.web.id/sambalsistem/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-neon hover:text-white transition-colors bg-brand-neon/10 hover:bg-brand-neon px-3 py-1.5 rounded-lg border border-brand-neon/30">
-                                        Preview Live <i class="ph ph-arrow-square-out"></i>
+                                        <span data-i18n="swc_preview">Preview Live</span> <i class="ph ph-arrow-square-out"></i>
                                     </a>
                                 </div>
                             </div>
@@ -518,13 +487,13 @@
                             </div>
                             <div class="p-6">
                                 <h5 class="text-xl font-bold mb-2 group-hover:text-brand-light transition-colors">Panoramic</h5>
-                                <p class="text-gray-300 text-sm mb-6 line-clamp-3">Portal agen perjalanan dengan fitur virtual tour 360 derajat interaktif.</p>
+                                <p class="text-gray-300 text-sm mb-6 line-clamp-3" data-i18n="swc_desc_pano">Portal agen perjalanan dengan fitur virtual tour 360 derajat interaktif.</p>
                                 <div class="flex items-center justify-between pt-4 border-t border-white/10">
                                     <div class="flex gap-2 text-xs text-gray-400 font-mono">
                                         <span>Virtual Tour</span>
                                     </div>
                                     <a href="https://digiwork.web.id/panoramic/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-neon hover:text-white transition-colors bg-brand-neon/10 hover:bg-brand-neon px-3 py-1.5 rounded-lg border border-brand-neon/30">
-                                        Preview Live <i class="ph ph-arrow-square-out"></i>
+                                        <span data-i18n="swc_preview">Preview Live</span> <i class="ph ph-arrow-square-out"></i>
                                     </a>
                                 </div>
                             </div>
@@ -540,13 +509,13 @@
                             </div>
                             <div class="p-6">
                                 <h5 class="text-xl font-bold mb-2 group-hover:text-brand-light transition-colors">Kereta Kopi</h5>
-                                <p class="text-gray-300 text-sm mb-6 line-clamp-3">Sistem pemesanan digital (digital menu) terintegrasi kasir.</p>
+                                <p class="text-gray-300 text-sm mb-6 line-clamp-3" data-i18n="swc_desc_kopi">Sistem pemesanan digital (digital menu) terintegrasi kasir.</p>
                                 <div class="flex items-center justify-between pt-4 border-t border-white/10">
                                     <div class="flex gap-2 text-xs text-gray-400 font-mono">
                                         <span>POS System</span>
                                     </div>
                                     <a href="https://digiwork.web.id/keretakopi/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-neon hover:text-white transition-colors bg-brand-neon/10 hover:bg-brand-neon px-3 py-1.5 rounded-lg border border-brand-neon/30">
-                                        Preview Live <i class="ph ph-arrow-square-out"></i>
+                                        <span data-i18n="swc_preview">Preview Live</span> <i class="ph ph-arrow-square-out"></i>
                                     </a>
                                 </div>
                             </div>
@@ -562,13 +531,13 @@
                             </div>
                             <div class="p-6">
                                 <h5 class="text-xl font-bold mb-2 group-hover:text-brand-light transition-colors">Bali Agent</h5>
-                                <p class="text-gray-300 text-sm mb-6 line-clamp-3">Direktori properti dan platform manajemen penyewaan villa di Bali.</p>
+                                <p class="text-gray-300 text-sm mb-6 line-clamp-3" data-i18n="swc_desc_bali">Direktori properti dan platform manajemen penyewaan villa di Bali.</p>
                                 <div class="flex items-center justify-between pt-4 border-t border-white/10">
                                     <div class="flex gap-2 text-xs text-gray-400 font-mono">
                                         <span>Listing</span>
                                     </div>
                                     <a href="https://digiwork.web.id/baliagent/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-neon hover:text-white transition-colors bg-brand-neon/10 hover:bg-brand-neon px-3 py-1.5 rounded-lg border border-brand-neon/30">
-                                        Preview Live <i class="ph ph-arrow-square-out"></i>
+                                        <span data-i18n="swc_preview">Preview Live</span> <i class="ph ph-arrow-square-out"></i>
                                     </a>
                                 </div>
                             </div>
@@ -584,13 +553,13 @@
                             </div>
                             <div class="p-6">
                                 <h5 class="text-xl font-bold mb-2 group-hover:text-brand-light transition-colors">Order Web Jogja</h5>
-                                <p class="text-gray-300 text-sm mb-6 line-clamp-3">Platform layanan pembuatan website profesional berbasis di Jogja.</p>
+                                <p class="text-gray-300 text-sm mb-6 line-clamp-3" data-i18n="swc_desc_jogja">Platform layanan pembuatan website profesional berbasis di Jogja.</p>
                                 <div class="flex items-center justify-between pt-4 border-t border-white/10">
                                     <div class="flex gap-2 text-xs text-gray-400 font-mono">
                                         <span>Landing Page</span>
                                     </div>
                                     <a href="https://digiwork.web.id/orderwebjogja/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-neon hover:text-white transition-colors bg-brand-neon/10 hover:bg-brand-neon px-3 py-1.5 rounded-lg border border-brand-neon/30">
-                                        Preview Live <i class="ph ph-arrow-square-out"></i>
+                                        <span data-i18n="swc_preview">Preview Live</span> <i class="ph ph-arrow-square-out"></i>
                                     </a>
                                 </div>
                             </div>
@@ -605,19 +574,19 @@
                             <i class="ph-fill ph-palette"></i>
                         </div>
                         <div>
-                            <h4 class="text-2xl font-bold text-white">Poster & Visual Branding</h4>
-                            <p class="text-gray-400 text-sm">Desain grafis imajinatif, identitas merek, dan infografis</p>
+                            <h4 class="text-2xl font-bold text-white" data-i18n="swc_poster_title">Poster & Visual Branding</h4>
+                            <p class="text-gray-400 text-sm" data-i18n="swc_poster_desc">Desain grafis imajinatif, identitas merek, dan infografis</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <div class="group relative rounded-2xl overflow-hidden glass-panel aspect-[4/5] reveal">
-                        <img src="Adventures.jfif" alt="Petualangan" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100">
+                        <img src="Adventures.jfif" alt="Petualangan Eleazar" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100">
                         <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent opacity-80"></div>
                         <div class="absolute bottom-0 left-0 w-full p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                             <h4 class="text-2xl font-bold text-white mb-1">Petualangan Eleazar</h4>
-                            <p class="text-gray-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">Desain poster petualangan imajinatif.</p>
+                            <p class="text-gray-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100" data-i18n="swc_poster_1">Desain poster petualangan imajinatif.</p>
                         </div>
                     </div>
 
@@ -626,16 +595,16 @@
                         <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent opacity-80"></div>
                         <div class="absolute bottom-0 left-0 w-full p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                             <h4 class="text-2xl font-bold text-white mb-1">Solusi Digital</h4>
-                            <p class="text-gray-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">Materi promosi layanan digital.</p>
+                            <p class="text-gray-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100" data-i18n="swc_poster_2">Materi promosi layanan digital.</p>
                         </div>
                     </div>
 
                     <div class="group relative rounded-2xl overflow-hidden glass-panel aspect-[4/5] reveal" style="transition-delay: 200ms;">
-                        <img src="Branding Products.jfif" alt="Branding Produk" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100">
+                        <img src="Branding Products.jfif" alt="Ane's Kitchen" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100">
                         <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent opacity-80"></div>
                         <div class="absolute bottom-0 left-0 w-full p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                             <h4 class="text-2xl font-bold text-white mb-1">Ane's Kitchen</h4>
-                            <p class="text-gray-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">Desain label dan promosi kuliner.</p>
+                            <p class="text-gray-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100" data-i18n="swc_poster_3">Desain label dan promosi kuliner.</p>
                         </div>
                     </div>
                     
@@ -644,25 +613,25 @@
                         <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent opacity-80"></div>
                         <div class="absolute bottom-0 left-0 w-full p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                             <h4 class="text-2xl font-bold text-white mb-1">Keluarga Hokoke</h4>
-                            <p class="text-gray-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">Ilustrasi kreatif bertema retro sci-fi.</p>
+                            <p class="text-gray-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100" data-i18n="swc_poster_4">Ilustrasi kreatif bertema retro sci-fi.</p>
                         </div>
                     </div>
 
                     <div class="group relative rounded-2xl overflow-hidden glass-panel aspect-[4/5] reveal" style="transition-delay: 100ms;">
-                        <img src="Poster motifasi penilaian diri.jfif" alt="Motivasi Diri" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100">
+                        <img src="Poster motifasi penilaian diri.jfif" alt="Self Assessment" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100">
                         <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent opacity-80"></div>
                         <div class="absolute bottom-0 left-0 w-full p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                             <h4 class="text-2xl font-bold text-white mb-1">Self Assessment</h4>
-                            <p class="text-gray-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">Poster infografis edukatif.</p>
+                            <p class="text-gray-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100" data-i18n="swc_poster_5">Poster infografis edukatif.</p>
                         </div>
                     </div>
 
                     <div class="group relative rounded-2xl overflow-hidden glass-panel aspect-[4/5] reveal" style="transition-delay: 200ms;">
-                        <img src="Siapa membangun sistem.jfif" alt="Sistem AI" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100">
+                        <img src="Siapa membangun sistem.jfif" alt="Era AI & Sistem" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100">
                         <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent opacity-80"></div>
                         <div class="absolute bottom-0 left-0 w-full p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                             <h4 class="text-2xl font-bold text-white mb-1">Era AI & Sistem</h4>
-                            <p class="text-gray-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">Desain visual informatif AI.</p>
+                            <p class="text-gray-300 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100" data-i18n="swc_poster_6">Desain visual informatif AI.</p>
                         </div>
                     </div>
                 </div>
@@ -672,9 +641,9 @@
                     <div class="text-center mb-10">
                         <h3 class="text-3xl font-bold inline-flex items-center gap-3">
                             <i class="ph-fill ph-video-camera text-brand-neon"></i>
-                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-400">Animasi & Video Produk</span>
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-400" data-i18n="swc_vid_title">Animasi & Video Produk</span>
                         </h3>
-                        <p class="text-gray-400 mt-2 text-sm">Preview langsung karya motion graphics dan video promosi kami.</p>
+                        <p class="text-gray-400 mt-2 text-sm" data-i18n="swc_vid_desc">Preview langsung karya motion graphics dan video promosi kami.</p>
                     </div>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
@@ -717,10 +686,10 @@
             <div class="absolute inset-0 bg-brand-neon/5"></div>
             <div class="max-w-4xl mx-auto px-4 relative z-10 text-center reveal">
                 <div class="glass-panel p-12 rounded-3xl neon-border">
-                    <h2 class="text-3xl md:text-5xl font-bold mb-6">Siap Transformasi Digital?</h2>
-                    <p class="text-gray-300 mb-8 text-lg">Mari diskusikan bagaimana kami dapat membantu gereja, sekolah, atau bisnis Anda mencapai potensi maksimal di era digital.</p>
+                    <h2 class="text-3xl md:text-5xl font-bold mb-6" data-i18n="cta_title">Siap Transformasi Digital?</h2>
+                    <p class="text-gray-300 mb-8 text-lg" data-i18n="cta_desc">Mari diskusikan bagaimana kami dapat membantu gereja, sekolah, atau bisnis Anda mencapai potensi maksimal di era digital.</p>
                     <a href="mailto:hello@digiwork.inc" class="inline-flex items-center justify-center gap-2 bg-brand-neon text-white px-10 py-4 rounded-full font-bold text-lg transition-all hover:bg-white hover:text-brand-dark shadow-[0_0_20px_rgba(138,43,226,0.6)]">
-                        Hubungi Kami Sekarang <i class="ph-bold ph-paper-plane-tilt"></i>
+                        <span data-i18n="cta_btn">Hubungi Kami Sekarang</span> <i class="ph-bold ph-paper-plane-tilt"></i>
                     </a>
                 </div>
             </div>
@@ -735,7 +704,7 @@
                             <div class="w-8 h-8 rounded-lg bg-brand-neon flex items-center justify-center font-bold text-xl">D</div>
                             <span class="font-bold text-xl tracking-wider">Digiwork<span class="text-brand-neon">.</span></span>
                         </div>
-                        <p class="text-gray-400 text-sm mb-6">Bridging creative design and technological excellence. Established 2009.</p>
+                        <p class="text-gray-400 text-sm mb-6" data-i18n="ft_desc">We turn imagination into digital experiences. Creative Digital Studio established 2009.</p>
                         <div class="flex space-x-4">
                             <a href="#" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-gray-400 hover:text-brand-neon hover:border-brand-neon transition-colors"><i class="ph-fill ph-instagram-logo text-xl"></i></a>
                             <a href="#" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-gray-400 hover:text-brand-neon hover:border-brand-neon transition-colors"><i class="ph-fill ph-youtube-logo text-xl"></i></a>
@@ -744,40 +713,187 @@
                     </div>
 
                     <div>
-                        <h4 class="text-white font-semibold mb-4">Perusahaan</h4>
+                        <h4 class="text-white font-semibold mb-4" data-i18n="ft_company">Perusahaan</h4>
                         <ul class="space-y-2 text-sm text-gray-400">
-                            <li><a href="#about" class="hover:text-brand-neon transition-colors">Tentang Kami</a></li>
-                            <li><a href="#" class="hover:text-brand-neon transition-colors">Visi & Misi</a></li>
+                            <li><a href="#about" class="hover:text-brand-neon transition-colors" data-i18n="ft_about">Tentang Kami</a></li>
+                            <li><a href="#" class="hover:text-brand-neon transition-colors" data-i18n="ft_vm">Visi & Misi</a></li>
                         </ul>
                     </div>
 
                     <div>
-                        <h4 class="text-white font-semibold mb-4">Layanan</h4>
+                        <h4 class="text-white font-semibold mb-4" data-i18n="ft_services">Layanan</h4>
                         <ul class="space-y-2 text-sm text-gray-400">
-                            <li><a href="#services" class="hover:text-brand-neon transition-colors">Web Development</a></li>
-                            <li><a href="#services" class="hover:text-brand-neon transition-colors">Creative Design</a></li>
+                            <li><a href="#services" class="hover:text-brand-neon transition-colors">CREATE</a></li>
+                            <li><a href="#services" class="hover:text-brand-neon transition-colors">DEVELOP</a></li>
+                            <li><a href="#services" class="hover:text-brand-neon transition-colors">DIGITALIZE</a></li>
                         </ul>
                     </div>
 
                     <div>
-                        <h4 class="text-white font-semibold mb-4">Target Pasar</h4>
+                        <h4 class="text-white font-semibold mb-4" data-i18n="ft_market">Target Pasar</h4>
                         <ul class="space-y-2 text-sm text-gray-400">
-                            <li><a href="#" class="hover:text-brand-neon transition-colors">Perusahaan</a></li>
-                            <li><a href="#" class="hover:text-brand-neon transition-colors">Sekolah / Universitas</a></li>
-                            <li><a href="#" class="hover:text-brand-neon transition-colors">UMKM & Startup</a></li>
+                            <li><a href="#" class="hover:text-brand-neon transition-colors" data-i18n="ft_corp">Perusahaan</a></li>
+                            <li><a href="#" class="hover:text-brand-neon transition-colors" data-i18n="ft_school">Sekolah / Universitas</a></li>
+                            <li><a href="#" class="hover:text-brand-neon transition-colors" data-i18n="ft_sme">UMKM & Startup</a></li>
                         </ul>
                     </div>
                 </div>
 
                 <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
-                    <p>&copy; 2025 Digiwork Inc. All rights reserved. Founded by Eleazar Agung Nugroho.</p>
+                    <p data-i18n="ft_copyright">&copy; 2025 Digiwork Inc. All rights reserved. Founded by Eleazar Agung Nugroho.</p>
                 </div>
             </div>
         </footer>
     </main>
 
     <script>
-        // Mobile Menu
+        // --- MULTI-LANGUAGE (i18n) SYSTEM ---
+        const i18nData = {
+            "id": {
+                "nav_about": "About", "nav_services": "Services", "nav_showcase": "Showcase", "nav_contact": "Hubungi Kami",
+                "hero_badge": "Creative Digital Studio",
+                "hero_title_1": "We turn imagination into", "hero_title_2": "Digital Experiences",
+                "hero_desc": "Sebagai studio digital strategis, kami mengintegrasikan estetika desain visual dengan keunggulan rekayasa teknologi untuk menciptakan produk, sistem, dan identitas digital skala industri.",
+                "hero_btn_1": "Eksplorasi Layanan", "hero_btn_2": "Lihat Portofolio", "hero_scroll": "Scroll",
+                "about_title": "Tentang Digiwork",
+                "about_p1": "Berawal dari passion seorang desainer dan developer, kini Digiwork Inc telah bertransformasi menjadi sebuah <strong>Creative Digital Studio</strong> profesional yang dipimpin oleh <strong class='text-white'>Eleazar Agung Nugroho</strong> sejak tahun <span class='text-brand-neon font-bold'>2009</span>.",
+                "about_p2": "Memadukan seni desain visual dengan logika teknologi mutakhir, kami bukan sekadar penyedia jasa lepas, melainkan mitra strategis untuk membangun dan mengelola ekosistem digital bisnis Anda.",
+                "vision_title": "Visi", "vision_desc": "Menjadi pelopor inovasi digital yang berpusat pada nilai kebenaran, memberdayakan komunitas dan bisnis menuju keunggulan teknologi global.",
+                "mission_title": "Misi",
+                "mission_1": "Menyediakan solusi desain kreatif berkualitas tinggi.", "mission_2": "Membangun infrastruktur web yang andal dan aman.", "mission_3": "Mendukung transformasi digital UMKM dan institusi rohani.",
+                "srv_subtitle": "Tiga Pilar Studio", "srv_title": "Layanan Digital Terpadu",
+                "srv_create_desc": "Merancang identitas visual dan karya seni digital yang memukau untuk mengkomunikasikan pesan brand Anda dengan kuat.",
+                "srv_dev_desc": "Membangun arsitektur digital dan sistem fungsional yang stabil, aman, serta mudah dikembangkan (scalable).",
+                "srv_dig_desc": "Mentransformasikan bisnis Anda menuju otomatisasi modern dengan eksekusi dan pemasaran digital yang terarah.",
+                "tools_title": "Alat & Teknologi yang Kami Kuasai",
+                "swc_subtitle": "Portofolio & Showcase", "swc_title": "Karya Digital Kami", "swc_btn": "Buka Full Showcase",
+                "swc_web_title": "Website & Web App Showcase", "swc_web_desc": "Pengembangan situs web modern, responsif, dan performa tinggi",
+                "swc_desc_griyabugar": "Platform reservasi layanan pijat dan kebugaran dengan sistem booking online.",
+                "swc_desc_career": "Portal pengembangan karir komprehensif untuk para pencari kerja (job seeker).",
+                "swc_desc_resort": "Sistem reservasi kamar eksklusif untuk resort premium terintegrasi.",
+                "swc_desc_mebel": "Platform e-commerce kustom untuk kustomisasi dan pemesanan furnitur.",
+                "swc_desc_sambal": "Aplikasi web manajemen rantai pasok cerdas khusus untuk bisnis kuliner.",
+                "swc_desc_pano": "Portal agen perjalanan dengan fitur virtual tour 360 derajat interaktif.",
+                "swc_desc_kopi": "Sistem pemesanan digital (digital menu) terintegrasi kasir.",
+                "swc_desc_bali": "Direktori properti dan platform manajemen penyewaan villa di Bali.",
+                "swc_desc_jogja": "Platform layanan pembuatan website profesional berbasis di Jogja.",
+                "swc_preview": "Preview Live",
+                "swc_poster_title": "Poster & Visual Branding", "swc_poster_desc": "Desain grafis imajinatif, identitas merek, dan infografis",
+                "swc_poster_1": "Desain poster petualangan imajinatif.", "swc_poster_2": "Materi promosi layanan digital.", "swc_poster_3": "Desain label dan promosi kuliner.",
+                "swc_poster_4": "Ilustrasi kreatif bertema retro sci-fi.", "swc_poster_5": "Poster infografis edukatif.", "swc_poster_6": "Desain visual informatif AI.",
+                "swc_vid_title": "Animasi & Video Produk", "swc_vid_desc": "Preview langsung karya motion graphics dan video promosi kami.",
+                "cta_title": "Siap Transformasi Digital?", "cta_desc": "Mari diskusikan bagaimana kami dapat membantu gereja, sekolah, atau bisnis Anda mencapai potensi maksimal di era digital.", "cta_btn": "Hubungi Kami Sekarang",
+                "ft_desc": "We turn imagination into digital experiences. Creative Digital Studio established 2009.",
+                "ft_company": "Perusahaan", "ft_about": "Tentang Kami", "ft_vm": "Visi & Misi",
+                "ft_services": "Layanan", "ft_market": "Target Pasar",
+                "ft_corp": "Perusahaan", "ft_school": "Sekolah / Universitas", "ft_sme": "UMKM & Startup",
+                "ft_copyright": "&copy; 2025 Digiwork Inc. All rights reserved. Founded by Eleazar Agung Nugroho."
+            },
+            "en": {
+                "nav_about": "About", "nav_services": "Services", "nav_showcase": "Showcase", "nav_contact": "Contact Us",
+                "hero_badge": "Creative Digital Studio",
+                "hero_title_1": "We turn imagination into", "hero_title_2": "Digital Experiences",
+                "hero_desc": "As a strategic digital studio, we integrate visual design aesthetics with technological engineering excellence to create industry-scale digital products, systems, and identities.",
+                "hero_btn_1": "Explore Services", "hero_btn_2": "View Portfolio", "hero_scroll": "Scroll",
+                "about_title": "About Digiwork",
+                "about_p1": "Starting from the passion of a designer and developer, Digiwork Inc has transformed into a professional <strong>Creative Digital Studio</strong> led by <strong class='text-white'>Eleazar Agung Nugroho</strong> since <span class='text-brand-neon font-bold'>2009</span>.",
+                "about_p2": "Combining the art of visual design with cutting-edge technological logic, we are not just freelance service providers, but strategic partners to build and manage your business's digital ecosystem.",
+                "vision_title": "Vision", "vision_desc": "To be a pioneer in digital innovation centered on truth, empowering communities and businesses towards global technological excellence.",
+                "mission_title": "Mission",
+                "mission_1": "Provide high-quality creative design solutions.", "mission_2": "Build reliable and secure web infrastructure.", "mission_3": "Support the digital transformation of SMEs and spiritual institutions.",
+                "srv_subtitle": "The Studio's Three Pillars", "srv_title": "Integrated Digital Services",
+                "srv_create_desc": "Designing stunning visual identities and digital artwork to strongly communicate your brand's message.",
+                "srv_dev_desc": "Building digital architecture and functional systems that are stable, secure, and easily scalable.",
+                "srv_dig_desc": "Transforming your business towards modern automation with targeted digital execution and marketing.",
+                "tools_title": "Tools & Technologies We Master",
+                "swc_subtitle": "Portfolio & Showcase", "swc_title": "Our Digital Work", "swc_btn": "Open Full Showcase",
+                "swc_web_title": "Website & Web App Showcase", "swc_web_desc": "Modern, responsive, and high-performance website development",
+                "swc_desc_griyabugar": "Massage and fitness reservation platform with an online booking system.",
+                "swc_desc_career": "Comprehensive career development portal for job seekers.",
+                "swc_desc_resort": "Exclusive room reservation system for integrated premium resorts.",
+                "swc_desc_mebel": "Custom e-commerce platform for furniture customization and ordering.",
+                "swc_desc_sambal": "Smart supply chain management web app specifically for culinary businesses.",
+                "swc_desc_pano": "Travel agent portal featuring interactive 360-degree virtual tours.",
+                "swc_desc_kopi": "Digital ordering system (digital menu) integrated with POS cashiers.",
+                "swc_desc_bali": "Property directory and villa rental management platform in Bali.",
+                "swc_desc_jogja": "Professional website creation service platform based in Jogja.",
+                "swc_preview": "Live Preview",
+                "swc_poster_title": "Poster & Visual Branding", "swc_poster_desc": "Imaginative graphic design, brand identity, and infographics",
+                "swc_poster_1": "Imaginative adventure poster design.", "swc_poster_2": "Digital services promotional materials.", "swc_poster_3": "Culinary label design and promotion.",
+                "swc_poster_4": "Creative retro sci-fi themed illustration.", "swc_poster_5": "Educational infographic poster.", "swc_poster_6": "Informative AI visual design.",
+                "swc_vid_title": "Animation & Product Video", "swc_vid_desc": "Live preview of our motion graphics and promotional videos.",
+                "cta_title": "Ready for Digital Transformation?", "cta_desc": "Let's discuss how we can help your church, school, or business reach its maximum potential in the digital era.", "cta_btn": "Contact Us Now",
+                "ft_desc": "We turn imagination into digital experiences. Creative Digital Studio established 2009.",
+                "ft_company": "Company", "ft_about": "About Us", "ft_vm": "Vision & Mission",
+                "ft_services": "Services", "ft_market": "Target Market",
+                "ft_corp": "Enterprises", "ft_school": "Schools / Universities", "ft_sme": "SMEs & Startups",
+                "ft_copyright": "&copy; 2025 Digiwork Inc. All rights reserved. Founded by Eleazar Agung Nugroho."
+            },
+            "ja": {
+                "nav_about": "概要", "nav_services": "サービス", "nav_showcase": "実績", "nav_contact": "お問い合わせ",
+                "hero_badge": "クリエイティブ・デジタル・スタジオ",
+                "hero_title_1": "想像力を", "hero_title_2": "デジタル体験へと変える",
+                "hero_desc": "戦略的なデジタルスタジオとして、私たちは視覚的デザインの美学と高度な技術エンジニアリングを統合し、産業規模のデジタル製品、システム、ブランドアイデンティティを創造します。",
+                "hero_btn_1": "サービスを探索", "hero_btn_2": "ポートフォリオを見る", "hero_scroll": "スクロール",
+                "about_title": "Digiworkについて",
+                "about_p1": "デザイナーと開発者の情熱から始まり、Digiwork Incは現在、<span class='text-brand-neon font-bold'>2009</span>年から<strong class='text-white'>Eleazar Agung Nugroho</strong>が率いるプロフェッショナルな<strong>クリエイティブ・デジタル・スタジオ</strong>へと変貌を遂げました。",
+                "about_p2": "視覚的デザインの芸術と最先端の技術的論理を組み合わせ、私たちは単なるフリーランスではなく、お客様のビジネスのデジタルエコシステムを構築・管理する戦略的パートナーです。",
+                "vision_title": "ビジョン", "vision_desc": "真実を重んじるデジタルイノベーションの先駆者となり、グローバルな技術的卓越性に向けてコミュニティとビジネスを強化します。",
+                "mission_title": "ミッション",
+                "mission_1": "高品質なクリエイティブデザインソリューションを提供する。", "mission_2": "信頼性が高く安全なウェブインフラを構築する。", "mission_3": "中小企業や宗教機関のデジタルトランスフォーメーションを支援する。",
+                "srv_subtitle": "スタジオの3つの柱", "srv_title": "統合デジタルサービス",
+                "srv_create_desc": "ブランドのメッセージを強力に伝える、魅力的な視覚的アイデンティティとデジタルアートワークを設計します。",
+                "srv_dev_desc": "安定し、安全で、拡張性のあるデジタルアーキテクチャと機能的システムを構築します。",
+                "srv_dig_desc": "ターゲットを絞ったデジタル実行とマーケティングにより、ビジネスを最新の自動化へと導きます。",
+                "tools_title": "習熟しているツールとテクノロジー",
+                "swc_subtitle": "ポートフォリオと実績", "swc_title": "私たちのデジタル作品", "swc_btn": "すべての実績を見る",
+                "swc_web_title": "ウェブサイト＆ウェブアプリ実績", "swc_web_desc": "モダンでレスポンシブ、かつ高性能なウェブサイト開発",
+                "swc_desc_griyabugar": "オンライン予約システムを備えたマッサージおよびフィットネス予約プラットフォーム。",
+                "swc_desc_career": "求職者向けの総合的なキャリア開発ポータル。",
+                "swc_desc_resort": "統合型プレミアムリゾート向けの専用客室予約システム。",
+                "swc_desc_mebel": "家具のカスタマイズと注文のためのカスタムEコマースプラットフォーム。",
+                "swc_desc_sambal": "料理ビジネスに特化したスマートなサプライチェーン管理ウェブアプリ。",
+                "swc_desc_pano": "インタラクティブな360度バーチャルツアーを備えた旅行代理店ポータル。",
+                "swc_desc_kopi": "POSレジと統合されたデジタル注文システム（デジタルメニュー）。",
+                "swc_desc_bali": "バリ島の物件ディレクトリとヴィラレンタル管理プラットフォーム。",
+                "swc_desc_jogja": "ジョグジャカルタを拠点とするプロフェッショナルなウェブサイト作成サービスプラットフォーム。",
+                "swc_preview": "ライブプレビュー",
+                "swc_poster_title": "ポスター＆ビジュアルブランディング", "swc_poster_desc": "想像力豊かなグラフィックデザイン、ブランドアイデンティティ、インフォグラフィック",
+                "swc_poster_1": "想像力豊かなアドベンチャーポスターデザイン。", "swc_poster_2": "デジタルサービスのプロモーション素材。", "swc_poster_3": "料理のラベルデザインとプロモーション。",
+                "swc_poster_4": "クリエイティブなレトロSFをテーマにしたイラスト。", "swc_poster_5": "教育用インフォグラフィックポスター。", "swc_poster_6": "情報に富んだAIビジュアルデザイン。",
+                "swc_vid_title": "アニメーション＆製品ビデオ", "swc_vid_desc": "モーショングラフィックスとプロモーションビデオのライブプレビュー。",
+                "cta_title": "デジタルトランスフォーメーションの準備はできましたか？", "cta_desc": "教会、学校、またはビジネスがデジタル時代において最大限の可能性を発揮できるよう、私たちがどのように支援できるかご相談ください。", "cta_btn": "今すぐお問い合わせ",
+                "ft_desc": "私たちは想像力をデジタル体験に変えます。2009年設立のクリエイティブ・デジタル・スタジオ。",
+                "ft_company": "会社", "ft_about": "会社概要", "ft_vm": "ビジョンとミッション",
+                "ft_services": "サービス", "ft_market": "ターゲット市場",
+                "ft_corp": "企業", "ft_school": "学校 / 大学", "ft_sme": "中小企業とスタートアップ",
+                "ft_copyright": "&copy; 2025 Digiwork Inc. 無断複写・転載を禁じます。Eleazar Agung Nugrohoによって設立されました。"
+            }
+        };
+
+        function setLanguage(lang) {
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18nData[lang] && i18nData[lang][key]) {
+                    el.innerHTML = i18nData[lang][key];
+                }
+            });
+            // Update all select dropdowns to match selected language
+            document.querySelectorAll('.language-selector').forEach(select => {
+                select.value = lang;
+            });
+        }
+
+        // Initialize listeners for all language dropdowns
+        document.querySelectorAll('.language-selector').forEach(select => {
+            select.addEventListener('change', (e) => {
+                setLanguage(e.target.value);
+            });
+        });
+
+
+        // --- UI & ANIMATION LOGIC ---
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
         mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
@@ -785,7 +901,6 @@
             link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
         });
 
-        // Navbar Scroll
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => {
             if (window.scrollY > 50) {
@@ -797,7 +912,6 @@
             }
         });
 
-        // Scroll Reveal
         const revealElements = document.querySelectorAll('.reveal');
         const revealObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -806,12 +920,12 @@
         }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
         revealElements.forEach(el => revealObserver.observe(el));
 
-        // Particle Background & Rockets Logic
+
+        // --- CANVAS & PARTICLES ---
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
         let particles = [];
-        let smokeParticles = [];
         let rockets = [];
         
         let mouse = { x: null, y: null, radius: 150 }
@@ -825,7 +939,6 @@
         window.addEventListener('resize', () => { resize(); initParticles(); });
         resize();
 
-        // Standard Background Nodes
         class Particle {
             constructor() {
                 this.x = Math.random() * width;
@@ -865,67 +978,39 @@
             }
         }
 
-        // Rocket Smoke Trail Class
-        class SmokeParticle {
-            constructor(x, y, r, g, b) {
-                this.x = x;
-                this.y = y;
-                this.size = Math.random() * 6 + 4; // Intial size
-                this.opacity = 0.7; // Initial opacity
-                this.growth = Math.random() * 0.4 + 0.1; // Grow rate
-                this.decay = Math.random() * 0.008 + 0.005; // Fade rate
-                this.r = r; this.g = g; this.b = b;
-                this.vx = (Math.random() - 0.5) * 0.5; // Drift x
-                this.vy = (Math.random() - 0.5) * 0.5; // Drift y
-            }
-            update() {
-                this.size += this.growth;
-                this.opacity -= this.decay;
-                this.x += this.vx;
-                this.y += this.vy;
-            }
-            draw() {
-                ctx.fillStyle = `rgba(${this.r}, ${this.g}, ${this.b}, ${this.opacity})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.closePath();
-                ctx.fill();
-            }
-        }
-
-        // JS Controlled Rocket Logic
+        // --- ROCKET LOGIC ---
         class Rocket {
             constructor(elId) {
                 this.el = document.getElementById(elId);
                 this.reset();
-                this.timer = Math.random() * 300; 
+                this.timer = Math.random() * 300; // Initial delay
             }
             reset() {
                 this.active = false;
                 this.el.style.opacity = 0;
-                this.timer = Math.random() * 600 + 300; // Delay before next launch
+                this.timer = Math.random() * 800 + 400; // Delay before next launch
             }
             launch() {
                 this.active = true;
                 this.el.style.opacity = 1;
                 
-                // Slow speed multiplier
-                let speedMultiplier = 0.5; 
+                // Slow speed multiplier (membuat gerakan sangat pelan)
+                let speedMultiplier = 0.2; 
                 let startLeft = Math.random() > 0.5;
 
                 if (startLeft) {
-                    this.x = -100;
-                    this.y = window.innerHeight + 100;
+                    this.x = -50;
+                    this.y = window.innerHeight + 50;
                     this.vx = (Math.random() * 0.5 + 0.5) * speedMultiplier; 
                     this.vy = - (Math.random() * 0.5 + 0.5) * speedMultiplier;
-                    this.el.style.color = '#00f3ff';
+                    this.el.style.color = '#00f3ff'; // Cyan
                     this.el.style.filter = 'drop-shadow(0 0 15px rgba(0, 243, 255, 0.8))';
                 } else {
-                    this.x = window.innerWidth + 100;
-                    this.y = window.innerHeight + 100;
+                    this.x = window.innerWidth + 50;
+                    this.y = window.innerHeight + 50;
                     this.vx = - (Math.random() * 0.5 + 0.5) * speedMultiplier;
                     this.vy = - (Math.random() * 0.5 + 0.5) * speedMultiplier;
-                    this.el.style.color = '#ff00a0';
+                    this.el.style.color = '#ff00a0'; // Pink
                     this.el.style.filter = 'drop-shadow(0 0 15px rgba(255, 0, 160, 0.8))';
                 }
                 
@@ -940,12 +1025,13 @@
                     return;
                 }
 
+                // Update Rocket Position
                 this.x += this.vx;
                 this.y += this.vy;
                 this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.angle}deg)`;
 
                 // Reset if offscreen
-                if (this.y < -300 || this.x < -300 || this.x > window.innerWidth + 300) {
+                if (this.y < -100 || this.x < -100 || this.x > window.innerWidth + 100) {
                     this.reset();
                 }
             }
@@ -956,6 +1042,7 @@
             let numberOfParticles = (width * height) / 15000;
             for (let i = 0; i < numberOfParticles; i++) particles.push(new Particle());
             
+            // Re-initialize Rocket
             rockets = [new Rocket('rocket-1')];
         }
 
@@ -982,7 +1069,7 @@
             for (let i = 0; i < particles.length; i++) particles[i].update();
             connectParticles();
 
-            // Handle rockets
+            // Handle rocket movement
             for (let i = 0; i < rockets.length; i++) rockets[i].update();
 
             requestAnimationFrame(animateParticles);
