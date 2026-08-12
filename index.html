@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digiwork Inc - Creative Digital Studio</title>
+    <title>Digiwork Inc - Jasa Pembuatan Website, Landing Page & Desain Grafis Jogja</title>
+    
+    <!-- SEO Optimization Meta Tags -->
+    <meta name="description" content="Layanan Digiwork: jasa pembuatan website Jogja, website UMKM, landing page, desain grafis, dan website murah terjangkau untuk bisnis.">
+    <meta name="keywords" content="jasa pembuatan website jogja, website umkm, jasa landing page, desain grafis jogja, bikin website murah">
+    <meta name="robots" content="index,follow">
+    <link rel="canonical" href="https://digiwork.web.id/">
     
     <!-- Google Fonts: Sora -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -112,6 +118,10 @@
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
+
+        /* Hide details marker for FAQ */
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
     </style>
 </head>
 <body class="antialiased selection:bg-brand-neon selection:text-white relative">
@@ -681,6 +691,58 @@
             </div>
         </section>
 
+        <!-- FAQ / SEO Content Section -->
+        <section id="faq" class="py-24 relative bg-brand-dark/30 border-t border-white/5">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12 reveal">
+                    <h2 class="text-sm font-bold tracking-widest text-brand-neon uppercase mb-2" data-i18n="faq_subtitle">FAQ & Informasi Layanan</h2>
+                    <h3 class="text-3xl md:text-4xl font-bold" data-i18n="faq_title">Pertanyaan Seputar Layanan Digital Kami</h3>
+                </div>
+                
+                <div class="space-y-4 reveal">
+                    <details class="glass-panel rounded-2xl group border border-white/10 hover:border-brand-neon/40 transition-colors">
+                        <summary class="flex justify-between items-center font-medium cursor-pointer p-6 text-lg text-white outline-none">
+                            <span data-i18n="faq_q1">Berapa biaya jasa pembuatan website di Jogja?</span>
+                            <span class="transition-transform duration-300 group-open:rotate-180 text-brand-neon"><i class="ph-bold ph-caret-down"></i></span>
+                        </summary>
+                        <div class="text-gray-300 px-6 pb-6 text-sm leading-relaxed" data-i18n="faq_a1">
+                            Kebutuhan tiap bisnis berbeda. Kami menyesuaikan struktur, jumlah halaman, desain, fitur, dan tingkat pengembangan berdasarkan tujuan proyek. Kami juga menyediakan opsi website murah dan profesional untuk UMKM.
+                        </div>
+                    </details>
+
+                    <details class="glass-panel rounded-2xl group border border-white/10 hover:border-brand-neon/40 transition-colors">
+                        <summary class="flex justify-between items-center font-medium cursor-pointer p-6 text-lg text-white outline-none">
+                            <span data-i18n="faq_q2">Apakah landing page bisa dipakai untuk iklan Meta atau Google?</span>
+                            <span class="transition-transform duration-300 group-open:rotate-180 text-brand-neon"><i class="ph-bold ph-caret-down"></i></span>
+                        </summary>
+                        <div class="text-gray-300 px-6 pb-6 text-sm leading-relaxed" data-i18n="faq_a2">
+                            Tentu. Jasa landing page kami dioptimalkan untuk rasio konversi tinggi (CRO) yang siap menampung traffic dari iklan Meta Ads maupun Google Ads, lengkap dengan integrasi tombol WhatsApp.
+                        </div>
+                    </details>
+
+                    <details class="glass-panel rounded-2xl group border border-white/10 hover:border-brand-neon/40 transition-colors">
+                        <summary class="flex justify-between items-center font-medium cursor-pointer p-6 text-lg text-white outline-none">
+                            <span data-i18n="faq_q3">Apakah Digiwork melayani jasa desain grafis untuk media sosial & cetak?</span>
+                            <span class="transition-transform duration-300 group-open:rotate-180 text-brand-neon"><i class="ph-bold ph-caret-down"></i></span>
+                        </summary>
+                        <div class="text-gray-300 px-6 pb-6 text-sm leading-relaxed" data-i18n="faq_a3">
+                            Ya. Kami merancang desain untuk kebutuhan digital (sosmed, banner, iklan) dan kebutuhan cetak (poster, kemasan/packaging, katalog) dengan visual yang konsisten menjaga identitas brand Anda.
+                        </div>
+                    </details>
+
+                    <details class="glass-panel rounded-2xl group border border-white/10 hover:border-brand-neon/40 transition-colors">
+                        <summary class="flex justify-between items-center font-medium cursor-pointer p-6 text-lg text-white outline-none">
+                            <span data-i18n="faq_q4">Apakah website UMKM bisa dikembangkan di kemudian hari?</span>
+                            <span class="transition-transform duration-300 group-open:rotate-180 text-brand-neon"><i class="ph-bold ph-caret-down"></i></span>
+                        </summary>
+                        <div class="text-gray-300 px-6 pb-6 text-sm leading-relaxed" data-i18n="faq_a4">
+                            Sangat bisa. Kami merancang website yang scalable. Halaman dapat dikembangkan bertahap sesuai kebutuhan, sehingga bisnis UMKM tidak harus langsung membangun sistem yang terlalu kompleks sejak awal.
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+
         <!-- CTA Section -->
         <section id="contact" class="py-24 relative overflow-hidden">
             <div class="absolute inset-0 bg-brand-neon/5"></div>
@@ -698,13 +760,13 @@
         <!-- Footer -->
         <footer class="bg-black/40 border-t border-white/10 pt-16 pb-8 relative z-10">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-                    <div class="md:col-span-1">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-8 mb-12">
+                    <div class="md:col-span-2">
                         <div class="flex items-center gap-2 mb-4">
                             <div class="w-8 h-8 rounded-lg bg-brand-neon flex items-center justify-center font-bold text-xl">D</div>
                             <span class="font-bold text-xl tracking-wider">Digiwork<span class="text-brand-neon">.</span></span>
                         </div>
-                        <p class="text-gray-400 text-sm mb-6" data-i18n="ft_desc">We turn imagination into digital experiences. Creative Digital Studio established 2009.</p>
+                        <p class="text-gray-400 text-sm mb-6 pr-4" data-i18n="ft_desc">We turn imagination into digital experiences. Creative Digital Studio established 2009. Berdedikasi membantu UMKM dan bisnis dengan website profesional.</p>
                         <div class="flex space-x-4">
                             <a href="#" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-gray-400 hover:text-brand-neon hover:border-brand-neon transition-colors"><i class="ph-fill ph-instagram-logo text-xl"></i></a>
                             <a href="#" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-gray-400 hover:text-brand-neon hover:border-brand-neon transition-colors"><i class="ph-fill ph-youtube-logo text-xl"></i></a>
@@ -718,10 +780,17 @@
                             <li><a href="#about" class="hover:text-brand-neon transition-colors" data-i18n="ft_about">Tentang Kami</a></li>
                             <li><a href="#" class="hover:text-brand-neon transition-colors" data-i18n="ft_vm">Visi & Misi</a></li>
                         </ul>
+                        
+                        <h4 class="text-white font-semibold mb-4 mt-8" data-i18n="ft_market">Target Pasar</h4>
+                        <ul class="space-y-2 text-sm text-gray-400">
+                            <li><a href="#" class="hover:text-brand-neon transition-colors" data-i18n="ft_corp">Perusahaan</a></li>
+                            <li><a href="#" class="hover:text-brand-neon transition-colors" data-i18n="ft_school">Sekolah / Universitas</a></li>
+                            <li><a href="#" class="hover:text-brand-neon transition-colors" data-i18n="ft_sme">UMKM & Startup</a></li>
+                        </ul>
                     </div>
 
                     <div>
-                        <h4 class="text-white font-semibold mb-4" data-i18n="ft_services">Layanan</h4>
+                        <h4 class="text-white font-semibold mb-4" data-i18n="ft_services">Layanan Utama</h4>
                         <ul class="space-y-2 text-sm text-gray-400">
                             <li><a href="#services" class="hover:text-brand-neon transition-colors">CREATE</a></li>
                             <li><a href="#services" class="hover:text-brand-neon transition-colors">DEVELOP</a></li>
@@ -730,11 +799,13 @@
                     </div>
 
                     <div>
-                        <h4 class="text-white font-semibold mb-4" data-i18n="ft_market">Target Pasar</h4>
+                        <h4 class="text-white font-semibold mb-4" data-i18n="ft_seo_links">Fokus Layanan</h4>
                         <ul class="space-y-2 text-sm text-gray-400">
-                            <li><a href="#" class="hover:text-brand-neon transition-colors" data-i18n="ft_corp">Perusahaan</a></li>
-                            <li><a href="#" class="hover:text-brand-neon transition-colors" data-i18n="ft_school">Sekolah / Universitas</a></li>
-                            <li><a href="#" class="hover:text-brand-neon transition-colors" data-i18n="ft_sme">UMKM & Startup</a></li>
+                            <li><a href="jasa-pembuatan-website-jogja.html" class="hover:text-brand-neon transition-colors" data-i18n="seo_web_jogja">Jasa Website Jogja</a></li>
+                            <li><a href="jasa-website-umkm.html" class="hover:text-brand-neon transition-colors" data-i18n="seo_web_umkm">Jasa Website UMKM</a></li>
+                            <li><a href="jasa-landing-page.html" class="hover:text-brand-neon transition-colors" data-i18n="seo_landing">Jasa Landing Page</a></li>
+                            <li><a href="jasa-desain-grafis.html" class="hover:text-brand-neon transition-colors" data-i18n="seo_desain">Jasa Desain Grafis</a></li>
+                            <li><a href="jasa-pembuatan-website-murah.html" class="hover:text-brand-neon transition-colors" data-i18n="seo_web_murah">Jasa Website Murah</a></li>
                         </ul>
                     </div>
                 </div>
@@ -753,7 +824,7 @@
                 "nav_about": "About", "nav_services": "Services", "nav_showcase": "Showcase", "nav_contact": "Hubungi Kami",
                 "hero_badge": "Creative Digital Studio",
                 "hero_title_1": "We turn imagination into", "hero_title_2": "Digital Experiences",
-                "hero_desc": "Sebagai studio digital strategis, kami mengintegrasikan estetika desain visual dengan keunggulan rekayasa teknologi untuk menciptakan produk, sistem, dan identitas digital skala industri.",
+                "hero_desc": "Sebagai studio digital strategis, kami mengintegrasikan estetika desain visual dengan keunggulan rekayasa teknologi untuk menciptakan produk, sistem, dan identitas digital skala industri. Temukan solusi website UMKM, landing page, dan desain grafis bersama kami.",
                 "hero_btn_1": "Eksplorasi Layanan", "hero_btn_2": "Lihat Portofolio", "hero_scroll": "Scroll",
                 "about_title": "Tentang Digiwork",
                 "about_p1": "Berawal dari passion seorang desainer dan developer, kini Digiwork Inc telah bertransformasi menjadi sebuah <strong>Creative Digital Studio</strong> profesional yang dipimpin oleh <strong class='text-white'>Eleazar Agung Nugroho</strong> sejak tahun <span class='text-brand-neon font-bold'>2009</span>.",
@@ -762,9 +833,9 @@
                 "mission_title": "Misi",
                 "mission_1": "Menyediakan solusi desain kreatif berkualitas tinggi.", "mission_2": "Membangun infrastruktur web yang andal dan aman.", "mission_3": "Mendukung transformasi digital UMKM dan institusi rohani.",
                 "srv_subtitle": "Tiga Pilar Studio", "srv_title": "Layanan Digital Terpadu",
-                "srv_create_desc": "Merancang identitas visual dan karya seni digital yang memukau untuk mengkomunikasikan pesan brand Anda dengan kuat.",
-                "srv_dev_desc": "Membangun arsitektur digital dan sistem fungsional yang stabil, aman, serta mudah dikembangkan (scalable).",
-                "srv_dig_desc": "Mentransformasikan bisnis Anda menuju otomatisasi modern dengan eksekusi dan pemasaran digital yang terarah.",
+                "srv_create_desc": "Menyediakan jasa desain grafis profesional, merancang identitas visual, poster, katalog, dan karya seni digital yang memukau untuk mengkomunikasikan pesan brand Anda dengan kuat.",
+                "srv_dev_desc": "Membangun arsitektur digital seperti jasa pembuatan website Jogja, website UMKM, dan sistem fungsional yang stabil, aman, serta mudah dikembangkan (scalable) dengan harga terjangkau.",
+                "srv_dig_desc": "Jasa landing page dan transformasi bisnis menuju otomatisasi modern dengan eksekusi serta pemasaran digital yang terarah untuk menaikkan konversi.",
                 "tools_title": "Alat & Teknologi yang Kami Kuasai",
                 "swc_subtitle": "Portofolio & Showcase", "swc_title": "Karya Digital Kami", "swc_btn": "Buka Full Showcase",
                 "swc_web_title": "Website & Web App Showcase", "swc_web_desc": "Pengembangan situs web modern, responsif, dan performa tinggi",
@@ -782,18 +853,29 @@
                 "swc_poster_1": "Desain poster petualangan imajinatif.", "swc_poster_2": "Materi promosi layanan digital.", "swc_poster_3": "Desain label dan promosi kuliner.",
                 "swc_poster_4": "Ilustrasi kreatif bertema retro sci-fi.", "swc_poster_5": "Poster infografis edukatif.", "swc_poster_6": "Desain visual informatif AI.",
                 "swc_vid_title": "Animasi & Video Produk", "swc_vid_desc": "Preview langsung karya motion graphics dan video promosi kami.",
+                "faq_subtitle": "FAQ & Informasi Layanan", "faq_title": "Pertanyaan Seputar Layanan Digital Kami",
+                "faq_q1": "Berapa biaya jasa pembuatan website di Jogja?", 
+                "faq_a1": "Kebutuhan tiap bisnis berbeda. Kami menyesuaikan struktur, jumlah halaman, desain, fitur, dan tingkat pengembangan berdasarkan tujuan proyek. Kami juga menyediakan opsi website murah dan profesional untuk UMKM.",
+                "faq_q2": "Apakah landing page bisa dipakai untuk iklan Meta atau Google?", 
+                "faq_a2": "Tentu. Jasa landing page kami dioptimalkan untuk rasio konversi tinggi (CRO) yang siap menampung traffic dari iklan Meta Ads maupun Google Ads, lengkap dengan integrasi tombol WhatsApp.",
+                "faq_q3": "Apakah Digiwork melayani jasa desain grafis untuk media sosial & cetak?", 
+                "faq_a3": "Ya. Kami merancang desain untuk kebutuhan digital (sosmed, banner, iklan) dan kebutuhan cetak (poster, kemasan/packaging, katalog) dengan visual yang konsisten menjaga identitas brand Anda.",
+                "faq_q4": "Apakah website UMKM bisa dikembangkan di kemudian hari?", 
+                "faq_a4": "Sangat bisa. Kami merancang website yang scalable. Halaman dapat dikembangkan bertahap sesuai kebutuhan, sehingga bisnis UMKM tidak harus langsung membangun sistem yang terlalu kompleks sejak awal.",
                 "cta_title": "Siap Transformasi Digital?", "cta_desc": "Mari diskusikan bagaimana kami dapat membantu gereja, sekolah, atau bisnis Anda mencapai potensi maksimal di era digital.", "cta_btn": "Hubungi Kami Sekarang",
-                "ft_desc": "We turn imagination into digital experiences. Creative Digital Studio established 2009.",
+                "ft_desc": "We turn imagination into digital experiences. Creative Digital Studio established 2009. Berdedikasi membantu UMKM dan bisnis dengan website profesional.",
                 "ft_company": "Perusahaan", "ft_about": "Tentang Kami", "ft_vm": "Visi & Misi",
-                "ft_services": "Layanan", "ft_market": "Target Pasar",
+                "ft_services": "Layanan Utama", "ft_market": "Target Pasar",
                 "ft_corp": "Perusahaan", "ft_school": "Sekolah / Universitas", "ft_sme": "UMKM & Startup",
+                "ft_seo_links": "Fokus Layanan",
+                "seo_web_jogja": "Jasa Website Jogja", "seo_web_umkm": "Jasa Website UMKM", "seo_landing": "Jasa Landing Page", "seo_desain": "Jasa Desain Grafis", "seo_web_murah": "Jasa Website Murah",
                 "ft_copyright": "&copy; 2025 Digiwork Inc. All rights reserved. Founded by Eleazar Agung Nugroho."
             },
             "en": {
                 "nav_about": "About", "nav_services": "Services", "nav_showcase": "Showcase", "nav_contact": "Contact Us",
                 "hero_badge": "Creative Digital Studio",
                 "hero_title_1": "We turn imagination into", "hero_title_2": "Digital Experiences",
-                "hero_desc": "As a strategic digital studio, we integrate visual design aesthetics with technological engineering excellence to create industry-scale digital products, systems, and identities.",
+                "hero_desc": "As a strategic digital studio, we integrate visual design aesthetics with technological engineering excellence to create industry-scale digital products, systems, and identities. Discover our SME websites, landing pages, and graphic design solutions.",
                 "hero_btn_1": "Explore Services", "hero_btn_2": "View Portfolio", "hero_scroll": "Scroll",
                 "about_title": "About Digiwork",
                 "about_p1": "Starting from the passion of a designer and developer, Digiwork Inc has transformed into a professional <strong>Creative Digital Studio</strong> led by <strong class='text-white'>Eleazar Agung Nugroho</strong> since <span class='text-brand-neon font-bold'>2009</span>.",
@@ -802,9 +884,9 @@
                 "mission_title": "Mission",
                 "mission_1": "Provide high-quality creative design solutions.", "mission_2": "Build reliable and secure web infrastructure.", "mission_3": "Support the digital transformation of SMEs and spiritual institutions.",
                 "srv_subtitle": "The Studio's Three Pillars", "srv_title": "Integrated Digital Services",
-                "srv_create_desc": "Designing stunning visual identities and digital artwork to strongly communicate your brand's message.",
-                "srv_dev_desc": "Building digital architecture and functional systems that are stable, secure, and easily scalable.",
-                "srv_dig_desc": "Transforming your business towards modern automation with targeted digital execution and marketing.",
+                "srv_create_desc": "Providing professional graphic design services, designing stunning visual identities, posters, catalogs, and digital artwork to strongly communicate your brand's message.",
+                "srv_dev_desc": "Building digital architecture such as Jogja website development, SME websites, and functional systems that are stable, secure, and easily scalable at affordable prices.",
+                "srv_dig_desc": "Landing page services and transforming your business towards modern automation with targeted digital execution and marketing to increase conversions.",
                 "tools_title": "Tools & Technologies We Master",
                 "swc_subtitle": "Portfolio & Showcase", "swc_title": "Our Digital Work", "swc_btn": "Open Full Showcase",
                 "swc_web_title": "Website & Web App Showcase", "swc_web_desc": "Modern, responsive, and high-performance website development",
@@ -822,18 +904,29 @@
                 "swc_poster_1": "Imaginative adventure poster design.", "swc_poster_2": "Digital services promotional materials.", "swc_poster_3": "Culinary label design and promotion.",
                 "swc_poster_4": "Creative retro sci-fi themed illustration.", "swc_poster_5": "Educational infographic poster.", "swc_poster_6": "Informative AI visual design.",
                 "swc_vid_title": "Animation & Product Video", "swc_vid_desc": "Live preview of our motion graphics and promotional videos.",
+                "faq_subtitle": "FAQ & Service Info", "faq_title": "Frequently Asked Questions",
+                "faq_q1": "How much does website development in Jogja cost?",
+                "faq_a1": "Every business has different needs. We tailor the structure, pages, design, and features based on your project goals. We also provide affordable and professional website options for SMEs.",
+                "faq_q2": "Can the landing page be used for Meta or Google Ads?",
+                "faq_a2": "Absolutely. Our landing page services are optimized for high conversion rates (CRO) to handle traffic from Meta and Google Ads, complete with WhatsApp integration.",
+                "faq_q3": "Does Digiwork provide graphic design services for social media & print?",
+                "faq_a3": "Yes. We design for digital needs (social media, banners) and print (posters, packaging, catalogs) with visuals that consistently maintain your brand identity.",
+                "faq_q4": "Can an SME website be upgraded in the future?",
+                "faq_a4": "Definitely. We build scalable websites. Pages can be developed gradually according to needs, so SMEs don't have to build complex systems from the start.",
                 "cta_title": "Ready for Digital Transformation?", "cta_desc": "Let's discuss how we can help your church, school, or business reach its maximum potential in the digital era.", "cta_btn": "Contact Us Now",
-                "ft_desc": "We turn imagination into digital experiences. Creative Digital Studio established 2009.",
+                "ft_desc": "We turn imagination into digital experiences. Creative Digital Studio established 2009. Dedicated to helping SMEs and businesses with professional websites.",
                 "ft_company": "Company", "ft_about": "About Us", "ft_vm": "Vision & Mission",
-                "ft_services": "Services", "ft_market": "Target Market",
+                "ft_services": "Main Services", "ft_market": "Target Market",
                 "ft_corp": "Enterprises", "ft_school": "Schools / Universities", "ft_sme": "SMEs & Startups",
+                "ft_seo_links": "Our Focus",
+                "seo_web_jogja": "Jogja Web Agency", "seo_web_umkm": "SME Websites", "seo_landing": "Landing Page Services", "seo_desain": "Graphic Design", "seo_web_murah": "Affordable Websites",
                 "ft_copyright": "&copy; 2025 Digiwork Inc. All rights reserved. Founded by Eleazar Agung Nugroho."
             },
             "ja": {
                 "nav_about": "概要", "nav_services": "サービス", "nav_showcase": "実績", "nav_contact": "お問い合わせ",
                 "hero_badge": "クリエイティブ・デジタル・スタジオ",
                 "hero_title_1": "想像力を", "hero_title_2": "デジタル体験へと変える",
-                "hero_desc": "戦略的なデジタルスタジオとして、私たちは視覚的デザインの美学と高度な技術エンジニアリングを統合し、産業規模のデジタル製品、システム、ブランドアイデンティティを創造します。",
+                "hero_desc": "戦略的なデジタルスタジオとして、私たちは視覚的デザインの美学と高度な技術エンジニアリングを統合し、産業規模のデジタル製品、システム、ブランドアイデンティティを創造します。中小企業向けウェブサイト、ランディングページ、グラフィックデザインのソリューションをご覧ください。",
                 "hero_btn_1": "サービスを探索", "hero_btn_2": "ポートフォリオを見る", "hero_scroll": "スクロール",
                 "about_title": "Digiworkについて",
                 "about_p1": "デザイナーと開発者の情熱から始まり、Digiwork Incは現在、<span class='text-brand-neon font-bold'>2009</span>年から<strong class='text-white'>Eleazar Agung Nugroho</strong>が率いるプロフェッショナルな<strong>クリエイティブ・デジタル・スタジオ</strong>へと変貌を遂げました。",
@@ -842,9 +935,9 @@
                 "mission_title": "ミッション",
                 "mission_1": "高品質なクリエイティブデザインソリューションを提供する。", "mission_2": "信頼性が高く安全なウェブインフラを構築する。", "mission_3": "中小企業や宗教機関のデジタルトランスフォーメーションを支援する。",
                 "srv_subtitle": "スタジオの3つの柱", "srv_title": "統合デジタルサービス",
-                "srv_create_desc": "ブランドのメッセージを強力に伝える、魅力的な視覚的アイデンティティとデジタルアートワークを設計します。",
-                "srv_dev_desc": "安定し、安全で、拡張性のあるデジタルアーキテクチャと機能的システムを構築します。",
-                "srv_dig_desc": "ターゲットを絞ったデジタル実行とマーケティングにより、ビジネスを最新の自動化へと導きます。",
+                "srv_create_desc": "プロフェッショナルなグラフィックデザインサービスを提供し、ブランドのメッセージを強力に伝える、魅力的な視覚的アイデンティティ、ポスター、カタログ、デジタルアートワークを設計します。",
+                "srv_dev_desc": "ジョグジャカルタのウェブサイト制作、中小企業向けウェブサイトなど、安定し、安全で、拡張性のあるデジタルアーキテクチャと機能的システムを手頃な価格で構築します。",
+                "srv_dig_desc": "ランディングページサービスと、コンバージョンを向上させるターゲットを絞ったデジタル実行とマーケティングにより、ビジネスを最新の自動化へと導きます。",
                 "tools_title": "習熟しているツールとテクノロジー",
                 "swc_subtitle": "ポートフォリオと実績", "swc_title": "私たちのデジタル作品", "swc_btn": "すべての実績を見る",
                 "swc_web_title": "ウェブサイト＆ウェブアプリ実績", "swc_web_desc": "モダンでレスポンシブ、かつ高性能なウェブサイト開発",
@@ -862,11 +955,22 @@
                 "swc_poster_1": "想像力豊かなアドベンチャーポスターデザイン。", "swc_poster_2": "デジタルサービスのプロモーション素材。", "swc_poster_3": "料理のラベルデザインとプロモーション。",
                 "swc_poster_4": "クリエイティブなレトロSFをテーマにしたイラスト。", "swc_poster_5": "教育用インフォグラフィックポスター。", "swc_poster_6": "情報に富んだAIビジュアルデザイン。",
                 "swc_vid_title": "アニメーション＆製品ビデオ", "swc_vid_desc": "モーショングラフィックスとプロモーションビデオのライブプレビュー。",
+                "faq_subtitle": "よくある質問とサービス情報", "faq_title": "サービスに関するよくある質問",
+                "faq_q1": "ジョグジャカルタでのウェブサイト制作費はいくらですか？",
+                "faq_a1": "ビジネスごとにニーズは異なります。プロジェクトの目標に基づいて、構造、ページ数、デザイン、機能を調整します。中小企業向けの手頃でプロフェッショナルなオプションも提供しています。",
+                "faq_q2": "ランディングページはMeta広告やGoogle広告に使用できますか？",
+                "faq_a2": "はい、可能です。当社のランディングページ制作は、高いコンバージョン率（CRO）に最適化されており、WhatsApp統合を含め、広告からのトラフィックに対応する準備ができています。",
+                "faq_q3": "ソーシャルメディアや印刷物用のグラフィックデザインサービスは提供していますか？",
+                "faq_a3": "はい。デジタル（SNS、バナー）と印刷（ポスター、パッケージ、カタログ）の両方のニーズに合わせて、ブランドアイデンティティを保つ視覚的なデザインを作成します。",
+                "faq_q4": "中小企業向けウェブサイトは将来的にアップグレードできますか？",
+                "faq_a4": "もちろん可能です。拡張性の高いウェブサイトを構築します。ニーズに合わせて段階的に開発できるため、最初から複雑なシステムを構築する必要はありません。",
                 "cta_title": "デジタルトランスフォーメーションの準備はできましたか？", "cta_desc": "教会、学校、またはビジネスがデジタル時代において最大限の可能性を発揮できるよう、私たちがどのように支援できるかご相談ください。", "cta_btn": "今すぐお問い合わせ",
-                "ft_desc": "私たちは想像力をデジタル体験に変えます。2009年設立のクリエイティブ・デジタル・スタジオ。",
+                "ft_desc": "私たちは想像力をデジタル体験に変えます。2009年設立のクリエイティブ・デジタル・スタジオ。プロフェッショナルなウェブサイトで中小企業とビジネスを支援することに専念しています。",
                 "ft_company": "会社", "ft_about": "会社概要", "ft_vm": "ビジョンとミッション",
-                "ft_services": "サービス", "ft_market": "ターゲット市場",
+                "ft_services": "主なサービス", "ft_market": "ターゲット市場",
                 "ft_corp": "企業", "ft_school": "学校 / 大学", "ft_sme": "中小企業とスタートアップ",
+                "ft_seo_links": "フォーカスサービス",
+                "seo_web_jogja": "ジョグジャカルタのWeb制作", "seo_web_umkm": "中小企業向けWeb", "seo_landing": "ランディングページ制作", "seo_desain": "グラフィックデザイン", "seo_web_murah": "格安ウェブサイト",
                 "ft_copyright": "&copy; 2025 Digiwork Inc. 無断複写・転載を禁じます。Eleazar Agung Nugrohoによって設立されました。"
             }
         };
