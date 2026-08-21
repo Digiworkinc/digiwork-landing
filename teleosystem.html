@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teleo Analytics - Sistem Analisis Integrasi Laporan Marketplace</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- SheetJS (XLSX Parser) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#0284c7',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="h-full text-slate-800 flex flex-col custom-scrollbar">
+
+  <!-- Main Header -->
+  <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo & Title -->
+        <div class="flex items-center space-x-3">
+          <div class="bg-gradient-to-tr from-sky-500 to-indigo-600 p-2.5 rounded-xl shadow-lg shadow-sky-500/20">
+            <i data-lucide="layers" class="w-6 h-6 text-white"></i>
+          </div>
+          <div>
+            <h1 class="font-bold text-lg leading-none tracking-tight text-white flex items-center gap-2">
+              TELEO Analytics
+              <span class="text-[10px] bg-sky-500/20 text-sky-300 font-medium px-2 py-0.5 rounded-full border border-sky-400/30">v2.4 Relational</span>
+            </h1>
+            <p class="text-xs text-slate-400 mt-0.5">Sistem Integrasi Laporan Order, Income & HPP Marketplace</p>
+          </div>
+        </div>
+
+        <!-- System Controls & Data Status Badge -->
+        <div class="flex items-center space-x-3">
+          <div id="data-status-badge" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="data-source-text">Menggunakan Data Utama Teleo (August 2026)</span>
+          </div>
+
+          <button onclick="toggleUploadModal(true)" class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-sky-600 hover:bg-sky-500 text-white transition-all shadow-sm">
+            <i data-lucide="file-up" class="w-4 h-4"></i>
+            <span>Import / Update File Excel</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Filter & Tab Navigation Bar -->
+  <nav class="bg-white border-b border-slate-200 sticky top-16 z-20 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 py-3">
+        
+        <!-- Navigation Tabs -->
+        <div class="flex space-x-1 overflow-x-auto pb-2 md:pb-0 custom-scrollbar text-xs font-medium">
+          <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="tab-btn active px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all font-semibold bg-sky-50 text-sky-700">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            <span>Dashboard & Pertumbuhan</span>
+          </button>
+          
+          <button onclick="switchTab('completed')" id="tab-btn-completed" class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+            <span>Pesanan Selesai</span>
+            <span id="badge-count-completed" class="ml-1 bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded-full text-[10px]">0</span>
+          </button>
+
+          <button onclick="switchTab('returns')" id="tab-btn-returns" class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100">
+            <i data-lucide="rotate-ccw" class="w-4 h-4 text-rose-600"></i>
+            <span>Retur & Pesanan Batal</span>
+            <span id="badge-count-returns" class="ml-1 bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded-full text-[10px]">0</span>
+          </button>
+
+          <button onclick="switchTab('profit')" id="tab-btn-profit" class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100">
+            <i data-lucide="wallet" class="w-4 h-4 text-amber-600"></i>
+            <span>Laba Bersih & P&L</span>
+          </button>
+
+          <button onclick="switchTab('sku')" id="tab-btn-sku" class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100">
+            <i data-lucide="package-search" class="w-4 h-4 text-indigo-600"></i>
+            <span>Evaluasi Kinerja SKU</span>
+          </button>
+        </div>
+
+        <!-- Global Search & Date Filter Bar -->
+        <div class="flex items-center gap-2">
+          <div class="relative flex-1 md:w-64">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+            <input type="text" id="global-search-input" onkeyup="applyFilters()" placeholder="Cari Order ID, SKU, atau Produk..." class="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition-all">
+          </div>
+          <button onclick="resetFilters()" title="Reset Filter" class="p-2 border border-slate-300 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Body Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- KPI Summary Row -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      
+      <!-- Total Order -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-slate-300 transition-all">
+        <div class="flex items-center justify-between text-slate-500 mb-1">
+          <span class="text-xs font-medium">Total Pesanan</span>
+          <i data-lucide="shopping-bag" class="w-4 h-4 text-slate-400"></i>
+        </div>
+        <div class="text-xl font-bold text-slate-900" id="kpi-total-orders">0</div>
+        <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1" id="kpi-unit-sold-text">
+          <span>0 unit barang</span>
+        </div>
+      </div>
+
+      <!-- Pesanan Selesai -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-slate-300 transition-all">
+        <div class="flex items-center justify-between text-slate-500 mb-1">
+          <span class="text-xs font-medium">Pesanan Selesai</span>
+          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
+        </div>
+        <div class="text-xl font-bold text-emerald-600" id="kpi-completed-orders">0</div>
+        <div class="text-[11px] text-emerald-700 mt-1 font-medium" id="kpi-completed-units">
+          0 unit cair
+        </div>
+      </div>
+
+      <!-- Rasio Retur & Batal -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-slate-300 transition-all">
+        <div class="flex items-center justify-between text-slate-500 mb-1">
+          <span class="text-xs font-medium">Rasio Retur & Batal</span>
+          <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500"></i>
+        </div>
+        <div class="text-xl font-bold text-rose-600" id="kpi-return-rate">0%</div>
+        <div class="text-[11px] text-rose-700 mt-1 font-medium" id="kpi-return-count-text">
+          0 order retur/batal
+        </div>
+      </div>
+
+      <!-- Total Penghasilan Cair -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-slate-300 transition-all">
+        <div class="flex items-center justify-between text-slate-500 mb-1">
+          <span class="text-xs font-medium">Penghasilan Bersih</span>
+          <i data-lucide="badge-dollar-sign" class="w-4 h-4 text-sky-500"></i>
+        </div>
+        <div class="text-lg font-bold text-sky-700" id="kpi-net-income">Rp 0</div>
+        <div class="text-[10px] text-slate-500 mt-1">Setelah admin & voucher</div>
+      </div>
+
+      <!-- Total HPP Terjual -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-slate-300 transition-all">
+        <div class="flex items-center justify-between text-slate-500 mb-1">
+          <span class="text-xs font-medium">Total Modal (HPP)</span>
+          <i data-lucide="boxes" class="w-4 h-4 text-slate-400"></i>
+        </div>
+        <div class="text-lg font-bold text-slate-800" id="kpi-total-hpp">Rp 0</div>
+        <div class="text-[10px] text-slate-500 mt-1">HPP unit selesai</div>
+      </div>
+
+      <!-- Real Net Profit -->
+      <div class="bg-gradient-to-br from-slate-900 to-slate-800 p-4 rounded-xl text-white shadow-md">
+        <div class="flex items-center justify-between text-slate-300 mb-1">
+          <span class="text-xs font-semibold">Laba Bersih Real</span>
+          <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
+        </div>
+        <div class="text-lg font-bold text-emerald-400" id="kpi-real-profit">Rp 0</div>
+        <div class="text-[10px] text-slate-300 mt-1 flex items-center justify-between">
+          <span>Profit Margin:</span>
+          <span id="kpi-profit-margin" class="font-bold text-white">0%</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TAB 1: DASHBOARD & PERTUMBUHAN -->
+    <div id="tab-content-dashboard" class="tab-panel space-y-6">
+      
+      <!-- Formula Relay Card Banner -->
+      <div class="bg-sky-50 border border-sky-200 rounded-xl p-4 text-xs text-sky-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+        <div class="flex items-start gap-3">
+          <div class="p-2 bg-sky-600 text-white rounded-lg mt-0.5">
+            <i data-lucide="git-merge" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm text-sky-950">Aturan Penggabungan & Integrasi Relasi Data</h4>
+            <p class="mt-0.5 text-sky-800">
+              Sistem menghubungkan <strong class="underline">Order ID</strong> untuk mengambil Dana Cair dari <em>Income File</em>, dan <strong class="underline">SKU Produk</strong> untuk menarik HPP dari <em>Master HPP Teleo</em>.
+            </p>
+          </div>
+        </div>
+        <div class="bg-white border border-sky-300 rounded-lg p-2.5 shadow-xs shrink-0 font-mono text-[11px] text-slate-800">
+          <span class="text-emerald-600 font-bold">Laba Bersih Real</span> = Dana Cair - HPP Terjual - Kerugian Retur
+        </div>
+      </div>
+
+      <!-- Growth Charts Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Daily Trend Growth Chart -->
+        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                <i data-lucide="line-chart" class="w-4 h-4 text-sky-600"></i>
+                Grafik Pertumbuhan Penjualan & Laba Bersih
+              </h3>
+              <p class="text-xs text-slate-500">Trend harian akumulasi omset cair vs Laba bersih real</p>
+            </div>
+            <div class="text-xs bg-slate-100 px-2.5 py-1 rounded-md text-slate-600 font-medium">Periode Aug 2026</div>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="chart-growth-trend"></canvas>
+          </div>
+        </div>
+
+        <!-- Status Breakdown Chart -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-slate-800 text-sm mb-1 flex items-center gap-2">
+              <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-600"></i>
+              Distribusi Status Pesanan
+            </h3>
+            <p class="text-xs text-slate-500 mb-4">Perbandingan Selesai, Retur & Batal</p>
+            <div class="h-48 relative flex items-center justify-center">
+              <canvas id="chart-status-pie"></canvas>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 text-xs space-y-2">
+            <div class="flex justify-between text-slate-600">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>Selesai Cair:</span>
+              <span id="chart-legend-completed" class="font-semibold text-slate-900">0 Order</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>Dikembalikan / Rusak:</span>
+              <span id="chart-legend-return" class="font-semibold text-slate-900">0 Order</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>Batal Dini:</span>
+              <span id="chart-legend-cancelled" class="font-semibold text-slate-900">0 Order</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick SKU Performance Highlights -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Top Profit SKU List -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i>
+              Top 5 SKU Kontributor Profit Terbesar
+            </h3>
+            <button onclick="switchTab('sku')" class="text-xs text-sky-600 hover:underline">Lihat Semua SKU</button>
+          </div>
+          <div class="divide-y divide-slate-100" id="top-profit-sku-list">
+            <!-- Dynamic Insertion -->
+          </div>
+        </div>
+
+        <!-- High Return Warning SKU List -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 text-rose-700">
+              <i data-lucide="alert-octagon" class="w-4 h-4 text-rose-600"></i>
+              SKU Warning: Tingkat Retur Tinggi (>3%)
+            </h3>
+            <button onclick="switchTab('returns')" class="text-xs text-rose-600 hover:underline">Detail Retur</button>
+          </div>
+          <div class="divide-y divide-slate-100" id="high-return-sku-list">
+            <!-- Dynamic Insertion -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TAB 2: PESANAN SELESAI -->
+    <div id="tab-content-completed" class="tab-panel space-y-4 hidden">
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+              <i data-lucide="check-check" class="w-5 h-5 text-emerald-600"></i>
+              Laporan Detail Pesanan Selesai (Dana Cair)
+            </h3>
+            <p class="text-xs text-slate-500">Data pesanan sukses dengan kalkulasi penghasilan cair marketplace & HPP modal produk</p>
+          </div>
+          <button onclick="exportTableToCSV('table-completed-orders', 'Laporan_Pesanan_Selesai')" class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-slate-50 flex items-center gap-1.5 text-slate-700">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            Export CSV
+          </button>
+        </div>
+
+        <!-- Table Container -->
+        <div class="overflow-x-auto rounded-lg border border-slate-200 custom-scrollbar">
+          <table id="table-completed-orders" class="w-full text-xs text-left text-slate-600">
+            <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+              <tr>
+                <th class="p-3">No. Pesanan</th>
+                <th class="p-3">Tanggal</th>
+                <th class="p-3">SKU Produk</th>
+                <th class="p-3">Nama Produk</th>
+                <th class="p-3 text-center">Qty</th>
+                <th class="p-3 text-right">Dana Cair (Income)</th>
+                <th class="p-3 text-right">HPP / Unit</th>
+                <th class="p-3 text-right">Total HPP</th>
+                <th class="p-3 text-right">Laba Bersih</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-completed-orders" class="divide-y divide-slate-100 bg-white">
+              <!-- Dynamic Insertion -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: RETUR & PESANAN BATAL -->
+    <div id="tab-content-returns" class="tab-panel space-y-4 hidden">
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2 text-rose-700">
+              <i data-lucide="rotate-ccw" class="w-5 h-5 text-rose-600"></i>
+              Laporan & Kerugian Pesanan Dikembalikan (Return) & Batal
+            </h3>
+            <p class="text-xs text-slate-500">Mengidentifikasi kerugian dari HPP produk rusak/hilang serta biaya ongkir penanganan retur</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="exportTableToCSV('table-return-orders', 'Laporan_Pesanan_Retur_Batal')" class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-slate-50 flex items-center gap-1.5 text-slate-700">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              Export CSV
+            </button>
+          </div>
+        </div>
+
+        <!-- Return Loss Breakdown Card -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+          <div class="bg-rose-50 border border-rose-200 rounded-xl p-3.5">
+            <span class="text-xs text-rose-700 font-medium">Total Order Retur/Batal</span>
+            <div class="text-lg font-bold text-rose-800" id="return-card-count">0 Order</div>
+            <p class="text-[10px] text-rose-600 mt-0.5">Rasio: <span id="return-card-ratio" class="font-bold">0%</span> dari total order</p>
+          </div>
+          <div class="bg-rose-50 border border-rose-200 rounded-xl p-3.5">
+            <span class="text-xs text-rose-700 font-medium">Kerugian HPP Barang Rusak/Hilang</span>
+            <div class="text-lg font-bold text-rose-800" id="return-card-hpp-loss">Rp 0</div>
+            <p class="text-[10px] text-rose-600 mt-0.5">Barang retur kondisi rusak tidak dapat dijual kembali</p>
+          </div>
+          <div class="bg-rose-50 border border-rose-200 rounded-xl p-3.5">
+            <span class="text-xs text-rose-700 font-medium">Ongkir/Penalti Denda Retur</span>
+            <div class="text-lg font-bold text-rose-800" id="return-card-fee-loss">Rp 0</div>
+            <p class="text-[10px] text-rose-600 mt-0.5">Biaya penanganan atau ongkir balik ditanggung toko</p>
+          </div>
+        </div>
+
+        <!-- Return Orders Table -->
+        <div class="overflow-x-auto rounded-lg border border-slate-200 custom-scrollbar">
+          <table id="table-return-orders" class="w-full text-xs text-left text-slate-600">
+            <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+              <tr>
+                <th class="p-3">No. Pesanan</th>
+                <th class="p-3">SKU & Nama Produk</th>
+                <th class="p-3 text-center">Qty</th>
+                <th class="p-3">Status / Alasan</th>
+                <th class="p-3">Kondisi Barang</th>
+                <th class="p-3 text-right">Beban HPP Rusak</th>
+                <th class="p-3 text-right">Ongkir/Denda</th>
+                <th class="p-3 text-right">Total Kerugian</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-return-orders" class="divide-y divide-slate-100 bg-white">
+              <!-- Dynamic Insertion -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: LABA BERSIH & FINANCIAL STATEMENT -->
+    <div id="tab-content-profit" class="tab-panel space-y-6 hidden">
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm max-w-4xl mx-auto">
+        <div class="border-b border-slate-200 pb-4 mb-6 flex justify-between items-center">
+          <div>
+            <h3 class="font-bold text-slate-900 text-lg flex items-center gap-2">
+              <i data-lucide="calculator" class="w-5 h-5 text-sky-600"></i>
+              Laporan Laba Rugi Presisi (Real Net Profit Statement)
+            </h3>
+            <p class="text-xs text-slate-500">Ringkasan penggabungan Penghasilan Bersih, HPP Modal, dan Beban Kerugian Retur</p>
+          </div>
+          <span class="text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-semibold">Tergabung Otomatis</span>
+        </div>
+
+        <!-- Income Statement Waterfall Table -->
+        <div class="space-y-3 font-sans">
+          
+          <!-- Section 1: Omset & Dana Cair -->
+          <div class="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200">
+            <div class="flex justify-between items-center text-sm font-semibold text-slate-800">
+              <span class="flex items-center gap-2">
+                <i data-lucide="circle-dollar-sign" class="w-4 h-4 text-sky-600"></i>
+                1. Total Penghasilan Bersih (Dana Cair Marketplace)
+              </span>
+              <span id="pl-net-income" class="text-sky-700 font-bold text-base">Rp 0</span>
+            </div>
+            <p class="text-xs text-slate-500 pl-6">
+              Total dana cair real yang telah dipotong langsung biaya admin platform, voucher diskon toko, dan promo marketplace dari file <code>Income.sudah dilepas.xlsx</code>.
+            </p>
+          </div>
+
+          <!-- Section 2: HPP Terjual -->
+          <div class="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200">
+            <div class="flex justify-between items-center text-sm font-semibold text-slate-800">
+              <span class="flex items-center gap-2">
+                <i data-lucide="box" class="w-4 h-4 text-amber-600"></i>
+                2. Total HPP Produk Terjual (Pesanan Selesai)
+              </span>
+              <span id="pl-total-hpp" class="text-amber-700 font-bold text-base">(Rp 0)</span>
+            </div>
+            <p class="text-xs text-slate-500 pl-6">
+              Kalkulasi modal produk selesai terjual: <code>Qty Selesai × HPP per SKU</code> dari file <code>DATA HPP TELEO</code>.
+            </p>
+          </div>
+
+          <!-- Gross Profit Row -->
+          <div class="px-4 py-3 bg-sky-50 rounded-lg flex justify-between items-center border border-sky-200 text-sky-950 font-semibold text-sm">
+            <span>Laba Kotor Operasional (Penghasilan Cair - Total HPP)</span>
+            <span id="pl-gross-profit" class="font-bold text-sky-900 text-base">Rp 0</span>
+          </div>
+
+          <!-- Section 3: Kerugian Retur & Batal -->
+          <div class="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200">
+            <div class="flex justify-between items-center text-sm font-semibold text-slate-800">
+              <span class="flex items-center gap-2">
+                <i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i>
+                3. Total Beban Kerugian Retur & Batal
+              </span>
+              <span id="pl-return-loss" class="text-rose-700 font-bold text-base">(Rp 0)</span>
+            </div>
+            <div class="pl-6 space-y-1 text-xs text-slate-600">
+              <div class="flex justify-between">
+                <span>• HPP Barang Retur Rusak / Hilang:</span>
+                <span id="pl-sub-hpp-damaged" class="font-medium">Rp 0</span>
+              </div>
+              <div class="flex justify-between">
+                <span>• Biaya Ongkir Penanganan / Penalti Denda:</span>
+                <span id="pl-sub-shipping-loss" class="font-medium">Rp 0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Final Net Profit Divider -->
+          <div class="pt-4 border-t-2 border-dashed border-slate-300">
+            <div class="p-5 bg-slate-900 text-white rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
+              <div>
+                <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Net Profit Presisi (Laba Bersih Real)</span>
+                <h2 class="text-2xl font-extrabold text-emerald-400 mt-1" id="pl-net-profit-final">Rp 0</h2>
+                <p class="text-xs text-slate-400 mt-0.5">Uang bersih bersih siap ditarik/direinvestasi</p>
+              </div>
+              <div class="text-right border-t sm:border-t-0 sm:border-l border-slate-700 pt-3 sm:pt-0 sm:pl-6">
+                <div class="text-xs text-slate-400">Net Profit Margin</div>
+                <div class="text-2xl font-bold text-white" id="pl-margin-final">0%</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: EVALUASI KINERJA SKU -->
+    <div id="tab-content-sku" class="tab-panel space-y-4 hidden">
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+              <i data-lucide="package-check" class="w-5 h-5 text-indigo-600"></i>
+              Analisis & Evaluasi Kinerja per SKU (Product Evaluation)
+            </h3>
+            <p class="text-xs text-slate-500">Menganalisis performa penjualan, kontribusi laba bersih, serta deteksi risiko retur tinggi per produk</p>
+          </div>
+        </div>
+
+        <!-- SKU Evaluation Table -->
+        <div class="overflow-x-auto rounded-lg border border-slate-200 custom-scrollbar">
+          <table class="w-full text-xs text-left text-slate-600">
+            <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+              <tr>
+                <th class="p-3">SKU Code</th>
+                <th class="p-3">Nama Produk</th>
+                <th class="p-3 text-right">Modal HPP</th>
+                <th class="p-3 text-center">Unit Selesai</th>
+                <th class="p-3 text-center">Unit Retur</th>
+                <th class="p-3 text-center">Rasio Retur</th>
+                <th class="p-3 text-right">Dana Cair</th>
+                <th class="p-3 text-right">Total HPP</th>
+                <th class="p-3 text-right">Laba Bersih Real</th>
+                <th class="p-3 text-center">Status / Rekomendasi</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-sku-performance" class="divide-y divide-slate-100 bg-white">
+              <!-- Dynamic Insertion -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL: File Upload & Relational Mapping -->
+  <div id="upload-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 border border-slate-200 space-y-5 animate-in fade-in zoom-in duration-150">
+      
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="file-spreadsheet" class="w-5 h-5 text-sky-600"></i>
+          <h3 class="font-bold text-slate-800 text-base">Import / Update File Excel Marketplace</h3>
+        </div>
+        <button onclick="toggleUploadModal(false)" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-500">
+        Unggah file Excel Anda di bawah ini. Sistem akan menyatukan data secara presisi berdasarkan <strong>Order ID</strong> dan <strong>SKU Produk</strong>.
+      </p>
+
+      <!-- 3 File Inputs Grid -->
+      <div class="space-y-3">
+        
+        <!-- File 1: Order Baru -->
+        <div class="border border-slate-200 rounded-xl p-3 bg-slate-50 hover:bg-white transition-all">
+          <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center justify-between">
+            <span>1. Laporan Pesanan (Order Baru)</span>
+            <span class="text-[10px] text-slate-400 font-normal">Kunci: Order ID & SKU</span>
+          </label>
+          <input type="file" id="input-file-orders" accept=".xlsx, .xls, .csv" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-100 file:text-sky-700 hover:file:bg-sky-200 cursor-pointer">
+        </div>
+
+        <!-- File 2: Income -->
+        <div class="border border-slate-200 rounded-xl p-3 bg-slate-50 hover:bg-white transition-all">
+          <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center justify-between">
+            <span>2. Laporan Total Penghasilan (Income.sudah dilepas.xlsx)</span>
+            <span class="text-[10px] text-slate-400 font-normal">Kunci: Order ID</span>
+          </label>
+          <input type="file" id="input-file-income" accept=".xlsx, .xls, .csv" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-100 file:text-sky-700 hover:file:bg-sky-200 cursor-pointer">
+        </div>
+
+        <!-- File 3: DATA HPP TELEO -->
+        <div class="border border-slate-200 rounded-xl p-3 bg-slate-50 hover:bg-white transition-all">
+          <label class="block text-xs font-bold text-slate-800 mb-1 flex items-center justify-between">
+            <span>3. DATA HPP TELEO</span>
+            <span class="text-[10px] text-slate-400 font-normal">Kunci: SKU Produk</span>
+          </label>
+          <input type="file" id="input-file-hpp" accept=".xlsx, .xls, .csv" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-100 file:text-sky-700 hover:file:bg-sky-200 cursor-pointer">
+        </div>
+
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+        <button onclick="loadDefaultTeleoData()" class="px-3.5 py-2 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all flex items-center gap-1.5">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          Gunakan Data Default Teleo
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="toggleUploadModal(false)" class="px-4 py-2 text-xs text-slate-600 hover:bg-slate-100 rounded-lg font-medium">Batal</button>
+          <button onclick="processUploadedFiles()" class="px-4 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-500 rounded-lg transition-all shadow-md">
+            Proses & Integrasikan
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <script>
+    // GLOBAL APPLICATION STATE
+    let rawOrders = [];
+    let rawIncome = [];
+    let rawHPP = [];
+    let processedIntegratedData = [];
+    let skuPerformanceMap = {};
+    
+    // Filtered State
+    let activeFilteredData = [];
+    let currentTab = 'dashboard';
+
+    // Chart instances
+    let growthTrendChart = null;
+    let statusPieChart = null;
+
+    // Helper: Currency Formatter
+    function formatIDR(amount) {
+      if (isNaN(amount) || amount === null) return 'Rp 0';
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount);
+    }
+
+    // DEFAULT MAIN DATASET (Sesuai Data Utama Teleo August 2026)
+    const DEFAULT_HPP_DATA = [
+      { SKU: 'TELEO-BLK-M', Nama: 'Teleo T-Shirt Premium Black M', HPP: 42000 },
+      { SKU: 'TELEO-BLK-L', Nama: 'Teleo T-Shirt Premium Black L', HPP: 42000 },
+      { SKU: 'TELEO-BLK-XL', Nama: 'Teleo T-Shirt Premium Black XL', HPP: 45000 },
+      { SKU: 'TELEO-WHT-M', Nama: 'Teleo T-Shirt White Cotton M', HPP: 38000 },
+      { SKU: 'TELEO-WHT-L', Nama: 'Teleo T-Shirt White Cotton L', HPP: 38000 },
+      { SKU: 'TELEO-HOOD-L', Nama: 'Teleo Heavyweight Hoodie Navy L', HPP: 95000 },
+      { SKU: 'TELEO-HOOD-XL', Nama: 'Teleo Heavyweight Hoodie Navy XL', HPP: 98000 },
+      { SKU: 'TELEO-JACK-L', Nama: 'Teleo Windbreaker Jacket Olive L', HPP: 110000 },
+      { SKU: 'TELEO-HAT-BLK', Nama: 'Teleo Embroidered Cap Black', HPP: 25000 }
+    ];
+
+    const DEFAULT_INCOME_DATA = [
+      { OrderID: 'ORD-20260801-001', DanaCair: 82500 },
+      { OrderID: 'ORD-20260801-002', DanaCair: 82500 },
+      { OrderID: 'ORD-20260801-003', DanaCair: 168000 },
+      { OrderID: 'ORD-20260802-004', DanaCair: 75000 },
+      { OrderID: 'ORD-20260802-005', DanaCair: 185000 },
+      { OrderID: 'ORD-20260803-006', DanaCair: 82500 },
+      { OrderID: 'ORD-20260803-007', DanaCair: 220000 },
+      { OrderID: 'ORD-20260804-008', DanaCair: 48000 },
+      { OrderID: 'ORD-20260804-009', DanaCair: 82500 },
+      { OrderID: 'ORD-20260805-010', DanaCair: 75000 },
+      { OrderID: 'ORD-20260805-011', DanaCair: 185000 },
+      { OrderID: 'ORD-20260806-012', DanaCair: 82500 },
+      { OrderID: 'ORD-20260806-013', DanaCair: 168000 },
+      { OrderID: 'ORD-20260807-014', DanaCair: 82500 },
+      { OrderID: 'ORD-20260807-015', DanaCair: 220000 },
+      { OrderID: 'ORD-20260808-016', DanaCair: 75000 },
+      { OrderID: 'ORD-20260808-017', DanaCair: 82500 },
+      { OrderID: 'ORD-20260809-018', DanaCair: 185000 },
+      { OrderID: 'ORD-20260809-019', DanaCair: 82500 },
+      { OrderID: 'ORD-20260810-020', DanaCair: 48000 },
+      { OrderID: 'ORD-20260810-021', DanaCair: 75000 },
+      { OrderID: 'ORD-20260811-022', DanaCair: 82500 },
+      { OrderID: 'ORD-20260811-023', DanaCair: 220000 },
+      { OrderID: 'ORD-20260812-024', DanaCair: 168000 },
+      { OrderID: 'ORD-20260812-025', DanaCair: 82500 },
+      { OrderID: 'ORD-20260813-026', DanaCair: 82500 },
+      { OrderID: 'ORD-20260813-027', DanaCair: 185000 },
+      { OrderID: 'ORD-20260814-028', DanaCair: 75000 },
+      { OrderID: 'ORD-20260814-029', DanaCair: 82500 },
+      { OrderID: 'ORD-20260815-030', DanaCair: 220000 },
+      { OrderID: 'ORD-20260815-031', DanaCair: 82500 },
+      { OrderID: 'ORD-20260816-032', DanaCair: 168000 },
+      { OrderID: 'ORD-20260816-033', DanaCair: 75000 },
+      { OrderID: 'ORD-20260817-034', DanaCair: 82500 },
+      { OrderID: 'ORD-20260817-035', DanaCair: 82500 },
+      { OrderID: 'ORD-20260818-036', DanaCair: 185000 }
+    ];
+
+    const DEFAULT_ORDERS_DATA = [
+      { OrderID: 'ORD-20260801-001', Tanggal: '2026-08-01', SKU: 'TELEO-BLK-M', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260801-002', Tanggal: '2026-08-01', SKU: 'TELEO-BLK-L', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260801-003', Tanggal: '2026-08-01', SKU: 'TELEO-HOOD-L', Qty: 1, HargaJual: 195000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260802-004', Tanggal: '2026-08-02', SKU: 'TELEO-WHT-M', Qty: 1, HargaJual: 85000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260802-005', Tanggal: '2026-08-02', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260802-006X', Tanggal: '2026-08-02', SKU: 'TELEO-HOOD-XL', Qty: 1, HargaJual: 198000, Status: 'Dikembalikan', Condition: 'Rusak / Cacat Jahitan', OngkirLoss: 15000 },
+      { OrderID: 'ORD-20260803-006', Tanggal: '2026-08-03', SKU: 'TELEO-BLK-XL', Qty: 1, HargaJual: 98000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260803-007', Tanggal: '2026-08-03', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260804-008', Tanggal: '2026-08-04', SKU: 'TELEO-HAT-BLK', Qty: 1, HargaJual: 55000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260804-009', Tanggal: '2026-08-04', SKU: 'TELEO-BLK-M', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260804-010X', Tanggal: '2026-08-04', SKU: 'TELEO-WHT-L', Qty: 1, HargaJual: 85000, Status: 'Dikembalikan', Condition: 'Ukuran Kekecilan (Kondisi Baik)', OngkirLoss: 10000 },
+      { OrderID: 'ORD-20260805-010', Tanggal: '2026-08-05', SKU: 'TELEO-WHT-M', Qty: 1, HargaJual: 85000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260805-011', Tanggal: '2026-08-05', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260806-012', Tanggal: '2026-08-06', SKU: 'TELEO-BLK-L', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260806-013', Tanggal: '2026-08-06', SKU: 'TELEO-HOOD-L', Qty: 1, HargaJual: 195000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260807-014', Tanggal: '2026-08-07', SKU: 'TELEO-BLK-M', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260807-015', Tanggal: '2026-08-07', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260808-016', Tanggal: '2026-08-08', SKU: 'TELEO-WHT-L', Qty: 1, HargaJual: 85000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260808-017', Tanggal: '2026-08-08', SKU: 'TELEO-BLK-XL', Qty: 1, HargaJual: 98000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260808-018X', Tanggal: '2026-08-08', SKU: 'TELEO-HOOD-XL', Qty: 1, HargaJual: 198000, Status: 'Pesanan Batal', Condition: 'Batal Pembeli Dini', OngkirLoss: 0 },
+      { OrderID: 'ORD-20260809-018', Tanggal: '2026-08-09', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260809-019', Tanggal: '2026-08-09', SKU: 'TELEO-BLK-M', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260810-020', Tanggal: '2026-08-10', SKU: 'TELEO-HAT-BLK', Qty: 1, HargaJual: 55000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260810-021', Tanggal: '2026-08-10', SKU: 'TELEO-WHT-M', Qty: 1, HargaJual: 85000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260811-022', Tanggal: '2026-08-11', SKU: 'TELEO-BLK-L', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260811-023', Tanggal: '2026-08-11', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260812-024', Tanggal: '2026-08-12', SKU: 'TELEO-HOOD-L', Qty: 1, HargaJual: 195000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260812-025', Tanggal: '2026-08-12', SKU: 'TELEO-BLK-M', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260812-026X', Tanggal: '2026-08-12', SKU: 'TELEO-HOOD-XL', Qty: 1, HargaJual: 198000, Status: 'Dikembalikan', Condition: 'Hilang / Noda Permanen Ekspedisi', OngkirLoss: 20000 },
+      { OrderID: 'ORD-20260813-026', Tanggal: '2026-08-13', SKU: 'TELEO-BLK-XL', Qty: 1, HargaJual: 98000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260813-027', Tanggal: '2026-08-13', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260814-028', Tanggal: '2026-08-14', SKU: 'TELEO-WHT-M', Qty: 1, HargaJual: 85000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260814-029', Tanggal: '2026-08-14', SKU: 'TELEO-BLK-L', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260815-030', Tanggal: '2026-08-15', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260815-031', Tanggal: '2026-08-15', SKU: 'TELEO-BLK-M', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260816-032', Tanggal: '2026-08-16', SKU: 'TELEO-HOOD-L', Qty: 1, HargaJual: 195000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260816-033', Tanggal: '2026-08-16', SKU: 'TELEO-WHT-L', Qty: 1, HargaJual: 85000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260817-034', Tanggal: '2026-08-17', SKU: 'TELEO-BLK-M', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260817-035', Tanggal: '2026-08-17', SKU: 'TELEO-BLK-XL', Qty: 1, HargaJual: 98000, Status: 'Selesai', Condition: '-' },
+      { OrderID: 'ORD-20260818-036', Tanggal: '2026-08-18', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' }
+    ];
+
+    // CORE INTEGRATION ENGINE (Replicating XLOOKUP & Relational Joins)
+    function integrateRelationalData() {
+      // Create Fast Lookup Maps
+      const hppMap = {};
+      rawHPP.forEach(item => {
+        if (item.SKU) {
+          hppMap[item.SKU.trim().toUpperCase()] = {
+            hpp: parseFloat(item.HPP) || 0,
+            nama: item.Nama || item.SKU
+          };
+        }
+      });
+
+      const incomeMap = {};
+      rawIncome.forEach(item => {
+        if (item.OrderID) {
+          incomeMap[item.OrderID.trim()] = parseFloat(item.DanaCair) || 0;
+        }
+      });
+
+      // Map Order Baru Data
+      skuPerformanceMap = {};
+
+      processedIntegratedData = rawOrders.map(order => {
+        const orderId = (order.OrderID || '').trim();
+        const skuKey = (order.SKU || '').trim().toUpperCase();
+        const qty = parseInt(order.Qty) || 1;
+        const status = order.Status || 'Selesai';
+        const isCompleted = status.toLowerCase() === 'selesai';
+        const isReturn = status.toLowerCase().includes('kembali') || status.toLowerCase().includes('retur');
+        const isCancelled = status.toLowerCase().includes('batal');
+
+        // Relational Lookups
+        const hppInfo = hppMap[skuKey] || { hpp: 0, nama: order.NamaProduk || skuKey };
+        const unitHPP = hppInfo.hpp;
+        const totalHPP = unitHPP * qty;
+
+        // Pull Released Income from Income File (XLOOKUP)
+        const netIncomeFromIncomeFile = isCompleted ? (incomeMap[orderId] || (order.HargaJual * 0.88 * qty)) : 0;
+
+        // Calculate Return Losses
+        let hppDamagedLoss = 0;
+        let shippingPenaltyLoss = parseFloat(order.OngkirLoss) || 0;
+
+        if (isReturn) {
+          const condition = (order.Condition || '').toLowerCase();
+          // If product is damaged/lost, we write off the HPP
+          if (condition.includes('rusak') || condition.includes('hilang') || condition.includes('noda')) {
+            hppDamagedLoss = totalHPP;
+          }
+        }
+
+        const totalReturnLoss = hppDamagedLoss + shippingPenaltyLoss;
+        const orderNetProfit = isCompleted ? (netIncomeFromIncomeFile - totalHPP) : (-totalReturnLoss);
+
+        // Aggregate SKU Level Matrix
+        if (!skuPerformanceMap[skuKey]) {
+          skuPerformanceMap[skuKey] = {
+            sku: skuKey,
+            nama: hppInfo.nama,
+            unitHPP: unitHPP,
+            totalOrders: 0,
+            unitsCompleted: 0,
+            unitsReturned: 0,
+            totalNetIncome: 0,
+            totalHPPCompleted: 0,
+            totalReturnLosses: 0,
+            totalNetProfit: 0
+          };
+        }
+
+        skuPerformanceMap[skuKey].totalOrders += 1;
+        if (isCompleted) {
+          skuPerformanceMap[skuKey].unitsCompleted += qty;
+          skuPerformanceMap[skuKey].totalNetIncome += netIncomeFromIncomeFile;
+          skuPerformanceMap[skuKey].totalHPPCompleted += totalHPP;
+          skuPerformanceMap[skuKey].totalNetProfit += orderNetProfit;
+        } else if (isReturn) {
+          skuPerformanceMap[skuKey].unitsReturned += qty;
+          skuPerformanceMap[skuKey].totalReturnLosses += totalReturnLoss;
+          skuPerformanceMap[skuKey].totalNetProfit += orderNetProfit;
+        }
+
+        return {
+          orderId,
+          tanggal: order.Tanggal || '2026-08-01',
+          sku: skuKey,
+          namaProduk: hppInfo.nama,
+          qty,
+          hargaJual: parseFloat(order.HargaJual) || 0,
+          status,
+          isCompleted,
+          isReturn,
+          isCancelled,
+          condition: order.Condition || '-',
+          netIncome: netIncomeFromIncomeFile,
+          unitHPP,
+          totalHPP,
+          hppDamagedLoss,
+          shippingPenaltyLoss,
+          totalReturnLoss,
+          netProfit: orderNetProfit
+        };
+      });
+
+      // Sync Filtered View
+      activeFilteredData = [...processedIntegratedData];
+      renderAllComponents();
+    }
+
+    // RENDER ALL UI DASHBOARD COMPONENTS
+    function renderAllComponents() {
+      // 1. Calculate Summary Metrics
+      let totalOrderCount = activeFilteredData.length;
+      let completedOrders = activeFilteredData.filter(d => d.isCompleted);
+      let returnOrders = activeFilteredData.filter(d => d.isReturn || d.isCancelled);
+
+      let completedCount = completedOrders.length;
+      let returnCount = returnOrders.length;
+      let completedUnits = completedOrders.reduce((sum, d) => sum + d.qty, 0);
+      let totalUnitsSold = activeFilteredData.reduce((sum, d) => sum + d.qty, 0);
+
+      // Return Rate % = (Return Count / Total Order) * 100%
+      let returnRatePct = totalOrderCount > 0 ? ((returnCount / totalOrderCount) * 100).toFixed(1) : '0.0';
+
+      let totalNetIncome = completedOrders.reduce((sum, d) => sum + d.netIncome, 0);
+      let totalHPPCompleted = completedOrders.reduce((sum, d) => sum + d.totalHPP, 0);
+      
+      let totalHppDamagedLoss = returnOrders.reduce((sum, d) => sum + d.hppDamagedLoss, 0);
+      let totalShippingPenaltyLoss = returnOrders.reduce((sum, d) => sum + d.shippingPenaltyLoss, 0);
+      let totalReturnLoss = totalHppDamagedLoss + totalShippingPenaltyLoss;
+
+      // Real Net Profit = Net Income - Total HPP - Return Losses
+      let realNetProfit = totalNetIncome - totalHPPCompleted - totalReturnLoss;
+      let profitMarginPct = totalNetIncome > 0 ? ((realNetProfit / totalNetIncome) * 100).toFixed(1) : '0.0';
+
+      // Update KPI Elements
+      document.getElementById('kpi-total-orders').innerText = totalOrderCount;
+      document.getElementById('kpi-unit-sold-text').innerText = `${totalUnitsSold} unit total transaksi`;
+
+      document.getElementById('kpi-completed-orders').innerText = completedCount;
+      document.getElementById('kpi-completed-units').innerText = `${completedUnits} unit cair`;
+
+      document.getElementById('kpi-return-rate').innerText = `${returnRatePct}%`;
+      document.getElementById('kpi-return-count-text').innerText = `${returnCount} order dikembalikan/batal`;
+
+      document.getElementById('kpi-net-income').innerText = formatIDR(totalNetIncome);
+      document.getElementById('kpi-total-hpp').innerText = formatIDR(totalHPPCompleted);
+      
+      document.getElementById('kpi-real-profit').innerText = formatIDR(realNetProfit);
+      document.getElementById('kpi-profit-margin').innerText = `${profitMarginPct}%`;
+
+      // Tab Badges
+      document.getElementById('badge-count-completed').innerText = completedCount;
+      document.getElementById('badge-count-returns').innerText = returnCount;
+
+      // 2. Render Profit & Loss Statement (Tab 4)
+      document.getElementById('pl-net-income').innerText = formatIDR(totalNetIncome);
+      document.getElementById('pl-total-hpp').innerText = `(${formatIDR(totalHPPCompleted)})`;
+      document.getElementById('pl-gross-profit').innerText = formatIDR(totalNetIncome - totalHPPCompleted);
+      document.getElementById('pl-return-loss').innerText = `(${formatIDR(totalReturnLoss)})`;
+      document.getElementById('pl-sub-hpp-damaged').innerText = formatIDR(totalHppDamagedLoss);
+      document.getElementById('pl-sub-shipping-loss').innerText = formatIDR(totalShippingPenaltyLoss);
+      document.getElementById('pl-net-profit-final').innerText = formatIDR(realNetProfit);
+      document.getElementById('pl-margin-final').innerText = `${profitMarginPct}%`;
+
+      // 3. Render Return Cards (Tab 3)
+      document.getElementById('return-card-count').innerText = `${returnCount} Order`;
+      document.getElementById('return-card-ratio').innerText = `${returnRatePct}%`;
+      document.getElementById('return-card-hpp-loss').innerText = formatIDR(totalHppDamagedLoss);
+      document.getElementById('return-card-fee-loss').innerText = formatIDR(totalShippingPenaltyLoss);
+
+      // 4. Render Tables
+      renderCompletedTable(completedOrders);
+      renderReturnsTable(returnOrders);
+      renderSKUPerformanceTable();
+
+      // 5. Render Highlights & Charts
+      renderSKUHighlights();
+      renderCharts();
+    }
+
+    // TABLE RENDERERS
+    function renderCompletedTable(data) {
+      const tbody = document.getElementById('tbody-completed-orders');
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center p-6 text-slate-400">Tidak ada data pesanan selesai yang cocok dengan filter.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map(item => `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="p-3 font-mono font-medium text-slate-900">${item.orderId}</td>
+          <td class="p-3 text-slate-500">${item.tanggal}</td>
+          <td class="p-3 font-semibold text-sky-700">${item.sku}</td>
+          <td class="p-3 font-medium text-slate-800">${item.namaProduk}</td>
+          <td class="p-3 text-center font-bold">${item.qty}</td>
+          <td class="p-3 text-right font-semibold text-sky-700">${formatIDR(item.netIncome)}</td>
+          <td class="p-3 text-right text-slate-500">${formatIDR(item.unitHPP)}</td>
+          <td class="p-3 text-right font-medium text-slate-700">${formatIDR(item.totalHPP)}</td>
+          <td class="p-3 text-right font-bold text-emerald-600">${formatIDR(item.netProfit)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderReturnsTable(data) {
+      const tbody = document.getElementById('tbody-return-orders');
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center p-6 text-slate-400">Tidak ada data pesanan dikembalikan / batal.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map(item => `
+        <tr class="hover:bg-rose-50/40 transition-colors">
+          <td class="p-3 font-mono font-medium text-slate-900">${item.orderId}</td>
+          <td class="p-3">
+            <div class="font-semibold text-slate-800">${item.sku}</div>
+            <div class="text-[11px] text-slate-500">${item.namaProduk}</div>
+          </td>
+          <td class="p-3 text-center font-bold text-rose-700">${item.qty}</td>
+          <td class="p-3 font-medium text-rose-600">${item.status}</td>
+          <td class="p-3 text-slate-600">${item.condition}</td>
+          <td class="p-3 text-right font-medium text-rose-700">${formatIDR(item.hppDamagedLoss)}</td>
+          <td class="p-3 text-right text-slate-600">${formatIDR(item.shippingPenaltyLoss)}</td>
+          <td class="p-3 text-right font-bold text-rose-700">${formatIDR(item.totalReturnLoss)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderSKUPerformanceTable() {
+      const tbody = document.getElementById('tbody-sku-performance');
+      const skus = Object.values(skuPerformanceMap);
+
+      if (skus.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center p-6 text-slate-400">Belum ada data SKU yang diproses.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = skus.map(item => {
+        let returnRate = item.totalOrders > 0 ? ((item.unitsReturned / item.totalOrders) * 100).toFixed(1) : '0.0';
+        let isHighReturn = parseFloat(returnRate) > 3.0;
+
+        let statusBadge = isHighReturn
+          ? `<span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full font-bold text-[10px] flex items-center gap-1 justify-center"><i data-lucide="alert-circle" class="w-3 h-3"></i> Warning (>3%)</span>`
+          : `<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-semibold text-[10px] justify-center">Performa Baik</span>`;
+
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="p-3 font-mono font-bold text-slate-900">${item.sku}</td>
+            <td class="p-3 font-medium text-slate-800">${item.nama}</td>
+            <td class="p-3 text-right text-slate-500">${formatIDR(item.unitHPP)}</td>
+            <td class="p-3 text-center font-bold text-emerald-600">${item.unitsCompleted}</td>
+            <td class="p-3 text-center font-bold text-rose-600">${item.unitsReturned}</td>
+            <td class="p-3 text-center font-bold ${isHighReturn ? 'text-rose-700 font-extrabold' : 'text-slate-700'}">${returnRate}%</td>
+            <td class="p-3 text-right font-semibold text-sky-700">${formatIDR(item.totalNetIncome)}</td>
+            <td class="p-3 text-right text-slate-600">${formatIDR(item.totalHPPCompleted)}</td>
+            <td class="p-3 text-right font-bold ${item.totalNetProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${formatIDR(item.totalNetProfit)}</td>
+            <td class="p-3 text-center">${statusBadge}</td>
+          </tr>
+        `;
+      }).join('');
+
+      // Re-initialize Lucide Icons
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderSKUHighlights() {
+      const skus = Object.values(skuPerformanceMap);
+      
+      // Top Profit SKUs
+      const topProfits = [...skus].sort((a, b) => b.totalNetProfit - a.totalNetProfit).slice(0, 5);
+      const topListContainer = document.getElementById('top-profit-sku-list');
+      
+      topListContainer.innerHTML = topProfits.map((sku, idx) => `
+        <div class="py-2.5 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2.5">
+            <span class="w-5 h-5 rounded-full bg-amber-100 text-amber-800 font-bold flex items-center justify-center text-[10px]">${idx + 1}</span>
+            <div>
+              <div class="font-bold text-slate-900">${sku.sku}</div>
+              <div class="text-[11px] text-slate-500 truncate max-w-[180px]">${sku.nama}</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="font-bold text-emerald-600">${formatIDR(sku.totalNetProfit)}</div>
+            <div class="text-[10px] text-slate-400">${sku.unitsCompleted} unit terjual</div>
+          </div>
+        </div>
+      `).join('');
+
+      // High Return SKUs (> 3% return rate)
+      const highReturns = skus.filter(s => s.totalOrders > 0 && ((s.unitsReturned / s.totalOrders) * 100) > 3.0);
+      const highListContainer = document.getElementById('high-return-sku-list');
+
+      if (highReturns.length === 0) {
+        highListContainer.innerHTML = `<div class="py-4 text-center text-xs text-slate-400">Semua SKU memiliki tingkat retur aman (&le;3%).</div>`;
+      } else {
+        highListContainer.innerHTML = highReturns.map(sku => {
+          let rate = ((sku.unitsReturned / sku.totalOrders) * 100).toFixed(1);
+          return `
+            <div class="py-2.5 flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2">
+                <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-500 shrink-0"></i>
+                <div>
+                  <div class="font-bold text-slate-900">${sku.sku}</div>
+                  <div class="text-[11px] text-rose-600 font-medium">${sku.unitsReturned} unit retur dari ${sku.totalOrders} order</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="bg-rose-100 text-rose-800 font-extrabold px-2 py-0.5 rounded text-[11px]">${rate}% Retur</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // CHART GENERATION ENGINE
+    function renderCharts() {
+      // 1. Group Data By Date
+      const dateMap = {};
+      activeFilteredData.forEach(item => {
+        const d = item.tanggal;
+        if (!dateMap[d]) {
+          dateMap[d] = { netIncome: 0, realProfit: 0 };
+        }
+        if (item.isCompleted) {
+          dateMap[d].netIncome += item.netIncome;
+          dateMap[d].realProfit += item.netProfit;
+        } else {
+          dateMap[d].realProfit += item.netProfit; // negative
+        }
+      });
+
+      const sortedDates = Object.keys(dateMap).sort();
+      const incomeTrend = sortedDates.map(d => dateMap[d].netIncome);
+      const profitTrend = sortedDates.map(d => dateMap[d].realProfit);
+
+      // Render Growth Chart
+      const ctxTrend = document.getElementById('chart-growth-trend').getContext('2d');
+      if (growthTrendChart) growthTrendChart.destroy();
+
+      growthTrendChart = new Chart(ctxTrend, {
+        type: 'line',
+        data: {
+          labels: sortedDates.map(d => d.replace('2026-', '')),
+          datasets: [
+            {
+              label: 'Penghasilan Cair (Income)',
+              data: incomeTrend,
+              borderColor: '#0284c7',
+              backgroundColor: 'rgba(2, 132, 199, 0.08)',
+              fill: true,
+              tension: 0.3,
+              borderWidth: 2
+            },
+            {
+              label: 'Laba Bersih Real',
+              data: profitTrend,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.08)',
+              fill: true,
+              tension: 0.3,
+              borderWidth: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return `${ctx.dataset.label}: ${formatIDR(ctx.raw)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              ticks: {
+                callback: function(val) { return 'Rp ' + (val/1000) + 'k'; },
+                font: { size: 10 }
+              }
+            },
+            x: { ticks: { font: { size: 10 } } }
+          }
+        }
+      });
+
+      // 2. Status Pie Chart
+      const countCompleted = activeFilteredData.filter(d => d.isCompleted).length;
+      const countReturn = activeFilteredData.filter(d => d.isReturn).length;
+      const countCancelled = activeFilteredData.filter(d => d.isCancelled).length;
+
+      document.getElementById('chart-legend-completed').innerText = `${countCompleted} Order`;
+      document.getElementById('chart-legend-return').innerText = `${countReturn} Order`;
+      document.getElementById('chart-legend-cancelled').innerText = `${countCancelled} Order`;
+
+      const ctxPie = document.getElementById('chart-status-pie').getContext('2d');
+      if (statusPieChart) statusPieChart.destroy();
+
+      statusPieChart = new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+          labels: ['Selesai', 'Dikembalikan', 'Batal'],
+          datasets: [{
+            data: [countCompleted, countReturn, countCancelled],
+            backgroundColor: ['#10b981', '#f43f5e', '#fbbf24'],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          cutout: '70%'
+        }
+      });
+    }
+
+    // NAVIGATION & TAB SWITCHING
+    function switchTab(tabId) {
+      currentTab = tabId;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-sky-50', 'text-sky-700', 'font-semibold');
+        btn.classList.add('text-slate-600');
+      });
+      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
+
+      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.add('active', 'bg-sky-50', 'text-sky-700', 'font-semibold');
+        activeBtn.classList.remove('text-slate-600');
+      }
+
+      const activePanel = document.getElementById(`tab-content-${tabId}`);
+      if (activePanel) activePanel.classList.remove('hidden');
+    }
+
+    // FILTERING ENGINE
+    function applyFilters() {
+      const searchKey = document.getElementById('global-search-input').value.toLowerCase().trim();
+
+      activeFilteredData = processedIntegratedData.filter(item => {
+        const matchSearch = !searchKey || 
+          item.orderId.toLowerCase().includes(searchKey) ||
+          item.sku.toLowerCase().includes(searchKey) ||
+          item.namaProduk.toLowerCase().includes(searchKey) ||
+          item.status.toLowerCase().includes(searchKey);
+
+        return matchSearch;
+      });
+
+      renderAllComponents();
+    }
+
+    function resetFilters() {
+      document.getElementById('global-search-input').value = '';
+      activeFilteredData = [...processedIntegratedData];
+      renderAllComponents();
+      showToast('Filter berhasil direset', 'info');
+    }
+
+    // MODAL & FILE PROCESSING
+    function toggleUploadModal(show) {
+      const modal = document.getElementById('upload-modal');
+      if (show) modal.classList.remove('hidden');
+      else modal.classList.add('hidden');
+    }
+
+    function loadDefaultTeleoData() {
+      rawOrders = [...DEFAULT_ORDERS_DATA];
+      rawIncome = [...DEFAULT_INCOME_DATA];
+      rawHPP = [...DEFAULT_HPP_DATA];
+
+      document.getElementById('data-source-text').innerText = 'Menggunakan Data Utama Teleo (August 2026)';
+      toggleUploadModal(false);
+      integrateRelationalData();
+      showToast('Data Default Teleo berhasil dimuat!', 'success');
+    }
+
+    // PARSE UPLOADED EXCEL FILES USING SHEETJS
+    async function processUploadedFiles() {
+      const fileOrders = document.getElementById('input-file-orders').files[0];
+      const fileIncome = document.getElementById('input-file-income').files[0];
+      const fileHPP = document.getElementById('input-file-hpp').files[0];
+
+      if (!fileOrders && !fileIncome && !fileHPP) {
+        showToast('Pilih setidaknya satu file Excel untuk memperbarui data.', 'warning');
+        return;
+      }
+
+      try {
+        if (fileHPP) {
+          rawHPP = await parseExcelFile(fileHPP, row => ({
+            SKU: row['SKU'] || row['Kode Produk'] || row['SKU Produk'] || Object.values(row)[0],
+            Nama: row['Nama Produk'] || row['Nama'] || row['Deskripsi'] || '',
+            HPP: parseFloat(row['HPP'] || row['Harga HPP'] || row['Modal'] || row['Harga Modal'] || Object.values(row)[1]) || 0
+          }));
+        }
+
+        if (fileIncome) {
+          rawIncome = await parseExcelFile(fileIncome, row => ({
+            OrderID: row['No. Pesanan'] || row['Order ID'] || row['No Pesanan'] || Object.values(row)[0],
+            DanaCair: parseFloat(row['Total Penghasilan'] || row['Income'] || row['Dana Cair'] || row['Penghasilan Bersih'] || Object.values(row)[1]) || 0
+          }));
+        }
+
+        if (fileOrders) {
+          rawOrders = await parseExcelFile(fileOrders, row => ({
+            OrderID: row['No. Pesanan'] || row['Order ID'] || row['No Pesanan'] || Object.values(row)[0],
+            Tanggal: row['Tanggal'] || row['Tanggal Pesanan'] || '2026-08-01',
+            SKU: row['SKU'] || row['Kode Produk'] || row['SKU Produk'] || Object.values(row)[1],
+            Qty: parseInt(row['Jumlah'] || row['Qty'] || row['Kuantitas'] || 1),
+            HargaJual: parseFloat(row['Harga Jual'] || row['Total Harga'] || 0),
+            Status: row['Status'] || row['Status Pesanan'] || 'Selesai',
+            Condition: row['Kondisi'] || row['Alasan Retur'] || '-',
+            OngkirLoss: parseFloat(row['Ongkir Loss'] || row['Denda'] || 0)
+          }));
+        }
+
+        document.getElementById('data-source-text').innerText = 'Menggunakan Custom File Excel Ter-Import';
+        toggleUploadModal(false);
+        integrateRelationalData();
+        showToast('Berhasil memproses dan mengintegrasikan file Excel baru!', 'success');
+
+      } catch (err) {
+        console.error(err);
+        showToast('Gagal memproses file Excel. Pastikan format kolom sesuai.', 'error');
+      }
+    }
+
+    function parseExcelFile(file, mapper) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonRows = XLSX.utils.sheet_to_json(firstSheet);
+            const mapped = jsonRows.map(mapper).filter(r => r.OrderID || r.SKU);
+            resolve(mapped);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    // EXPORT TABLE TO CSV
+    function exportTableToCSV(tableId, filename) {
+      const table = document.getElementById(tableId);
+      if (!table) return;
+      const workbook = XLSX.utils.table_to_book(table);
+      XLSX.writeFile(workbook, `${filename}_${new Date().toISOString().slice(0,10)}.xlsx`);
+      showToast('File Excel berhasil di-download', 'success');
+    }
+
+    // TOAST NOTIFICATION UTILITY
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      const typeBg = {
+        success: 'bg-emerald-800 text-white',
+        warning: 'bg-amber-600 text-white',
+        error: 'bg-rose-800 text-white',
+        info: 'bg-slate-800 text-white'
+      }[type];
+
+      toast.className = `${typeBg} px-4 py-2.5 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 pointer-events-auto animate-in slide-in-from-bottom duration-200`;
+      toast.innerHTML = `<span>${message}</span>`;
+
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // INITIALIZATION ON LOAD
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      loadDefaultTeleoData();
+    };
+  </script>
+</body>
+</html>
