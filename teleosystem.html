@@ -86,6 +86,10 @@
             <i data-lucide="file-up" class="w-4 h-4"></i>
             <span>Import / Update File Excel</span>
           </button>
+          <button type="button" id="btn-reset-data" onclick="resetAllData(event)" class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-rose-600 hover:bg-rose-500 text-white transition-all shadow-sm" title="Hapus semua data dan mulai dari awal">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <span>Reset Data</span>
+          </button>
         </div>
       </div>
     </div>
@@ -568,7 +572,7 @@
       </div>
 
       <p class="text-xs text-slate-500">
-        Unggah file Excel Anda di bawah ini. Sistem akan menyatukan data secara presisi berdasarkan <strong>Order ID</strong> dan <strong>SKU Produk</strong>.
+        Unggah 3 sumber data utama. Untuk analisis laba bersih yang lengkap, gunakan ketiganya: <strong>Order</strong>, <strong>Income</strong>, dan <strong>HPP</strong>. Sistem menggabungkan Order ID untuk Income dan SKU untuk HPP.
       </p>
 
       <!-- 3 File Inputs Grid -->
@@ -645,100 +649,11 @@
       return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount);
     }
 
-    // DEFAULT MAIN DATASET (Sesuai Data Utama Teleo August 2026)
-    const DEFAULT_HPP_DATA = [
-      { SKU: 'TELEO-BLK-M', Nama: 'Teleo T-Shirt Premium Black M', HPP: 42000 },
-      { SKU: 'TELEO-BLK-L', Nama: 'Teleo T-Shirt Premium Black L', HPP: 42000 },
-      { SKU: 'TELEO-BLK-XL', Nama: 'Teleo T-Shirt Premium Black XL', HPP: 45000 },
-      { SKU: 'TELEO-WHT-M', Nama: 'Teleo T-Shirt White Cotton M', HPP: 38000 },
-      { SKU: 'TELEO-WHT-L', Nama: 'Teleo T-Shirt White Cotton L', HPP: 38000 },
-      { SKU: 'TELEO-HOOD-L', Nama: 'Teleo Heavyweight Hoodie Navy L', HPP: 95000 },
-      { SKU: 'TELEO-HOOD-XL', Nama: 'Teleo Heavyweight Hoodie Navy XL', HPP: 98000 },
-      { SKU: 'TELEO-JACK-L', Nama: 'Teleo Windbreaker Jacket Olive L', HPP: 110000 },
-      { SKU: 'TELEO-HAT-BLK', Nama: 'Teleo Embroidered Cap Black', HPP: 25000 }
-    ];
-
-    const DEFAULT_INCOME_DATA = [
-      { OrderID: 'ORD-20260801-001', DanaCair: 82500 },
-      { OrderID: 'ORD-20260801-002', DanaCair: 82500 },
-      { OrderID: 'ORD-20260801-003', DanaCair: 168000 },
-      { OrderID: 'ORD-20260802-004', DanaCair: 75000 },
-      { OrderID: 'ORD-20260802-005', DanaCair: 185000 },
-      { OrderID: 'ORD-20260803-006', DanaCair: 82500 },
-      { OrderID: 'ORD-20260803-007', DanaCair: 220000 },
-      { OrderID: 'ORD-20260804-008', DanaCair: 48000 },
-      { OrderID: 'ORD-20260804-009', DanaCair: 82500 },
-      { OrderID: 'ORD-20260805-010', DanaCair: 75000 },
-      { OrderID: 'ORD-20260805-011', DanaCair: 185000 },
-      { OrderID: 'ORD-20260806-012', DanaCair: 82500 },
-      { OrderID: 'ORD-20260806-013', DanaCair: 168000 },
-      { OrderID: 'ORD-20260807-014', DanaCair: 82500 },
-      { OrderID: 'ORD-20260807-015', DanaCair: 220000 },
-      { OrderID: 'ORD-20260808-016', DanaCair: 75000 },
-      { OrderID: 'ORD-20260808-017', DanaCair: 82500 },
-      { OrderID: 'ORD-20260809-018', DanaCair: 185000 },
-      { OrderID: 'ORD-20260809-019', DanaCair: 82500 },
-      { OrderID: 'ORD-20260810-020', DanaCair: 48000 },
-      { OrderID: 'ORD-20260810-021', DanaCair: 75000 },
-      { OrderID: 'ORD-20260811-022', DanaCair: 82500 },
-      { OrderID: 'ORD-20260811-023', DanaCair: 220000 },
-      { OrderID: 'ORD-20260812-024', DanaCair: 168000 },
-      { OrderID: 'ORD-20260812-025', DanaCair: 82500 },
-      { OrderID: 'ORD-20260813-026', DanaCair: 82500 },
-      { OrderID: 'ORD-20260813-027', DanaCair: 185000 },
-      { OrderID: 'ORD-20260814-028', DanaCair: 75000 },
-      { OrderID: 'ORD-20260814-029', DanaCair: 82500 },
-      { OrderID: 'ORD-20260815-030', DanaCair: 220000 },
-      { OrderID: 'ORD-20260815-031', DanaCair: 82500 },
-      { OrderID: 'ORD-20260816-032', DanaCair: 168000 },
-      { OrderID: 'ORD-20260816-033', DanaCair: 75000 },
-      { OrderID: 'ORD-20260817-034', DanaCair: 82500 },
-      { OrderID: 'ORD-20260817-035', DanaCair: 82500 },
-      { OrderID: 'ORD-20260818-036', DanaCair: 185000 }
-    ];
-
-    const DEFAULT_ORDERS_DATA = [
-      { OrderID: 'ORD-20260801-001', Tanggal: '2026-08-01', SKU: 'TELEO-BLK-M', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260801-002', Tanggal: '2026-08-01', SKU: 'TELEO-BLK-L', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260801-003', Tanggal: '2026-08-01', SKU: 'TELEO-HOOD-L', Qty: 1, HargaJual: 195000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260802-004', Tanggal: '2026-08-02', SKU: 'TELEO-WHT-M', Qty: 1, HargaJual: 85000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260802-005', Tanggal: '2026-08-02', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260802-006X', Tanggal: '2026-08-02', SKU: 'TELEO-HOOD-XL', Qty: 1, HargaJual: 198000, Status: 'Dikembalikan', Condition: 'Rusak / Cacat Jahitan', OngkirLoss: 15000 },
-      { OrderID: 'ORD-20260803-006', Tanggal: '2026-08-03', SKU: 'TELEO-BLK-XL', Qty: 1, HargaJual: 98000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260803-007', Tanggal: '2026-08-03', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260804-008', Tanggal: '2026-08-04', SKU: 'TELEO-HAT-BLK', Qty: 1, HargaJual: 55000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260804-009', Tanggal: '2026-08-04', SKU: 'TELEO-BLK-M', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260804-010X', Tanggal: '2026-08-04', SKU: 'TELEO-WHT-L', Qty: 1, HargaJual: 85000, Status: 'Dikembalikan', Condition: 'Ukuran Kekecilan (Kondisi Baik)', OngkirLoss: 10000 },
-      { OrderID: 'ORD-20260805-010', Tanggal: '2026-08-05', SKU: 'TELEO-WHT-M', Qty: 1, HargaJual: 85000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260805-011', Tanggal: '2026-08-05', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260806-012', Tanggal: '2026-08-06', SKU: 'TELEO-BLK-L', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260806-013', Tanggal: '2026-08-06', SKU: 'TELEO-HOOD-L', Qty: 1, HargaJual: 195000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260807-014', Tanggal: '2026-08-07', SKU: 'TELEO-BLK-M', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260807-015', Tanggal: '2026-08-07', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260808-016', Tanggal: '2026-08-08', SKU: 'TELEO-WHT-L', Qty: 1, HargaJual: 85000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260808-017', Tanggal: '2026-08-08', SKU: 'TELEO-BLK-XL', Qty: 1, HargaJual: 98000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260808-018X', Tanggal: '2026-08-08', SKU: 'TELEO-HOOD-XL', Qty: 1, HargaJual: 198000, Status: 'Pesanan Batal', Condition: 'Batal Pembeli Dini', OngkirLoss: 0 },
-      { OrderID: 'ORD-20260809-018', Tanggal: '2026-08-09', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260809-019', Tanggal: '2026-08-09', SKU: 'TELEO-BLK-M', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260810-020', Tanggal: '2026-08-10', SKU: 'TELEO-HAT-BLK', Qty: 1, HargaJual: 55000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260810-021', Tanggal: '2026-08-10', SKU: 'TELEO-WHT-M', Qty: 1, HargaJual: 85000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260811-022', Tanggal: '2026-08-11', SKU: 'TELEO-BLK-L', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260811-023', Tanggal: '2026-08-11', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260812-024', Tanggal: '2026-08-12', SKU: 'TELEO-HOOD-L', Qty: 1, HargaJual: 195000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260812-025', Tanggal: '2026-08-12', SKU: 'TELEO-BLK-M', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260812-026X', Tanggal: '2026-08-12', SKU: 'TELEO-HOOD-XL', Qty: 1, HargaJual: 198000, Status: 'Dikembalikan', Condition: 'Hilang / Noda Permanen Ekspedisi', OngkirLoss: 20000 },
-      { OrderID: 'ORD-20260813-026', Tanggal: '2026-08-13', SKU: 'TELEO-BLK-XL', Qty: 1, HargaJual: 98000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260813-027', Tanggal: '2026-08-13', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260814-028', Tanggal: '2026-08-14', SKU: 'TELEO-WHT-M', Qty: 1, HargaJual: 85000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260814-029', Tanggal: '2026-08-14', SKU: 'TELEO-BLK-L', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260815-030', Tanggal: '2026-08-15', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260815-031', Tanggal: '2026-08-15', SKU: 'TELEO-BLK-M', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260816-032', Tanggal: '2026-08-16', SKU: 'TELEO-HOOD-L', Qty: 1, HargaJual: 195000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260816-033', Tanggal: '2026-08-16', SKU: 'TELEO-WHT-L', Qty: 1, HargaJual: 85000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260817-034', Tanggal: '2026-08-17', SKU: 'TELEO-BLK-M', Qty: 1, HargaJual: 95000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260817-035', Tanggal: '2026-08-17', SKU: 'TELEO-BLK-XL', Qty: 1, HargaJual: 98000, Status: 'Selesai', Condition: '-' },
-      { OrderID: 'ORD-20260818-036', Tanggal: '2026-08-18', SKU: 'TELEO-JACK-L', Qty: 1, HargaJual: 210000, Status: 'Selesai', Condition: '-' }
-    ];
+    // DATASET AWAL: KOSONG
+    // Sistem sengaja dimulai tanpa data. Pengguna memasukkan Order, Income, dan HPP sendiri.
+    const DEFAULT_HPP_DATA = [];
+    const DEFAULT_INCOME_DATA = [];
+    const DEFAULT_ORDERS_DATA = [];
 
     // CORE INTEGRATION ENGINE (Replicating XLOOKUP & Relational Joins)
     function integrateRelationalData() {
@@ -756,7 +671,7 @@
       const incomeMap = {};
       rawIncome.forEach(item => {
         if (item.OrderID) {
-          incomeMap[item.OrderID.trim()] = parseFloat(item.DanaCair) || 0;
+          incomeMap[normalizeKey(item.OrderID)] = parseFloat(item.DanaCair) || 0;
         }
       });
 
@@ -764,8 +679,8 @@
       skuPerformanceMap = {};
 
       processedIntegratedData = rawOrders.map(order => {
-        const orderId = (order.OrderID || '').trim();
-        const skuKey = (order.SKU || '').trim().toUpperCase();
+        const orderId = normalizeKey(order.OrderID);
+        const skuKey = normalizeKey(order.SKU).toUpperCase();
         const qty = parseInt(order.Qty) || 1;
         const status = order.Status || 'Selesai';
         const isCompleted = status.toLowerCase() === 'selesai';
@@ -778,7 +693,7 @@
         const totalHPP = unitHPP * qty;
 
         // Pull Released Income from Income File (XLOOKUP)
-        const netIncomeFromIncomeFile = isCompleted ? (incomeMap[orderId] || (order.HargaJual * 0.88 * qty)) : 0;
+        const netIncomeFromIncomeFile = isCompleted ? (incomeMap[orderId] || 0) : 0;
 
         // Calculate Return Losses
         let hppDamagedLoss = 0;
@@ -1217,86 +1132,260 @@
       else modal.classList.add('hidden');
     }
 
-    function loadDefaultTeleoData() {
-      rawOrders = [...DEFAULT_ORDERS_DATA];
-      rawIncome = [...DEFAULT_INCOME_DATA];
-      rawHPP = [...DEFAULT_HPP_DATA];
+    function resetAllData(event) {
+      if (event) { event.preventDefault(); event.stopPropagation(); }
 
-      document.getElementById('data-source-text').innerText = 'Menggunakan Data Utama Teleo (August 2026)';
-      toggleUploadModal(false);
-      integrateRelationalData();
-      showToast('Data Default Teleo berhasil dimuat!', 'success');
+      // Konfirmasi dibuat aman untuk browser/file://
+      let confirmed = true;
+      try { confirmed = window.confirm('Hapus semua data Order, Income, HPP, filter, dan grafik?'); } catch (e) {}
+      if (!confirmed) return false;
+
+      try {
+        // 1. Hapus seluruh dataset aplikasi
+        rawOrders = [];
+        rawIncome = [];
+        rawHPP = [];
+        processedIntegratedData = [];
+        activeFilteredData = [];
+        skuPerformanceMap = {};
+
+        // 2. Hancurkan chart lama dengan aman
+        if (growthTrendChart) {
+          try { growthTrendChart.destroy(); } catch (e) {}
+          growthTrendChart = null;
+        }
+        if (statusPieChart) {
+          try { statusPieChart.destroy(); } catch (e) {}
+          statusPieChart = null;
+        }
+
+        // 3. Bersihkan input file dan pencarian
+        const search = document.getElementById('global-search-input');
+        if (search) search.value = '';
+        ['input-file-orders','input-file-income','input-file-hpp'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            try { el.value = ''; } catch (e) {}
+          }
+        });
+
+        // 4. Reset sumber data
+        const source = document.getElementById('data-source-text');
+        if (source) source.innerText = 'Belum ada data — silakan import 3 file Excel';
+
+        // 5. Tutup modal jika terbuka
+        try { toggleUploadModal(false); } catch (e) {}
+
+        // 6. Render ulang kondisi kosong tanpa menghentikan proses jika ada
+        // komponen/chart tertentu yang gagal dirender.
+        try { renderAllComponents(); } catch (renderError) {
+          console.warn('Render setelah reset:', renderError);
+        }
+
+        showToast('Semua data berhasil direset. Siap memulai dataset baru.', 'success');
+        return false;
+      } catch (error) {
+        console.error('Reset Data Error:', error);
+        try { showToast('Reset gagal: ' + error.message, 'error'); } catch (e) {
+          alert('Reset gagal: ' + error.message);
+        }
+        return false;
+      }
+    }
+
+    // Dipertahankan untuk kompatibilitas tombol lama, tetapi sekarang memulai kondisi kosong.
+    function loadDefaultTeleoData() {
+      resetAllData();
     }
 
     // PARSE UPLOADED EXCEL FILES USING SHEETJS
+    function normalizeKey(value) { return String(value ?? '').normalize('NFKC').replace(/\u00A0/g, ' ').trim().replace(/\s+/g, ' '); }
+    function normalizeHeader(value) {
+      return String(value ?? '').normalize('NFKC').trim().toLowerCase()
+        .replace(/[\r\n\t]+/g,' ').replace(/\s+/g,' ')
+        .replace(/[._\-\/\\():]+/g,' ').replace(/[^a-z0-9\u00c0-\u024f\u4e00-\u9fff ]/gi,' ')
+        .replace(/\s+/g,' ').trim();
+    }
+    function cleanText(value) {
+      if (value === null || value === undefined) return '';
+      return String(value).replace(/[\u0000-\u001f\u007f]/g,'').trim();
+    }
+    function normalizeKey(value) { return cleanText(value).toUpperCase().replace(/\s+/g,''); }
+    function parseNumber(value) {
+      if (value === null || value === undefined || value === '') return 0;
+      if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+      let text = String(value).trim().replace(/\s/g,'').replace(/rp/gi,'').replace(/IDR/gi,'');
+      text = text.replace(/\(([^)]+)\)/,'-$1');
+      if (text.includes('.') && text.includes(',')) {
+        if (text.lastIndexOf(',') > text.lastIndexOf('.')) text = text.replace(/\./g,'').replace(',','.');
+        else text = text.replace(/,/g,'');
+      } else if (text.includes(',')) {
+        const parts=text.split(','); text=parts.length===2 && parts[1].length<=2 ? parts[0].replace(/\./g,'')+'.'+parts[1] : text.replace(/,/g,'');
+      } else if ((text.match(/\./g)||[]).length>1) text=text.replace(/\./g,'');
+      const result=Number(text.replace(/[^\d.-]/g,''));
+      return Number.isFinite(result) ? result : 0;
+    }
+    function parseExcelDate(value) {
+      if (value instanceof Date && !isNaN(value.getTime())) return value.toISOString().slice(0,10);
+      if (typeof value === 'number') { const d=new Date(Date.UTC(1899,11,30)+value*86400000); if(!isNaN(d.getTime())) return d.toISOString().slice(0,10); }
+      const text=cleanText(value); if(!text) return '2026-08-01';
+      const m=text.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})(?:\s|$)/);
+      if(m){let y=Number(m[3]); if(y<100)y+=2000; return `${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;}
+      const d=new Date(text); return isNaN(d.getTime()) ? text : d.toISOString().slice(0,10);
+    }
+    const COLUMN_ALIASES = {
+      orders: {
+        OrderID:['no pesanan','nomor pesanan','order id','orderid','order number','order no','id pesanan','pesanan id','kode pesanan','nomor order'],
+        Tanggal:['tanggal','tanggal pesanan','waktu pesanan','order date','order time','tanggal order','waktu order','date'],
+        SKU:['sku','kode produk','sku produk','kode sku','product sku','product id','item sku','kode barang','kode item'],
+        Qty:['jumlah','qty','kuantitas','quantity','jumlah produk','jumlah pesanan','unit','units'],
+        HargaJual:['harga jual','total harga','harga produk','jumlah pesanan','harga','subtotal','total penjualan','total pesanan'],
+        Status:['status','status pesanan','order status','status order','keadaan pesanan'],
+        Condition:['kondisi','alasan retur','alasan pengembalian','return reason','return condition','keterangan retur'],
+        OngkirLoss:['ongkir loss','denda','shipping loss','biaya retur','ongkos kirim retur','penalty','shipping penalty']
+      },
+      income: {
+        OrderID:['no pesanan','nomor pesanan','order id','orderid','order number','order no','id pesanan','kode pesanan'],
+        DanaCair:['total penghasilan','income','dana cair','penghasilan bersih','total dana cair','jumlah diterima','jumlah yang diterima','total diterima','total penghasilan bersih','penghasilan','net income','net payout','payout','settlement','jumlah pembayaran','total pembayaran']
+      },
+      hpp: {
+        SKU:['sku','kode produk','sku produk','kode sku','product sku','product id','kode barang','kode item'],
+        Nama:['nama produk','nama','deskripsi','product name','product title','nama barang','item name','description'],
+        HPP:['hpp','harga hpp','modal','harga modal','cost','harga beli','biaya produk','cost price','unit cost','harga pokok','harga pokok penjualan']
+      }
+    };
+    function scoreHeaderRow(row,type) {
+      const aliases=COLUMN_ALIASES[type]||{}; const cells=row.map(v=>normalizeHeader(v)); let score=0;
+      Object.values(aliases).forEach(list=>{if(list.some(a=>cells.some(c=>c===normalizeHeader(a))))score+=3; else if(list.some(a=>cells.some(c=>c.includes(normalizeHeader(a))||normalizeHeader(a).includes(c))))score+=1;});
+      return score;
+    }
+    function detectHeaderRow(rows,type) {
+      let bestIndex=-1,bestScore=0; rows.slice(0,50).forEach((row,i)=>{const s=scoreHeaderRow(row,type); if(s>bestScore){bestScore=s;bestIndex=i;}});
+      if(bestIndex<0) throw new Error('Header kolom tidak berhasil ditemukan. Pastikan file berisi nama kolom seperti Order ID/SKU/HPP/Dana Cair.');
+      return bestIndex;
+    }
+    function findColumn(row,aliases) {
+      const keys=Object.keys(row), normalized=keys.map(k=>({key:k,n:normalizeHeader(k)}));
+      for(const alias of aliases){const a=normalizeHeader(alias); const exact=normalized.find(x=>x.n===a); if(exact)return row[exact.key];}
+      for(const alias of aliases){const a=normalizeHeader(alias); const partial=normalized.find(x=>x.n.length>=3 && (x.n.includes(a)||a.includes(x.n))); if(partial)return row[partial.key];}
+      return undefined;
+    }
+    function findBestSheet(workbook,type) {
+      let best=null,bestScore=-1;
+      for(const name of workbook.SheetNames){const sh=workbook.Sheets[name]; const matrix=XLSX.utils.sheet_to_json(sh,{header:1,defval:'',raw:true}); if(!matrix.length)continue; const nonEmpty=matrix.filter(r=>r.some(c=>cleanText(c)!=='')); if(!nonEmpty.length)continue; const sample=nonEmpty.slice(0,50); const score=Math.max(...sample.map(r=>scoreHeaderRow(r,type))); if(score>bestScore){best={sheet:sh,name,matrix};bestScore=score;}}
+      if(!best) throw new Error('Workbook tidak memiliki sheet berisi data.');
+      return best;
+    }
+    function parseExcelFile(file,type) {
+      return new Promise((resolve,reject)=>{
+        const reader=new FileReader();
+        reader.onload=e=>{try{
+          if(!window.XLSX) throw new Error('Library Excel (SheetJS) belum dimuat.');
+          const workbook=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true,raw:true,codepage:65001});
+          if(!workbook.SheetNames.length) throw new Error('Workbook tidak memiliki sheet.');
+          const picked=findBestSheet(workbook,type), matrix=picked.matrix, hi=detectHeaderRow(matrix,type);
+          const header=(matrix[hi]||[]).map((h,i)=>cleanText(h)||`Kolom_${i+1}`);
+          const rows=matrix.slice(hi+1).map(r=>{const o={};header.forEach((h,i)=>o[h]=r[i]??'');return o;}).filter(r=>Object.values(r).some(v=>cleanText(v)!==''));
+          if(!rows.length) throw new Error(`Sheet "${picked.name}": tidak ditemukan baris data setelah header.`);
+          resolve({rows,headers:header,sheet:picked.name,headerRow:hi+1});
+        }catch(err){reject(new Error(`${file.name}: ${err.message}`));}};
+        reader.onerror=()=>reject(new Error(`File ${file.name} tidak dapat dibaca.`)); reader.readAsArrayBuffer(file);
+      });
+    }
+    function validateMappedData(type,data) {
+      const problems=[]; if(!data.length){problems.push('tidak ada baris data');return problems;}
+      if(type==='orders'){if(!data.some(x=>x.OrderID))problems.push('Order ID/No. Pesanan tidak ditemukan');if(!data.some(x=>x.SKU))problems.push('SKU/Kode Produk tidak ditemukan');}
+      if(type==='income'){if(!data.some(x=>x.OrderID))problems.push('Order ID/No. Pesanan tidak ditemukan');if(!data.some(x=>x.DanaCair!==0))problems.push('Dana Cair/Total Penghasilan tidak ditemukan atau semua bernilai 0');}
+      if(type==='hpp'){if(!data.some(x=>x.SKU))problems.push('SKU/Kode Produk tidak ditemukan');if(!data.some(x=>x.HPP!==0))problems.push('HPP/Harga Modal tidak ditemukan atau semua bernilai 0');}
+      return problems;
+    }
     async function processUploadedFiles() {
-      const fileOrders = document.getElementById('input-file-orders').files[0];
-      const fileIncome = document.getElementById('input-file-income').files[0];
-      const fileHPP = document.getElementById('input-file-hpp').files[0];
+      const inputOrders = document.getElementById('input-file-orders');
+      const inputIncome = document.getElementById('input-file-income');
+      const inputHPP = document.getElementById('input-file-hpp');
+      const fileOrders = inputOrders && inputOrders.files ? inputOrders.files[0] : null;
+      const fileIncome = inputIncome && inputIncome.files ? inputIncome.files[0] : null;
+      const fileHPP = inputHPP && inputHPP.files ? inputHPP.files[0] : null;
 
       if (!fileOrders && !fileIncome && !fileHPP) {
-        showToast('Pilih setidaknya satu file Excel untuk memperbarui data.', 'warning');
+        showToast('Pilih minimal satu file Excel terlebih dahulu.', 'warning');
         return;
       }
 
       try {
+        const errors = [];
+        const loaded = [];
+        // Jangan langsung mengubah dataset aktif. Semua file divalidasi dahulu,
+        // baru data dipindahkan ke dataset aplikasi jika seluruh proses sukses.
+        let nextOrders = [...rawOrders];
+        let nextIncome = [...rawIncome];
+        let nextHPP = [...rawHPP];
+
         if (fileHPP) {
-          rawHPP = await parseExcelFile(fileHPP, row => ({
-            SKU: row['SKU'] || row['Kode Produk'] || row['SKU Produk'] || Object.values(row)[0],
-            Nama: row['Nama Produk'] || row['Nama'] || row['Deskripsi'] || '',
-            HPP: parseFloat(row['HPP'] || row['Harga HPP'] || row['Modal'] || row['Harga Modal'] || Object.values(row)[1]) || 0
-          }));
+          const p = await parseExcelFile(fileHPP, 'hpp');
+          nextHPP = p.rows.map(r => ({
+            SKU: cleanText(findColumn(r, COLUMN_ALIASES.hpp.SKU)),
+            Nama: cleanText(findColumn(r, COLUMN_ALIASES.hpp.Nama)),
+            HPP: parseNumber(findColumn(r, COLUMN_ALIASES.hpp.HPP))
+          })).filter(x => x.SKU || x.HPP !== 0);
+          const e = validateMappedData('hpp', nextHPP);
+          if (e.length) errors.push(`HPP (${p.sheet}, header baris ${p.headerRow}): ${e.join('; ')}`);
+          else loaded.push(`HPP ${nextHPP.length} SKU`);
         }
 
         if (fileIncome) {
-          rawIncome = await parseExcelFile(fileIncome, row => ({
-            OrderID: row['No. Pesanan'] || row['Order ID'] || row['No Pesanan'] || Object.values(row)[0],
-            DanaCair: parseFloat(row['Total Penghasilan'] || row['Income'] || row['Dana Cair'] || row['Penghasilan Bersih'] || Object.values(row)[1]) || 0
-          }));
+          const p = await parseExcelFile(fileIncome, 'income');
+          nextIncome = p.rows.map(r => ({
+            OrderID: cleanText(findColumn(r, COLUMN_ALIASES.income.OrderID)),
+            DanaCair: parseNumber(findColumn(r, COLUMN_ALIASES.income.DanaCair))
+          })).filter(x => x.OrderID);
+          const e = validateMappedData('income', nextIncome);
+          if (e.length) errors.push(`Income (${p.sheet}, header baris ${p.headerRow}): ${e.join('; ')}`);
+          else loaded.push(`Income ${nextIncome.length} order`);
         }
 
         if (fileOrders) {
-          rawOrders = await parseExcelFile(fileOrders, row => ({
-            OrderID: row['No. Pesanan'] || row['Order ID'] || row['No Pesanan'] || Object.values(row)[0],
-            Tanggal: row['Tanggal'] || row['Tanggal Pesanan'] || '2026-08-01',
-            SKU: row['SKU'] || row['Kode Produk'] || row['SKU Produk'] || Object.values(row)[1],
-            Qty: parseInt(row['Jumlah'] || row['Qty'] || row['Kuantitas'] || 1),
-            HargaJual: parseFloat(row['Harga Jual'] || row['Total Harga'] || 0),
-            Status: row['Status'] || row['Status Pesanan'] || 'Selesai',
-            Condition: row['Kondisi'] || row['Alasan Retur'] || '-',
-            OngkirLoss: parseFloat(row['Ongkir Loss'] || row['Denda'] || 0)
-          }));
+          const p = await parseExcelFile(fileOrders, 'orders');
+          nextOrders = p.rows.map(r => ({
+            OrderID: cleanText(findColumn(r, COLUMN_ALIASES.orders.OrderID)),
+            Tanggal: parseExcelDate(findColumn(r, COLUMN_ALIASES.orders.Tanggal)),
+            SKU: cleanText(findColumn(r, COLUMN_ALIASES.orders.SKU)),
+            Qty: Math.max(1, Math.round(parseNumber(findColumn(r, COLUMN_ALIASES.orders.Qty)) || 1)),
+            HargaJual: parseNumber(findColumn(r, COLUMN_ALIASES.orders.HargaJual)),
+            Status: cleanText(findColumn(r, COLUMN_ALIASES.orders.Status)) || 'Selesai',
+            Condition: cleanText(findColumn(r, COLUMN_ALIASES.orders.Condition)) || '-',
+            OngkirLoss: parseNumber(findColumn(r, COLUMN_ALIASES.orders.OngkirLoss))
+          })).filter(x => x.OrderID || x.SKU);
+          const e = validateMappedData('orders', nextOrders);
+          if (e.length) errors.push(`Order (${p.sheet}, header baris ${p.headerRow}): ${e.join('; ')}`);
+          else loaded.push(`Order ${nextOrders.length} transaksi`);
         }
 
-        document.getElementById('data-source-text').innerText = 'Menggunakan Custom File Excel Ter-Import';
+        if (errors.length) throw new Error(errors.join(' | '));
+
+        // Commit atomically: hanya setelah semua file valid.
+        rawOrders = nextOrders;
+        rawIncome = nextIncome;
+        rawHPP = nextHPP;
+        activeFilteredData = [];
+        processedIntegratedData = [];
+        skuPerformanceMap = {};
+
+        const source = document.getElementById('data-source-text');
+        if (source) source.innerText = 'Custom Excel: ' + loaded.join(' • ');
         toggleUploadModal(false);
         integrateRelationalData();
-        showToast('Berhasil memproses dan mengintegrasikan file Excel baru!', 'success');
 
-      } catch (err) {
-        console.error(err);
-        showToast('Gagal memproses file Excel. Pastikan format kolom sesuai.', 'error');
-      }
-    }
-
-    function parseExcelFile(file, mapper) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const jsonRows = XLSX.utils.sheet_to_json(firstSheet);
-            const mapped = jsonRows.map(mapper).filter(r => r.OrderID || r.SKU);
-            resolve(mapped);
-          } catch (err) {
-            reject(err);
+        [inputOrders, inputIncome, inputHPP].forEach(el => {
+          if (el) {
+            try { el.value = ''; } catch (e) {}
           }
-        };
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(file);
-      });
+        });
+        showToast('Berhasil membaca ' + loaded.join(', ') + '. Dashboard diperbarui.', 'success');
+      } catch (err) {
+        console.error('Import Excel Error:', err);
+        showToast(`Import gagal: ${err.message}`, 'error');
+      }
     }
 
     // EXPORT TABLE TO CSV
@@ -1332,7 +1421,15 @@
     // INITIALIZATION ON LOAD
     window.onload = function() {
       if (window.lucide) lucide.createIcons();
-      loadDefaultTeleoData();
+      // Empty state: tidak memuat data contoh secara otomatis.
+      rawOrders = [];
+      rawIncome = [];
+      rawHPP = [];
+      processedIntegratedData = [];
+      activeFilteredData = [];
+      skuPerformanceMap = {};
+      document.getElementById('data-source-text').innerText = 'Belum ada data — silakan import 3 file Excel';
+      renderAllComponents();
     };
   </script>
 </body>
