@@ -691,6 +691,335 @@
             </div>
         </section>
 
+<section id="tools" class="py-24 relative bg-brand-dark/80 border-t border-brand-neon/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16 reveal">
+            <h2 class="text-sm font-bold tracking-widest text-brand-neon uppercase mb-2">Free Business Tools</h2>
+            <h3 class="text-4xl md:text-5xl font-bold">Generator Bisnis Praktis</h3>
+            <p class="text-gray-300 mt-4 max-w-2xl mx-auto">Gunakan perangkat instan langsung di browser untuk kebutuhan operasional UMKM Anda.</p>
+        </div>
+
+        <!-- Tool Tabs Navigation -->
+        <div class="flex flex-wrap justify-center gap-2 mb-12 reveal">
+            <button onclick="switchTool('qr')" class="tool-tab px-6 py-3 rounded-xl font-bold text-sm transition-all bg-brand-neon text-white shadow-[0_0_15px_rgba(138,43,226,0.4)] flex items-center gap-2" data-target="qr">
+                <i class="ph ph-qr-code text-lg"></i> Generator QR Code
+            </button>
+            <button onclick="switchTool('invoice')" class="tool-tab px-6 py-3 rounded-xl font-bold text-sm transition-all glass-panel hover:bg-white/5 text-gray-300 flex items-center gap-2" data-target="invoice">
+                <i class="ph ph-receipt text-lg"></i> Generator Invoice
+            </button>
+            <button onclick="switchTool('quotation')" class="tool-tab px-6 py-3 rounded-xl font-bold text-sm transition-all glass-panel hover:bg-white/5 text-gray-300 flex items-center gap-2" data-target="quotation">
+                <i class="ph ph-file-text text-lg"></i> Generator Quotation
+            </button>
+            <button onclick="switchTool('nota')" class="tool-tab px-6 py-3 rounded-xl font-bold text-sm transition-all glass-panel hover:bg-white/5 text-gray-300 flex items-center gap-2" data-target="nota">
+                <i class="ph ph-note text-lg"></i> Generator Nota
+            </button>
+            <button onclick="switchTool('catalog')" class="tool-tab px-6 py-3 rounded-xl font-bold text-sm transition-all glass-panel hover:bg-white/5 text-gray-300 flex items-center gap-2" data-target="catalog">
+                <i class="ph ph-storefront text-lg"></i> Generator Katalog Produk
+            </button>
+        </div>
+
+        <!-- Tool Contents Container -->
+        <div class="glass-panel p-6 sm:p-10 rounded-3xl reveal max-w-4xl mx-auto">
+            
+            <!-- 1. QR Code Generator -->
+            <div id="tool-qr" class="tool-content space-y-6">
+                <div class="border-b border-white/10 pb-4">
+                    <h4 class="text-2xl font-bold text-white flex items-center gap-2"><i class="ph ph-qr-code text-brand-neon"></i> Generator QR Code</h4>
+                    <p class="text-gray-400 text-sm">Buat QR code instan untuk link WhatsApp, website, atau teks promosi.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Teks / URL Tujuan</label>
+                            <input type="text" id="qr-input" value="https://digiwork.web.id" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-neon" placeholder="Masukkan URL atau teks...">
+                        </div>
+                        <button onclick="generateQRCode()" class="w-full bg-brand-neon hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_15px_rgba(138,43,226,0.3)]">
+                            Generate QR Code
+                        </button>
+                    </div>
+                    <div class="flex flex-col items-center justify-center p-6 bg-black/40 rounded-2xl border border-white/10">
+                        <div id="qr-result-box" class="bg-white p-4 rounded-xl shadow-lg mb-3 flex items-center justify-center min-h-[160px] min-w-[160px]">
+                            <img id="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://digiwork.web.id" alt="QR Code" class="rounded-lg">
+                        </div>
+                        <span class="text-xs text-gray-400">Hasil QR Code Siap Pakai</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Invoice Generator -->
+            <div id="tool-invoice" class="tool-content hidden space-y-6">
+                <div class="border-b border-white/10 pb-4">
+                    <h4 class="text-2xl font-bold text-white flex items-center gap-2"><i class="ph ph-receipt text-brand-neon"></i> Generator Invoice</h4>
+                    <p class="text-gray-400 text-sm">Buat tagihan profesional untuk klien dalam hitungan detik.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nama Klien</label>
+                        <input type="text" id="inv-client" value="Bpk. Budi Santoso" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nomor Invoice</label>
+                        <input type="text" id="inv-number" value="INV/2026/03/001" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nama Item / Layanan</label>
+                        <input type="text" id="inv-item" value="Pembuatan Website Landing Page UMKM" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Total Harga (Rp)</label>
+                        <input type="number" id="inv-total" value="1500000" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                    </div>
+                </div>
+                <button onclick="printPreviewModal('Invoice', 'inv')" class="w-full bg-brand-neon hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_15px_rgba(138,43,226,0.3)]">
+                    Cetak / Preview Invoice
+                </button>
+            </div>
+
+            <!-- 3. Quotation Generator -->
+            <div id="tool-quotation" class="tool-content hidden space-y-6">
+                <div class="border-b border-white/10 pb-4">
+                    <h4 class="text-2xl font-bold text-white flex items-center gap-2"><i class="ph ph-file-text text-brand-neon"></i> Generator Quotation</h4>
+                    <p class="text-gray-400 text-sm">Buat surat penawaran harga resmi untuk calon klien.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Kepada Yth.</label>
+                        <input type="text" id="quo-client" value="PT Maju Bersama Jogja" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nomor Penawaran</label>
+                        <input type="text" id="quo-number" value="QUO/2026/03/088" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Deskripsi Proyek</label>
+                        <input type="text" id="quo-project" value="Redesign Sistem Branding & E-Commerce" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Estimasi Biaya (Rp)</label>
+                        <input type="number" id="quo-total" value="5000000" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                    </div>
+                </div>
+                <button onclick="printPreviewModal('Quotation', 'quo')" class="w-full bg-brand-neon hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_15px_rgba(138,43,226,0.3)]">
+                    Cetak / Preview Quotation
+                </button>
+            </div>
+
+            <!-- 4. Nota Generator -->
+            <div id="tool-nota" class="tool-content hidden space-y-6">
+                <div class="border-b border-white/10 pb-4">
+                    <h4 class="text-2xl font-bold text-white flex items-center gap-2"><i class="ph ph-note text-brand-neon"></i> Generator Nota</h4>
+                    <p class="text-gray-400 text-sm">Cetak nota transaksi tunai kasir atau toko cepat.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nama Pembeli</label>
+                        <input type="text" id="nota-buyer" value="Ibu Siska" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nama Barang</label>
+                        <input type="text" id="nota-item" value="Paket Desain Feed Instagram (1 Bulan)" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Jumlah Nominal (Rp)</label>
+                        <input type="number" id="nota-total" value="350000" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Metode Pembayaran</label>
+                        <select id="nota-pay" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                            <option value="Tunai" class="bg-brand-dark">Tunai (Cash)</option>
+                            <option value="Transfer Bank" class="bg-brand-dark">Transfer Bank / QRIS</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="printPreviewModal('Nota Transaksi', 'nota')" class="w-full bg-brand-neon hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_15px_rgba(138,43,226,0.3)]">
+                    Cetak / Preview Nota
+                </button>
+            </div>
+
+            <!-- 5. Katalog Produk Generator -->
+            <div id="tool-catalog" class="tool-content hidden space-y-6">
+                <div class="border-b border-white/10 pb-4">
+                    <h4 class="text-2xl font-bold text-white flex items-center gap-2"><i class="ph ph-storefront text-brand-neon"></i> Generator Katalog Produk</h4>
+                    <p class="text-gray-400 text-sm">Buat daftar mini produk jualan untuk dibagikan ke calon pembeli.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nama Produk 1</label>
+                        <input type="text" id="cat-p1" value="Website UMKM Kilat" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Harga 1 (Rp)</label>
+                        <input type="number" id="cat-pr1" value="750000" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nama Produk 2</label>
+                        <input type="text" id="cat-p2" value="Paket Branding Logo & Feed" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Harga 2 (Rp)</label>
+                        <input type="number" id="cat-pr2" value="450000" class="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-neon">
+                    </div>
+                </div>
+                <button onclick="printPreviewModal('Katalog Produk', 'catalog')" class="w-full bg-brand-neon hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-[0_0_15px_rgba(138,43,226,0.3)]">
+                    Cetak / Preview Katalog
+                </button>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Preview Modal Overlay -->
+<div id="tool-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+    <div class="glass-panel w-full max-w-xl rounded-3xl p-6 sm:p-8 relative border border-brand-neon/40 shadow-2xl">
+        <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-3">
+            <h3 id="modal-title" class="text-xl font-bold text-white">Preview Dokumen</h3>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-white p-2"><i class="ph ph-x text-xl"></i></button>
+        </div>
+        <div id="modal-body" class="bg-white text-gray-900 p-6 rounded-2xl font-mono text-sm space-y-4 mb-6 shadow-inner max-h-[350px] overflow-y-auto">
+            <!-- Dynamic Document Content -->
+        </div>
+        <div class="flex gap-4">
+            <button onclick="alertBox('Dokumen berhasil disalin / dicetak!')" class="flex-1 bg-brand-neon hover:bg-purple-600 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                <i class="ph ph-printer"></i> Cetak Dokumen
+            </button>
+            <button onclick="closeModal()" class="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tool Tabs Switcher Logic
+    function switchTool(targetId) {
+        document.querySelectorAll('.tool-content').forEach(el => el.classList.add('hidden'));
+        document.getElementById('tool-' + targetId).classList.remove('hidden');
+
+        document.querySelectorAll('.tool-tab').forEach(btn => {
+            btn.classList.remove('bg-brand-neon', 'text-white', 'shadow-[0_0_15px_rgba(138,43,226,0.4)]');
+            btn.classList.add('glass-panel', 'text-gray-300');
+        });
+
+        const activeBtn = document.querySelector(`[data-target="${targetId}"]`);
+        activeBtn.classList.remove('glass-panel', 'text-gray-300');
+        activeBtn.classList.add('bg-brand-neon', 'text-white', 'shadow-[0_0_15px_rgba(138,43,226,0.4)]');
+    }
+
+    // QR Code Generator Function
+    function generateQRCode() {
+        const val = document.getElementById('qr-input').value.trim();
+        if(!val) {
+            alertBox('Mohon masukkan teks atau URL terlebih dahulu!');
+            return;
+        }
+        const img = document.getElementById('qr-img');
+        img.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(val)}`;
+        alertBox('QR Code berhasil diperbarui!');
+    }
+
+    // Modal Preview / Print Generator Function
+    function printPreviewModal(type, prefix) {
+        document.getElementById('modal-title').textContent = 'Preview ' + type + ' - Digiwork Inc';
+        const body = document.getElementById('modal-body');
+        
+        let htmlContent = '';
+        const dateStr = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        if(prefix === 'inv') {
+            const client = document.getElementById('inv-client').value;
+            const number = document.getElementById('inv-number').value;
+            const item = document.getElementById('inv-item').value;
+            const total = parseInt(document.getElementById('inv-total').value || 0).toLocaleString('id-ID');
+            
+            htmlContent = `
+                <div class="border-b pb-3 mb-3 flex justify-between items-center">
+                    <div><strong>DIGIWORK INC</strong><br><span class="text-xs text-gray-500">Creative Studio & Tech</span></div>
+                    <div class="text-right"><strong>INVOICE</strong><br><span class="text-xs text-gray-500">${number}</span></div>
+                </div>
+                <div class="mb-3 text-xs">
+                    <strong>Tanggal:</strong> ${dateStr}<br>
+                    <strong>Kepada:</strong> ${client}
+                </div>
+                <table class="w-full text-left text-xs mb-4">
+                    <tr class="border-b"><th class="py-1">Deskripsi Layanan</th><th class="text-right py-1">Jumlah</th></tr>
+                    <tr><td class="py-2">${item}</td><td class="text-right py-2">Rp ${total}</td></tr>
+                </table>
+                <div class="border-t pt-2 text-right font-bold text-base">Total: Rp ${total}</div>
+            `;
+        } else if(prefix === 'quo') {
+            const client = document.getElementById('quo-client').value;
+            const number = document.getElementById('quo-number').value;
+            const project = document.getElementById('quo-project').value;
+            const total = parseInt(document.getElementById('quo-total').value || 0).toLocaleString('id-ID');
+
+            htmlContent = `
+                <div class="border-b pb-3 mb-3 flex justify-between items-center">
+                    <div><strong>DIGIWORK INC</strong><br><span class="text-xs text-gray-500">Official Quotation</span></div>
+                    <div class="text-right"><strong>QUOTATION</strong><br><span class="text-xs text-gray-500">${number}</span></div>
+                </div>
+                <div class="mb-3 text-xs">
+                    <strong>Tanggal:</strong> ${dateStr}<br>
+                    <strong>Kepada Yth:</strong> ${client}
+                </div>
+                <p class="text-xs mb-3">Berikut adalah penawaran resmi untuk proyek: <strong>${project}</strong></p>
+                <div class="bg-gray-100 p-3 rounded-xl mb-4 text-xs">
+                    <div class="flex justify-between font-bold"><span>Estimasi Total Biaya:</span> <span>Rp ${total}</span></div>
+                </div>
+            `;
+        } else if(prefix === 'nota') {
+            const buyer = document.getElementById('nota-buyer').value;
+            const item = document.getElementById('nota-item').value;
+            const total = parseInt(document.getElementById('nota-total').value || 0).toLocaleString('id-ID');
+            const pay = document.getElementById('nota-pay').value;
+
+            htmlContent = `
+                <div class="text-center border-b pb-2 mb-3">
+                    <strong>NOTA PEMBAYARAN</strong><br><span class="text-xs text-gray-500">Digiwork Store & Services</span>
+                </div>
+                <div class="text-xs space-y-1 mb-3">
+                    <div><strong>Tanggal:</strong> ${dateStr}</div>
+                    <div><strong>Pembeli:</strong> ${buyer}</div>
+                    <div><strong>Metode:</strong> ${pay}</div>
+                </div>
+                <div class="border-t border-b py-2 text-xs mb-3">
+                    <div class="flex justify-between"><span>${item}</span> <span>Rp ${total}</span></div>
+                </div>
+                <div class="text-right font-bold text-sm">TOTAL: Rp ${total}</div>
+            `;
+        } else if(prefix === 'catalog') {
+            const p1 = document.getElementById('cat-p1').value;
+            const pr1 = parseInt(document.getElementById('cat-pr1').value || 0).toLocaleString('id-ID');
+            const p2 = document.getElementById('cat-p2').value;
+            const pr2 = parseInt(document.getElementById('cat-pr2').value || 0).toLocaleString('id-ID');
+
+            htmlContent = `
+                <div class="text-center border-b pb-2 mb-3">
+                    <strong>KATALOG PRODUK & LAYANAN</strong><br><span class="text-xs text-gray-500">Digiwork Inc Studio</span>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <div class="p-2 bg-gray-50 rounded border flex justify-between items-center">
+                        <div><strong>1. ${p1}</strong></div>
+                        <div class="text-brand-neon font-bold">Rp ${pr1}</div>
+                    </div>
+                    <div class="p-2 bg-gray-50 rounded border flex justify-between items-center">
+                        <div><strong>2. ${p2}</strong></div>
+                        <div class="text-brand-neon font-bold">Rp ${pr2}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        body.innerHTML = htmlContent;
+        document.getElementById('tool-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('tool-modal').classList.add('hidden');
+    }
+</script>
+
+        
         <!-- FAQ / SEO Content Section -->
         <section id="faq" class="py-24 relative bg-brand-dark/30 border-t border-white/5">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
