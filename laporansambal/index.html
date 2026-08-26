@@ -22,11 +22,11 @@
                     <span class="bg-white/20 p-3 rounded-xl text-2xl backdrop-blur-sm shadow-inner"><i class="fa-solid fa-fire text-amber-300"></i></span>
                     <div>
                         <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard Sambal Nampol</h1>
-                        <p class="text-red-100 text-sm mt-0.5">Laporan Penjualan, Rincian Pengeluaran, & Laba Rugi</p>
+                        <p class="text-red-100 text-sm mt-0.5">Laporan Penjualan, Rincian Pengeluaran, & Laba Rugi (Lokal PC Storage)</p>
                     </div>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
                 <button onclick="openInputModal()" class="bg-white text-red-700 hover:bg-red-50 font-semibold px-4 py-2.5 rounded-xl shadow transition duration-200 flex items-center gap-2 text-sm">
                     <i class="fa-solid fa-plus-circle"></i> Input Transaksi Baru
                 </button>
@@ -39,7 +39,26 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
         
-        <!-- Summary Cards Grid -->
+        <!-- Filter & Search Toolbar -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-100 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 w-full md:w-auto">
+                <div class="relative w-full md:w-80">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-search"></i>
+                    </span>
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari keterangan atau tanggal..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white transition">
+                </div>
+            </div>
+            <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap"><i class="fa-solid fa-calendar-days text-red-600 mr-1"></i> Periode Bulan:</label>
+                    <select id="filterMonth" onchange="handleMonthFilter()" class="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-red-500 font-medium">
+                        <option value="all">Semua Periode (Keseluruhan)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
             <!-- Total Penjualan -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
@@ -128,6 +147,7 @@
                                     <th class="py-3 px-4 font-semibold">Tanggal</th>
                                     <th class="py-3 px-4 font-semibold">Keterangan</th>
                                     <th class="py-3 px-4 font-semibold text-right">Jumlah (Debit)</th>
+                                    <th class="py-3 px-2 text-center w-12">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="tablePenjualanBody" class="divide-y divide-slate-100 text-sm">
@@ -155,6 +175,7 @@
                                     <th class="py-3 px-4 font-semibold">Tanggal</th>
                                     <th class="py-3 px-4 font-semibold">Keterangan</th>
                                     <th class="py-3 px-4 font-semibold text-right">Biaya (Kredit)</th>
+                                    <th class="py-3 px-2 text-center w-12">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="tablePengeluaranBody" class="divide-y divide-slate-100 text-sm">
@@ -199,13 +220,13 @@
                 <!-- Update Instructions -->
                 <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl shadow-md p-6">
                     <h3 class="font-bold text-base mb-2 flex items-center gap-2">
-                        <i class="fa-solid fa-book-open text-amber-400"></i> Cara Input Data Baru
+                        <i class="fa-solid fa-database text-amber-400"></i> Penyimpanan Lokal PC
                     </h3>
                     <p class="text-xs text-slate-300 leading-relaxed mb-4">
-                        Gunakan tombol <b>"Input Transaksi Baru"</b> di atas untuk mencatat penjualan atau pengeluaran harian baru. Data akan langsung diperbarui secara otomatis di dashboard dan dapat di-download dalam format Excel kapan saja.
+                        Data keuangan Anda otomatis disimpan di penyimpanan lokal browser PC Anda (`localStorage`). Data tidak akan hilang saat halaman dimuat ulang.
                     </p>
                     <div class="border-t border-slate-700 pt-3 text-[11px] text-slate-400 flex items-center justify-between">
-                        <span>Status: Data Tersimpan di Sesi</span>
+                        <span>Status: Tersimpan di Lokal</span>
                         <button onclick="resetToDefaultData()" class="text-rose-400 hover:text-rose-300 underline font-medium">Reset Data Awal</button>
                     </div>
                 </div>
@@ -214,7 +235,6 @@
 
     </main>
 
-    <!-- Input Modal -->
     <div id="inputModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div class="px-6 py-4 bg-slate-100 border-b border-slate-200 flex justify-between items-center">
@@ -232,7 +252,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Jenis Transaksi</label>
-                    <select id="inputJenis" onchange="toggleJenisInput()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm bg-white">
+                    <select id="inputJenis" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm bg-white">
                         <option value="debit">Pemasukan (Penjualan)</option>
                         <option value="kredit">Pengeluaran (Bahan/Modal/Biaya)</option>
                     </select>
@@ -254,97 +274,154 @@
     </div>
 
     <script>
-        // Default initial data extracted from the uploaded Excel sheets
+        // Default initial data from Excel files
         const defaultData = [
-            { tanggal: '17/6', keterangan: 'paket sambal surabaya', debit: 0, kredit: 17000 },
-            { tanggal: '17/6', keterangan: 'buah', debit: 0, kredit: 15000 },
-            { tanggal: '18/6', keterangan: 'bensin', debit: 0, kredit: 30000 },
-            { tanggal: '18/6', keterangan: 'paket sambal bali', debit: 0, kredit: 39000 },
-            { tanggal: '18/6', keterangan: 'paket sambal temanggung', debit: 0, kredit: 15000 },
-            { tanggal: '18/6', keterangan: 'cetak stiker sambal', debit: 0, kredit: 11000 },
-            { tanggal: '18/6', keterangan: 'tempe', debit: 0, kredit: 10000 },
-            { tanggal: '20/6', keterangan: 'penjualan sambal 1 pouch tf B', debit: 65000, kredit: 0 },
-            { tanggal: '22/6', keterangan: 'penjualan sambal 3 btl + ongkir tf B', debit: 100000, kredit: 0 },
-            { tanggal: '23/6', keterangan: 'ikan pindang 2', debit: 0, kredit: 14000 },
-            { tanggal: '23/6', keterangan: 'bahan sambal', debit: 0, kredit: 46000 },
-            { tanggal: '24/6', keterangan: 'paket sambal bekasi + bali', debit: 0, kredit: 57000 },
-            { tanggal: '25/6', keterangan: 'penjualan sambal 6btl + ongkir tf B', debit: 132000, kredit: 0 },
-            { tanggal: '25/6', keterangan: 'penjualan sambal 10 pouch + ongkir tf B', debit: 650000, kredit: 0 },
-            { tanggal: '25/6', keterangan: 'cumi asin 1kg QR', debit: 0, kredit: 98000 },
-            { tanggal: '25/6', keterangan: 'bahan sambal QR', debit: 0, kredit: 85000 },
-            { tanggal: '26/6', keterangan: 'paket sambal bali', debit: 0, kredit: 42000 },
-            { tanggal: '26/6', keterangan: 'paket sambal surabaya', debit: 0, kredit: 40000 },
-            { tanggal: '07/04', keterangan: 'cumi asin 500gr', debit: 0, kredit: 49000 },
-            { tanggal: '07/04', keterangan: 'minyak grg', debit: 0, kredit: 19000 },
-            { tanggal: '07/04', keterangan: 'ikan pindang 2kj', debit: 0, kredit: 15000 },
-            { tanggal: '07/04', keterangan: 'cabe rawit & kriting', debit: 0, kredit: 29000 },
-            { tanggal: '07/04', keterangan: 'botol sambal 1pc', debit: 0, kredit: 21500 },
-            { tanggal: '07/05', keterangan: 'penjualan sambal 1btl 1pouch + ongkir tf B', debit: 90000, kredit: 0 },
-            { tanggal: '07/06', keterangan: 'penjualan sambal 4btl 1 pouch + ongkir', debit: 283000, kredit: 0 },
-            { tanggal: '07/06', keterangan: 'paketin sambal ke blppn', debit: 0, kredit: 118000 },
-            { tanggal: '16/7', keterangan: 'penjualan sambal 2btl', debit: 50000, kredit: 0 },
-            { tanggal: '21/7', keterangan: 'penjualan sambal 5btl tf + ongkir', debit: 125000, kredit: 0 },
-            { tanggal: '21/7', keterangan: 'bahan sambal', debit: 0, kredit: 60000 },
-            { tanggal: '23/7', keterangan: 'penjualan sambal 2 btl', debit: 50000, kredit: 0 },
-            { tanggal: '25/7', keterangan: 'cumi asin 500gr', debit: 0, kredit: 49000 },
-            { tanggal: '25/7', keterangan: 'cabe rawit & kriting', debit: 0, kredit: 45000 },
-            { tanggal: '25/7', keterangan: 'jahe, lengkuas', debit: 0, kredit: 5000 },
-            { tanggal: '26/7', keterangan: 'penjualan sambal 1pouch', debit: 65000, kredit: 0 },
-            { tanggal: '27/7', keterangan: 'penjualan sambal 1 pouc + ongkir tf', debit: 85000, kredit: 0 },
-            { tanggal: '30/7', keterangan: 'penjualan cumi 2 btl', debit: 50000, kredit: 0 },
-            { tanggal: '08/04', keterangan: 'botol sambal 2pac', debit: 0, kredit: 43000 },
-            { tanggal: '08/04', keterangan: 'cetak stiker sambal', debit: 0, kredit: 50000 },
-            { tanggal: '08/05', keterangan: 'minyak grg', debit: 0, kredit: 20900 },
-            { tanggal: '08/05', keterangan: 'penjualan sambal 1 pouch tf', debit: 65000, kredit: 0 },
-            { tanggal: '08/06', keterangan: 'cumi asin 250gr', debit: 0, kredit: 25000 },
-            { tanggal: '08/06', keterangan: 'garam kotak', debit: 0, kredit: 8000 },
-            { tanggal: '08/08', keterangan: 'bahan sambal', debit: 0, kredit: 60000 },
-            { tanggal: '08/12', keterangan: 'penjualan sambal 2 btl', debit: 50000, kredit: 0 },
-            { tanggal: '13/8', keterangan: 'penjualan sambal 3 btl', debit: 75000, kredit: 0 },
-            { tanggal: '19/8', keterangan: 'penjualan sambal 2pouch + ongkir tf', debit: 150000, kredit: 0 },
-            { tanggal: '20/8', keterangan: 'cumi asin 500gr', debit: 0, kredit: 50000 },
-            { tanggal: '20/8', keterangan: 'cabe rawit 250gr', debit: 0, kredit: 17000 },
-            { tanggal: '20/8', keterangan: 'cabe kriting 500gr', debit: 0, kredit: 15000 },
-            { tanggal: '20/8', keterangan: 'tomat', debit: 0, kredit: 7000 },
-            { tanggal: '20/8', keterangan: 'sere & jahe', debit: 0, kredit: 4000 },
-            { tanggal: '20/8', keterangan: 'pe juala sambal 2 pouc 12 btl + ongkir tf', debit: 470000, kredit: 0 },
-            { tanggal: '20/8', keterangan: 'cetak stiker sambal', debit: 0, kredit: 40000 },
-            { tanggal: '21/8', keterangan: 'botol sambal 2 pac', debit: 0, kredit: 43000 },
-            { tanggal: '21/8', keterangan: 'segel botol', debit: 0, kredit: 12500 },
-            { tanggal: '21/8', keterangan: 'cumi asin 500gr', debit: 0, kredit: 50000 },
-            { tanggal: '21/8', keterangan: 'minyak grg', debit: 0, kredit: 19000 },
-            { tanggal: '24/8', keterangan: 'ikan pindang 2 kj', debit: 0, kredit: 18000 },
-            { tanggal: '24/8', keterangan: 'cabe rawit 250gr', debit: 0, kredit: 13000 },
-            { tanggal: '24/8', keterangan: 'cabe kriting 500gr', debit: 0, kredit: 18000 },
-            { tanggal: '24/8', keterangan: 'tomat 1kg', debit: 0, kredit: 40000 },
-            { tanggal: '24/8', keterangan: 'bangmer bangput', debit: 0, kredit: 20000 },
-            { tanggal: '25/8', keterangan: 'paket sambal surabaya', debit: 0, kredit: 32000 },
-            { tanggal: '25/8', keterangan: 'penjualan sambal 2btl tf', debit: 50000, kredit: 0 }
+            { id: 1, tanggal: '17/6', keterangan: 'paket sambal surabaya', debit: 0, kredit: 17000 },
+            { id: 2, tanggal: '17/6', keterangan: 'buah', debit: 0, kredit: 15000 },
+            { id: 3, tanggal: '18/6', keterangan: 'bensin', debit: 0, kredit: 30000 },
+            { id: 4, tanggal: '18/6', keterangan: 'paket sambal bali', debit: 0, kredit: 39000 },
+            { id: 5, tanggal: '18/6', keterangan: 'paket sambal temanggung', debit: 0, kredit: 15000 },
+            { id: 6, tanggal: '18/6', keterangan: 'cetak stiker sambal', debit: 0, kredit: 11000 },
+            { id: 7, tanggal: '18/6', keterangan: 'tempe', debit: 0, kredit: 10000 },
+            { id: 8, tanggal: '20/6', keterangan: 'penjualan sambal 1 pouch tf B', debit: 65000, kredit: 0 },
+            { id: 9, tanggal: '22/6', keterangan: 'penjualan sambal 3 btl + ongkir tf B', debit: 100000, kredit: 0 },
+            { id: 10, tanggal: '23/6', keterangan: 'ikan pindang 2', debit: 0, kredit: 14000 },
+            { id: 11, tanggal: '23/6', keterangan: 'bahan sambal', debit: 0, kredit: 46000 },
+            { id: 12, tanggal: '24/6', keterangan: 'paket sambal bekasi + bali', debit: 0, kredit: 57000 },
+            { id: 13, tanggal: '25/6', keterangan: 'penjualan sambal 6btl + ongkir tf B', debit: 132000, kredit: 0 },
+            { id: 14, tanggal: '25/6', keterangan: 'penjualan sambal 10 pouch + ongkir tf B', debit: 650000, kredit: 0 },
+            { id: 15, tanggal: '25/6', keterangan: 'cumi asin 1kg QR', debit: 0, kredit: 98000 },
+            { id: 16, tanggal: '25/6', keterangan: 'bahan sambal QR', debit: 0, kredit: 85000 },
+            { id: 17, tanggal: '26/6', keterangan: 'paket sambal bali', debit: 0, kredit: 42000 },
+            { id: 18, tanggal: '26/6', keterangan: 'paket sambal surabaya', debit: 0, kredit: 40000 },
+            { id: 19, tanggal: '07/04', keterangan: 'cumi asin 500gr', debit: 0, kredit: 49000 },
+            { id: 20, tanggal: '07/04', keterangan: 'minyak grg', debit: 0, kredit: 19000 },
+            { id: 21, tanggal: '07/04', keterangan: 'ikan pindang 2kj', debit: 0, kredit: 15000 },
+            { id: 22, tanggal: '07/04', keterangan: 'cabe rawit & kriting', debit: 0, kredit: 29000 },
+            { id: 23, tanggal: '07/04', keterangan: 'botol sambal 1pc', debit: 0, kredit: 21500 },
+            { id: 24, tanggal: '07/05', keterangan: 'penjualan sambal 1btl 1pouch + ongkir tf B', debit: 90000, kredit: 0 },
+            { id: 25, tanggal: '07/06', keterangan: 'penjualan sambal 4btl 1 pouch + ongkir', debit: 283000, kredit: 0 },
+            { id: 26, tanggal: '07/06', keterangan: 'paketin sambal ke blppn', debit: 0, kredit: 118000 },
+            { id: 27, tanggal: '16/7', keterangan: 'penjualan sambal 2btl', debit: 50000, kredit: 0 },
+            { id: 28, tanggal: '21/7', keterangan: 'penjualan sambal 5btl tf + ongkir', debit: 125000, kredit: 0 },
+            { id: 29, tanggal: '21/7', keterangan: 'bahan sambal', debit: 0, kredit: 60000 },
+            { id: 30, tanggal: '23/7', keterangan: 'penjualan sambal 2 btl', debit: 50000, kredit: 0 },
+            { id: 31, tanggal: '25/7', keterangan: 'cumi asin 500gr', debit: 0, kredit: 49000 },
+            { id: 32, tanggal: '25/7', keterangan: 'cabe rawit & kriting', debit: 0, kredit: 45000 },
+            { id: 33, tanggal: '25/7', keterangan: 'jahe, lengkuas', debit: 0, kredit: 5000 },
+            { id: 34, tanggal: '26/7', keterangan: 'penjualan sambal 1pouch', debit: 65000, kredit: 0 },
+            { id: 35, tanggal: '27/7', keterangan: 'penjualan sambal 1 pouc + ongkir tf', debit: 85000, kredit: 0 },
+            { id: 36, tanggal: '30/7', keterangan: 'penjualan cumi 2 btl', debit: 50000, kredit: 0 },
+            { id: 37, tanggal: '08/04', keterangan: 'botol sambal 2pac', debit: 0, kredit: 43000 },
+            { id: 38, tanggal: '08/04', keterangan: 'cetak stiker sambal', debit: 0, kredit: 50000 },
+            { id: 39, tanggal: '08/05', keterangan: 'minyak grg', debit: 0, kredit: 20900 },
+            { id: 40, tanggal: '08/05', keterangan: 'penjualan sambal 1 pouch tf', debit: 65000, kredit: 0 },
+            { id: 41, tanggal: '08/06', keterangan: 'cumi asin 250gr', debit: 0, kredit: 25000 },
+            { id: 42, tanggal: '08/06', keterangan: 'garam kotak', debit: 0, kredit: 8000 },
+            { id: 43, tanggal: '08/08', keterangan: 'bahan sambal', debit: 0, kredit: 60000 },
+            { id: 44, tanggal: '08/12', keterangan: 'penjualan sambal 2 btl', debit: 50000, kredit: 0 },
+            { id: 45, tanggal: '13/8', keterangan: 'penjualan sambal 3 btl', debit: 75000, kredit: 0 },
+            { id: 46, tanggal: '19/8', keterangan: 'penjualan sambal 2pouch + ongkir tf', debit: 150000, kredit: 0 },
+            { id: 47, tanggal: '20/8', keterangan: 'cumi asin 500gr', debit: 0, kredit: 50000 },
+            { id: 48, tanggal: '20/8', keterangan: 'cabe rawit 250gr', debit: 0, kredit: 17000 },
+            { id: 49, tanggal: '20/8', keterangan: 'cabe kriting 500gr', debit: 0, kredit: 15000 },
+            { id: 50, tanggal: '20/8', keterangan: 'tomat', debit: 0, kredit: 7000 },
+            { id: 51, tanggal: '20/8', keterangan: 'sere & jahe', debit: 0, kredit: 4000 },
+            { id: 52, tanggal: '20/8', keterangan: 'pe juala sambal 2 pouc 12 btl + ongkir tf', debit: 470000, kredit: 0 },
+            { id: 53, tanggal: '20/8', keterangan: 'cetak stiker sambal', debit: 0, kredit: 40000 },
+            { id: 54, tanggal: '21/8', keterangan: 'botol sambal 2 pac', debit: 0, kredit: 43000 },
+            { id: 55, tanggal: '21/8', keterangan: 'segel botol', debit: 0, kredit: 12500 },
+            { id: 56, tanggal: '21/8', keterangan: 'cumi asin 500gr', debit: 0, kredit: 50000 },
+            { id: 57, tanggal: '21/8', keterangan: 'minyak grg', debit: 0, kredit: 19000 },
+            { id: 58, tanggal: '24/8', keterangan: 'ikan pindang 2 kj', debit: 0, kredit: 18000 },
+            { id: 59, tanggal: '24/8', keterangan: 'cabe rawit 250gr', debit: 0, kredit: 13000 },
+            { id: 60, tanggal: '24/8', keterangan: 'cabe kriting 500gr', debit: 0, kredit: 18000 },
+            { id: 61, tanggal: '24/8', keterangan: 'tomat 1kg', debit: 0, kredit: 40000 },
+            { id: 62, tanggal: '24/8', keterangan: 'bangmer bangput', debit: 0, kredit: 20000 },
+            { id: 63, tanggal: '25/8', keterangan: 'paket sambal surabaya', debit: 0, kredit: 32000 },
+            { id: 64, tanggal: '25/8', keterangan: 'penjualan sambal 2btl tf', debit: 50000, kredit: 0 }
         ];
 
-        let transactions = JSON.parse(localStorage.getItem('sambal_nampol_data')) || defaultData;
+        // Load data from localStorage or fallback to defaultData
+        let transactions = JSON.parse(localStorage.getItem('sambal_nampol_local_storage')) || defaultData;
+        transactions = transactions.map((item, index) => ({ id: item.id || (index + 1), ...item }));
+
+        const monthNames = {
+            '01': 'Januari', '1': 'Januari',
+            '02': 'Februari', '2': 'Februari',
+            '03': 'Maret', '3': 'Maret',
+            '04': 'April', '4': 'April',
+            '05': 'Mei', '5': 'Mei',
+            '06': 'Juni', '6': 'Juni',
+            '07': 'Juli', '7': 'Juli',
+            '08': 'Agustus', '8': 'Agustus',
+            '09': 'September', '9': 'September',
+            '10': 'Oktober',
+            '11': 'November',
+            '12': 'Desember'
+        };
 
         function formatRupiah(angka) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(angka);
         }
 
-        // Parse quantity of sambal sold from descriptions
+        function extractMonthKey(dateStr) {
+            if (!dateStr) return 'lainnya';
+            dateStr = dateStr.trim();
+            if (dateStr.includes('-')) {
+                const parts = dateStr.split('-');
+                if (parts.length >= 2) return parts[1].padStart(2, '0');
+            } else if (dateStr.includes('/')) {
+                const parts = dateStr.split('/');
+                if (parts.length >= 2) {
+                    return parts[1].padStart(2, '0');
+                }
+            }
+            return 'lainnya';
+        }
+
+        function populateMonthDropdown() {
+            const select = document.getElementById('filterMonth');
+            const currentVal = select.value;
+            
+            const monthsSet = new Set();
+            transactions.forEach(item => {
+                const m = extractMonthKey(item.tanggal);
+                if (m !== 'lainnya') monthsSet.add(m);
+            });
+
+            const sortedMonths = Array.from(monthsSet).sort((a, b) => parseInt(a) - parseInt(b));
+
+            select.innerHTML = '<option value="all">Semua Periode (Keseluruhan)</option>';
+            sortedMonths.forEach(m => {
+                const mName = monthNames[m] || `Bulan ${m}`;
+                select.innerHTML += `<option value="${m}">${mName} (${m})</option>`;
+            });
+
+            if (select.querySelector(`option[value="${currentVal}"]`)) {
+                select.value = currentVal;
+            }
+        }
+
         function calculateUnitsSold(text) {
             text = text.toLowerCase();
             let count = 0;
-            // Match patterns like "1 pouch", "3 btl", "6btl", "10 pouch", "12 btl", "2pouch"
             const regex = /(\d+)\s*(btl|pouch|botol)/g;
             let match;
             while ((match = regex.exec(text)) !== null) {
                 count += parseInt(match[1]);
             }
-            // Also check for specific phrases
             if (text.includes('1 pouch') && count === 0) count += 1;
             if (text.includes('1btl') && count === 0) count += 1;
             return count;
         }
 
         function renderDashboard() {
+            populateMonthDropdown();
+
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            const selectedMonth = document.getElementById('filterMonth').value;
+
             let totalOmzet = 0;
             let totalPengeluaran = 0;
             let totalSambal = 0;
@@ -358,7 +435,17 @@
             let penjualanCount = 0;
             let pengeluaranCount = 0;
 
-            transactions.forEach(item => {
+            const filteredTransactions = transactions.filter(item => {
+                const matchSearch = (item.keterangan && item.keterangan.toLowerCase().includes(searchQuery)) || 
+                                    (item.tanggal && item.tanggal.toLowerCase().includes(searchQuery));
+                
+                const itemMonth = extractMonthKey(item.tanggal);
+                const matchMonth = (selectedMonth === 'all' || itemMonth === selectedMonth);
+
+                return matchSearch && matchMonth;
+            });
+
+            filteredTransactions.forEach(item => {
                 const debit = Number(item.debit) || 0;
                 const kredit = Number(item.kredit) || 0;
 
@@ -368,10 +455,13 @@
                     totalSambal += calculateUnitsSold(item.keterangan);
 
                     penjualanTable.innerHTML += `
-                        <tr class="hover:bg-slate-50 transition">
+                        <tr class="hover:bg-slate-50 transition group">
                             <td class="py-3 px-4 text-slate-600 font-medium">${item.tanggal || '-'}</td>
                             <td class="py-3 px-4 text-slate-800">${item.keterangan}</td>
                             <td class="py-3 px-4 text-right font-semibold text-emerald-600">${formatRupiah(debit)}</td>
+                            <td class="py-3 px-2 text-center">
+                                <button onclick="deleteTransaction(${item.id})" title="Hapus" class="text-slate-300 hover:text-rose-600 transition p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                            </td>
                         </tr>
                     `;
                 }
@@ -381,31 +471,57 @@
                     pengeluaranCount++;
 
                     pengeluaranTable.innerHTML += `
-                        <tr class="hover:bg-slate-50 transition">
+                        <tr class="hover:bg-slate-50 transition group">
                             <td class="py-3 px-4 text-slate-600 font-medium">${item.tanggal || '-'}</td>
                             <td class="py-3 px-4 text-slate-800">${item.keterangan}</td>
                             <td class="py-3 px-4 text-right font-semibold text-rose-600">${formatRupiah(kredit)}</td>
+                            <td class="py-3 px-2 text-center">
+                                <button onclick="deleteTransaction(${item.id})" title="Hapus" class="text-slate-300 hover:text-rose-600 transition p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                            </td>
                         </tr>
                     `;
                 }
             });
 
+            if (penjualanCount === 0) {
+                penjualanTable.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400 text-sm">Tidak ada data penjualan yang cocok.</td></tr>`;
+            }
+            if (pengeluaranCount === 0) {
+                pengeluaranTable.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400 text-sm">Tidak ada data pengeluaran yang cocok.</td></tr>`;
+            }
+
             const saldo = totalOmzet - totalPengeluaran;
             const margin = totalOmzet > 0 ? ((saldo / totalOmzet) * 100).toFixed(1) : 0;
 
-            // Update Metric Cards
             document.getElementById('cardOmzet').innerText = formatRupiah(totalOmzet);
             document.getElementById('cardPengeluaran').innerText = formatRupiah(totalPengeluaran);
             document.getElementById('cardSaldo').innerText = formatRupiah(saldo);
             document.getElementById('cardTotalSambal').innerText = totalSambal + ' Pcs';
 
-            // Update Badges & Stats
             document.getElementById('badgePenjualanCount').innerText = penjualanCount + ' Transaksi';
             document.getElementById('badgePengeluaranCount').innerText = pengeluaranCount + ' Transaksi';
             document.getElementById('statJumlahPenjualan').innerText = penjualanCount + ' catatan';
             document.getElementById('statJumlahPengeluaran').innerText = pengeluaranCount + ' catatan';
             document.getElementById('statMargin').innerText = margin + '%';
-            document.getElementById('statDetailProdukTerjual').innerHTML = `Berdasarkan deteksi teks rincian penjualan, total produk sambal (botol & pouch) yang berhasil terjual adalah sekitar <b>${totalSambal} Pcs</b>.`;
+            
+            const monthLabel = selectedMonth === 'all' ? 'semua periode' : `bulan ${monthNames[selectedMonth] || selectedMonth}`;
+            document.getElementById('statDetailProdukTerjual').innerHTML = `Total produk sambal (botol & pouch) yang terjual pada <b>${monthLabel}</b> adalah sekitar <b>${totalSambal} Pcs</b>.`;
+        }
+
+        function handleSearch() {
+            renderDashboard();
+        }
+
+        function handleMonthFilter() {
+            renderDashboard();
+        }
+
+        function deleteTransaction(id) {
+            if (confirm("Hapus catatan transaksi ini?")) {
+                transactions = transactions.filter(item => item.id !== id);
+                localStorage.setItem('sambal_nampol_local_storage', JSON.stringify(transactions));
+                renderDashboard();
+            }
         }
 
         function openInputModal() {
@@ -424,7 +540,10 @@
             const keterangan = document.getElementById('inputKeterangan').value;
             const nominal = parseFloat(document.getElementById('inputNominal').value) || 0;
 
+            const newId = transactions.length > 0 ? Math.max(...transactions.map(t => t.id || 0)) + 1 : 1;
+
             const newItem = {
+                id: newId,
                 tanggal: tanggal,
                 keterangan: keterangan,
                 debit: jenis === 'debit' ? nominal : 0,
@@ -432,7 +551,7 @@
             };
 
             transactions.push(newItem);
-            localStorage.setItem('sambal_nampol_data', JSON.stringify(transactions));
+            localStorage.setItem('sambal_nampol_local_storage', JSON.stringify(transactions));
             
             renderDashboard();
             closeInputModal();
@@ -440,44 +559,49 @@
 
         function resetToDefaultData() {
             if (confirm("Reset data kembali ke data awal file Excel?")) {
-                transactions = [...defaultData];
-                localStorage.removeItem('sambal_nampol_data');
+                transactions = defaultData.map((item, index) => ({ id: index + 1, ...item }));
+                localStorage.removeItem('sambal_nampol_local_storage');
+                document.getElementById('searchInput').value = '';
+                document.getElementById('filterMonth').value = 'all';
                 renderDashboard();
             }
         }
 
         function exportToExcel() {
-            // Prepare data for SheetJS
+            const selectedMonth = document.getElementById('filterMonth').value;
+            
+            const exportList = transactions.filter(item => {
+                const itemMonth = extractMonthKey(item.tanggal);
+                return selectedMonth === 'all' || itemMonth === selectedMonth;
+            });
+
             const wsData = [
-                ["LAPORAN KEUANGAN KAS SAMBAL NAMPOL"],
+                ["LAPORAN KEUANGAN KAS SAMBAL NAMPOL", selectedMonth === 'all' ? "(Semua Periode)" : `(Periode Bulan: ${monthNames[selectedMonth] || selectedMonth})`],
                 ["Tanggal", "Keterangan", "Debit (Pemasukan)", "Kredit (Pengeluaran)", "Saldo Kumulatif"]
             ];
 
             let runningSaldo = 0;
-            transactions.forEach(item => {
+            exportList.forEach(item => {
                 const d = item.debit || 0;
                 const k = item.kredit || 0;
                 runningSaldo += (d - k);
                 wsData.push([item.tanggal || '', item.keterangan || '', d > 0 ? d : '', k > 0 ? k : '', runningSaldo]);
             });
 
-            // Add summary row
-            const totalDebit = transactions.reduce((sum, i) => sum + (i.debit || 0), 0);
-            const totalKredit = transactions.reduce((sum, i) => sum + (i.kredit || 0), 0);
+            const totalDebit = exportList.reduce((sum, i) => sum + (i.debit || 0), 0);
+            const totalKredit = exportList.reduce((sum, i) => sum + (i.kredit || 0), 0);
             wsData.push([]);
             wsData.push(["TOTAL", "", totalDebit, totalKredit, totalDebit - totalKredit]);
 
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.aoa_to_sheet(wsData);
             
-            // Styling column width
             ws['!cols'] = [ {wch: 15}, {wch: 45}, {wch: 20}, {wch: 20}, {wch: 20} ];
 
             XLSX.utils.book_append_sheet(wb, ws, "Laporan Keuangan");
-            XLSX.writeFile(wb, "Laporan_Keuangan_Sambal_Nampol_Update.xlsx");
+            XLSX.writeFile(wb, `Laporan_Keuangan_Sambal_Nampol_${selectedMonth}.xlsx`);
         }
 
-        // Initialize on load
         window.onload = function() {
             renderDashboard();
         };
