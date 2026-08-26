@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Keuangan Sambal Nampol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-12">
+
+    <header class="bg-gradient-to-r from-red-700 via-rose-600 to-orange-600 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <span class="bg-white/20 p-3 rounded-xl text-2xl backdrop-blur-sm shadow-inner"><i class="fa-solid fa-fire text-amber-300"></i></span>
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard Sambal Nampol</h1>
+                        <p class="text-red-100 text-sm mt-0.5">Laporan Penjualan, Rincian Pengeluaran, & Laba Rugi</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="openInputModal()" class="bg-white text-red-700 hover:bg-red-50 font-semibold px-4 py-2.5 rounded-xl shadow transition duration-200 flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-plus-circle"></i> Input Transaksi Baru
+                </button>
+                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2.5 rounded-xl shadow transition duration-200 flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-file-excel"></i> Download Excel
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        
+        <!-- Summary Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <!-- Total Penjualan -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Omzet / Penjualan</p>
+                        <h3 id="cardOmzet" class="text-2xl font-bold text-slate-800 mt-1">Rp 0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-xs text-emerald-600 font-medium">
+                    <i class="fa-solid fa-arrow-trend-up mr-1"></i> Pemasukan Kotor Kas
+                </div>
+            </div>
+
+            <!-- Total Pengeluaran -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Pengeluaran Detail</p>
+                        <h3 id="cardPengeluaran" class="text-2xl font-bold text-slate-800 mt-1">Rp 0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-xs text-rose-600 font-medium">
+                    <i class="fa-solid fa-receipt mr-1"></i> Bahan, Stiker, Botol, dll
+                </div>
+            </div>
+
+            <!-- Saldo / Laba Bersih -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Keuntungan Bersih (Saldo)</p>
+                        <h3 id="cardSaldo" class="text-2xl font-bold text-indigo-600 mt-1">Rp 0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-xs text-indigo-600 font-medium">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> Omzet dikurangi Pengeluaran
+                </div>
+            </div>
+
+            <!-- Total Produk Terjual -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Sambal Terjual</p>
+                        <h3 id="cardTotalSambal" class="text-2xl font-bold text-amber-600 mt-1">0 Pcs</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-jar"></i>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-xs text-amber-600 font-medium">
+                    <i class="fa-solid fa-boxes-stacked mr-1"></i> Botol, Pouch & Paket
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left 2 Cols: Detailed Tables -->
+            <div class="lg:col-span-2 space-y-8">
+                
+                <!-- Table: Penjualan -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                                <i class="fa-solid fa-cash-register text-emerald-600"></i> Rincian Penjualan Sambal
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Daftar transaksi masuk dan estimasi jumlah sambal terjual</p>
+                        </div>
+                        <span id="badgePenjualanCount" class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full">0 Transaksi</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 uppercase text-xs tracking-wider">
+                                    <th class="py-3 px-4 font-semibold">Tanggal</th>
+                                    <th class="py-3 px-4 font-semibold">Keterangan</th>
+                                    <th class="py-3 px-4 font-semibold text-right">Jumlah (Debit)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablePenjualanBody" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Table: Pengeluaran -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                                <i class="fa-solid fa-receipt text-rose-600"></i> Rincian Pengeluaran Detail
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Bahan baku, botol, stiker, minyak, bensin, dan operasional</p>
+                        </div>
+                        <span id="badgePengeluaranCount" class="bg-rose-100 text-rose-800 text-xs font-semibold px-3 py-1 rounded-full">0 Transaksi</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 uppercase text-xs tracking-wider">
+                                    <th class="py-3 px-4 font-semibold">Tanggal</th>
+                                    <th class="py-3 px-4 font-semibold">Keterangan</th>
+                                    <th class="py-3 px-4 font-semibold text-right">Biaya (Kredit)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablePengeluaranBody" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right 1 Col: Summary Breakdown & Instructions -->
+            <div class="space-y-6">
+                <!-- Breakdown Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                    <h3 class="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-indigo-600"></i> Analisis Ringkas
+                    </h3>
+                    
+                    <div class="space-y-4 text-sm">
+                        <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                            <span class="text-slate-500">Total Transaksi Masuk</span>
+                            <span id="statJumlahPenjualan" class="font-bold text-slate-800">0</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                            <span class="text-slate-500">Total Transaksi Keluar</span>
+                            <span id="statJumlahPengeluaran" class="font-bold text-slate-800">0</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                            <span class="text-slate-500">Margin Keuntungan Kotor</span>
+                            <span id="statMargin" class="font-bold text-emerald-600">0%</span>
+                        </div>
+                        <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 text-amber-900">
+                            <h4 class="font-bold text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5"><i class="fa-solid fa-lightbulb text-amber-600"></i> Catatan Produk Terjual</h4>
+                            <p id="statDetailProdukTerjual" class="text-xs leading-relaxed text-amber-800">
+                                Menganalisis kuantitas botol dan pouch sambal dari keterangan transaksi.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Update Instructions -->
+                <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl shadow-md p-6">
+                    <h3 class="font-bold text-base mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-book-open text-amber-400"></i> Cara Input Data Baru
+                    </h3>
+                    <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                        Gunakan tombol <b>"Input Transaksi Baru"</b> di atas untuk mencatat penjualan atau pengeluaran harian baru. Data akan langsung diperbarui secara otomatis di dashboard dan dapat di-download dalam format Excel kapan saja.
+                    </p>
+                    <div class="border-t border-slate-700 pt-3 text-[11px] text-slate-400 flex items-center justify-between">
+                        <span>Status: Data Tersimpan di Sesi</span>
+                        <button onclick="resetToDefaultData()" class="text-rose-400 hover:text-rose-300 underline font-medium">Reset Data Awal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Input Modal -->
+    <div id="inputModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="px-6 py-4 bg-slate-100 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-plus-circle text-red-600"></i> Tambah Catatan Kas Baru
+                </h3>
+                <button onclick="closeInputModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="transactionForm" onsubmit="handleFormSubmit(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Tanggal</label>
+                    <input type="text" id="inputTanggal" required placeholder="Contoh: 26/8 atau 2026-08-26" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Jenis Transaksi</label>
+                    <select id="inputJenis" onchange="toggleJenisInput()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm bg-white">
+                        <option value="debit">Pemasukan (Penjualan)</option>
+                        <option value="kredit">Pengeluaran (Bahan/Modal/Biaya)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Keterangan</label>
+                    <input type="text" id="inputKeterangan" required placeholder="Contoh: penjualan sambal 2btl / bahan sambal" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Nominal (Rp)</label>
+                    <input type="number" id="inputNominal" required placeholder="Contoh: 50000" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm">
+                </div>
+                <div class="pt-3 flex gap-3">
+                    <button type="button" onclick="closeInputModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm transition">Batal</button>
+                    <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-xl text-sm shadow transition">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Default initial data extracted from the uploaded Excel sheets
+        const defaultData = [
+            { tanggal: '17/6', keterangan: 'paket sambal surabaya', debit: 0, kredit: 17000 },
+            { tanggal: '17/6', keterangan: 'buah', debit: 0, kredit: 15000 },
+            { tanggal: '18/6', keterangan: 'bensin', debit: 0, kredit: 30000 },
+            { tanggal: '18/6', keterangan: 'paket sambal bali', debit: 0, kredit: 39000 },
+            { tanggal: '18/6', keterangan: 'paket sambal temanggung', debit: 0, kredit: 15000 },
+            { tanggal: '18/6', keterangan: 'cetak stiker sambal', debit: 0, kredit: 11000 },
+            { tanggal: '18/6', keterangan: 'tempe', debit: 0, kredit: 10000 },
+            { tanggal: '20/6', keterangan: 'penjualan sambal 1 pouch tf B', debit: 65000, kredit: 0 },
+            { tanggal: '22/6', keterangan: 'penjualan sambal 3 btl + ongkir tf B', debit: 100000, kredit: 0 },
+            { tanggal: '23/6', keterangan: 'ikan pindang 2', debit: 0, kredit: 14000 },
+            { tanggal: '23/6', keterangan: 'bahan sambal', debit: 0, kredit: 46000 },
+            { tanggal: '24/6', keterangan: 'paket sambal bekasi + bali', debit: 0, kredit: 57000 },
+            { tanggal: '25/6', keterangan: 'penjualan sambal 6btl + ongkir tf B', debit: 132000, kredit: 0 },
+            { tanggal: '25/6', keterangan: 'penjualan sambal 10 pouch + ongkir tf B', debit: 650000, kredit: 0 },
+            { tanggal: '25/6', keterangan: 'cumi asin 1kg QR', debit: 0, kredit: 98000 },
+            { tanggal: '25/6', keterangan: 'bahan sambal QR', debit: 0, kredit: 85000 },
+            { tanggal: '26/6', keterangan: 'paket sambal bali', debit: 0, kredit: 42000 },
+            { tanggal: '26/6', keterangan: 'paket sambal surabaya', debit: 0, kredit: 40000 },
+            { tanggal: '07/04', keterangan: 'cumi asin 500gr', debit: 0, kredit: 49000 },
+            { tanggal: '07/04', keterangan: 'minyak grg', debit: 0, kredit: 19000 },
+            { tanggal: '07/04', keterangan: 'ikan pindang 2kj', debit: 0, kredit: 15000 },
+            { tanggal: '07/04', keterangan: 'cabe rawit & kriting', debit: 0, kredit: 29000 },
+            { tanggal: '07/04', keterangan: 'botol sambal 1pc', debit: 0, kredit: 21500 },
+            { tanggal: '07/05', keterangan: 'penjualan sambal 1btl 1pouch + ongkir tf B', debit: 90000, kredit: 0 },
+            { tanggal: '07/06', keterangan: 'penjualan sambal 4btl 1 pouch + ongkir', debit: 283000, kredit: 0 },
+            { tanggal: '07/06', keterangan: 'paketin sambal ke blppn', debit: 0, kredit: 118000 },
+            { tanggal: '16/7', keterangan: 'penjualan sambal 2btl', debit: 50000, kredit: 0 },
+            { tanggal: '21/7', keterangan: 'penjualan sambal 5btl tf + ongkir', debit: 125000, kredit: 0 },
+            { tanggal: '21/7', keterangan: 'bahan sambal', debit: 0, kredit: 60000 },
+            { tanggal: '23/7', keterangan: 'penjualan sambal 2 btl', debit: 50000, kredit: 0 },
+            { tanggal: '25/7', keterangan: 'cumi asin 500gr', debit: 0, kredit: 49000 },
+            { tanggal: '25/7', keterangan: 'cabe rawit & kriting', debit: 0, kredit: 45000 },
+            { tanggal: '25/7', keterangan: 'jahe, lengkuas', debit: 0, kredit: 5000 },
+            { tanggal: '26/7', keterangan: 'penjualan sambal 1pouch', debit: 65000, kredit: 0 },
+            { tanggal: '27/7', keterangan: 'penjualan sambal 1 pouc + ongkir tf', debit: 85000, kredit: 0 },
+            { tanggal: '30/7', keterangan: 'penjualan cumi 2 btl', debit: 50000, kredit: 0 },
+            { tanggal: '08/04', keterangan: 'botol sambal 2pac', debit: 0, kredit: 43000 },
+            { tanggal: '08/04', keterangan: 'cetak stiker sambal', debit: 0, kredit: 50000 },
+            { tanggal: '08/05', keterangan: 'minyak grg', debit: 0, kredit: 20900 },
+            { tanggal: '08/05', keterangan: 'penjualan sambal 1 pouch tf', debit: 65000, kredit: 0 },
+            { tanggal: '08/06', keterangan: 'cumi asin 250gr', debit: 0, kredit: 25000 },
+            { tanggal: '08/06', keterangan: 'garam kotak', debit: 0, kredit: 8000 },
+            { tanggal: '08/08', keterangan: 'bahan sambal', debit: 0, kredit: 60000 },
+            { tanggal: '08/12', keterangan: 'penjualan sambal 2 btl', debit: 50000, kredit: 0 },
+            { tanggal: '13/8', keterangan: 'penjualan sambal 3 btl', debit: 75000, kredit: 0 },
+            { tanggal: '19/8', keterangan: 'penjualan sambal 2pouch + ongkir tf', debit: 150000, kredit: 0 },
+            { tanggal: '20/8', keterangan: 'cumi asin 500gr', debit: 0, kredit: 50000 },
+            { tanggal: '20/8', keterangan: 'cabe rawit 250gr', debit: 0, kredit: 17000 },
+            { tanggal: '20/8', keterangan: 'cabe kriting 500gr', debit: 0, kredit: 15000 },
+            { tanggal: '20/8', keterangan: 'tomat', debit: 0, kredit: 7000 },
+            { tanggal: '20/8', keterangan: 'sere & jahe', debit: 0, kredit: 4000 },
+            { tanggal: '20/8', keterangan: 'pe juala sambal 2 pouc 12 btl + ongkir tf', debit: 470000, kredit: 0 },
+            { tanggal: '20/8', keterangan: 'cetak stiker sambal', debit: 0, kredit: 40000 },
+            { tanggal: '21/8', keterangan: 'botol sambal 2 pac', debit: 0, kredit: 43000 },
+            { tanggal: '21/8', keterangan: 'segel botol', debit: 0, kredit: 12500 },
+            { tanggal: '21/8', keterangan: 'cumi asin 500gr', debit: 0, kredit: 50000 },
+            { tanggal: '21/8', keterangan: 'minyak grg', debit: 0, kredit: 19000 },
+            { tanggal: '24/8', keterangan: 'ikan pindang 2 kj', debit: 0, kredit: 18000 },
+            { tanggal: '24/8', keterangan: 'cabe rawit 250gr', debit: 0, kredit: 13000 },
+            { tanggal: '24/8', keterangan: 'cabe kriting 500gr', debit: 0, kredit: 18000 },
+            { tanggal: '24/8', keterangan: 'tomat 1kg', debit: 0, kredit: 40000 },
+            { tanggal: '24/8', keterangan: 'bangmer bangput', debit: 0, kredit: 20000 },
+            { tanggal: '25/8', keterangan: 'paket sambal surabaya', debit: 0, kredit: 32000 },
+            { tanggal: '25/8', keterangan: 'penjualan sambal 2btl tf', debit: 50000, kredit: 0 }
+        ];
+
+        let transactions = JSON.parse(localStorage.getItem('sambal_nampol_data')) || defaultData;
+
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(angka);
+        }
+
+        // Parse quantity of sambal sold from descriptions
+        function calculateUnitsSold(text) {
+            text = text.toLowerCase();
+            let count = 0;
+            // Match patterns like "1 pouch", "3 btl", "6btl", "10 pouch", "12 btl", "2pouch"
+            const regex = /(\d+)\s*(btl|pouch|botol)/g;
+            let match;
+            while ((match = regex.exec(text)) !== null) {
+                count += parseInt(match[1]);
+            }
+            // Also check for specific phrases
+            if (text.includes('1 pouch') && count === 0) count += 1;
+            if (text.includes('1btl') && count === 0) count += 1;
+            return count;
+        }
+
+        function renderDashboard() {
+            let totalOmzet = 0;
+            let totalPengeluaran = 0;
+            let totalSambal = 0;
+
+            const penjualanTable = document.getElementById('tablePenjualanBody');
+            const pengeluaranTable = document.getElementById('tablePengeluaranBody');
+            
+            penjualanTable.innerHTML = '';
+            pengeluaranTable.innerHTML = '';
+
+            let penjualanCount = 0;
+            let pengeluaranCount = 0;
+
+            transactions.forEach(item => {
+                const debit = Number(item.debit) || 0;
+                const kredit = Number(item.kredit) || 0;
+
+                if (debit > 0) {
+                    totalOmzet += debit;
+                    penjualanCount++;
+                    totalSambal += calculateUnitsSold(item.keterangan);
+
+                    penjualanTable.innerHTML += `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="py-3 px-4 text-slate-600 font-medium">${item.tanggal || '-'}</td>
+                            <td class="py-3 px-4 text-slate-800">${item.keterangan}</td>
+                            <td class="py-3 px-4 text-right font-semibold text-emerald-600">${formatRupiah(debit)}</td>
+                        </tr>
+                    `;
+                }
+
+                if (kredit > 0) {
+                    totalPengeluaran += kredit;
+                    pengeluaranCount++;
+
+                    pengeluaranTable.innerHTML += `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="py-3 px-4 text-slate-600 font-medium">${item.tanggal || '-'}</td>
+                            <td class="py-3 px-4 text-slate-800">${item.keterangan}</td>
+                            <td class="py-3 px-4 text-right font-semibold text-rose-600">${formatRupiah(kredit)}</td>
+                        </tr>
+                    `;
+                }
+            });
+
+            const saldo = totalOmzet - totalPengeluaran;
+            const margin = totalOmzet > 0 ? ((saldo / totalOmzet) * 100).toFixed(1) : 0;
+
+            // Update Metric Cards
+            document.getElementById('cardOmzet').innerText = formatRupiah(totalOmzet);
+            document.getElementById('cardPengeluaran').innerText = formatRupiah(totalPengeluaran);
+            document.getElementById('cardSaldo').innerText = formatRupiah(saldo);
+            document.getElementById('cardTotalSambal').innerText = totalSambal + ' Pcs';
+
+            // Update Badges & Stats
+            document.getElementById('badgePenjualanCount').innerText = penjualanCount + ' Transaksi';
+            document.getElementById('badgePengeluaranCount').innerText = pengeluaranCount + ' Transaksi';
+            document.getElementById('statJumlahPenjualan').innerText = penjualanCount + ' catatan';
+            document.getElementById('statJumlahPengeluaran').innerText = pengeluaranCount + ' catatan';
+            document.getElementById('statMargin').innerText = margin + '%';
+            document.getElementById('statDetailProdukTerjual').innerHTML = `Berdasarkan deteksi teks rincian penjualan, total produk sambal (botol & pouch) yang berhasil terjual adalah sekitar <b>${totalSambal} Pcs</b>.`;
+        }
+
+        function openInputModal() {
+            document.getElementById('inputModal').classList.remove('hidden');
+        }
+
+        function closeInputModal() {
+            document.getElementById('inputModal').classList.add('hidden');
+            document.getElementById('transactionForm').reset();
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const tanggal = document.getElementById('inputTanggal').value;
+            const jenis = document.getElementById('inputJenis').value;
+            const keterangan = document.getElementById('inputKeterangan').value;
+            const nominal = parseFloat(document.getElementById('inputNominal').value) || 0;
+
+            const newItem = {
+                tanggal: tanggal,
+                keterangan: keterangan,
+                debit: jenis === 'debit' ? nominal : 0,
+                kredit: jenis === 'kredit' ? nominal : 0
+            };
+
+            transactions.push(newItem);
+            localStorage.setItem('sambal_nampol_data', JSON.stringify(transactions));
+            
+            renderDashboard();
+            closeInputModal();
+        }
+
+        function resetToDefaultData() {
+            if (confirm("Reset data kembali ke data awal file Excel?")) {
+                transactions = [...defaultData];
+                localStorage.removeItem('sambal_nampol_data');
+                renderDashboard();
+            }
+        }
+
+        function exportToExcel() {
+            // Prepare data for SheetJS
+            const wsData = [
+                ["LAPORAN KEUANGAN KAS SAMBAL NAMPOL"],
+                ["Tanggal", "Keterangan", "Debit (Pemasukan)", "Kredit (Pengeluaran)", "Saldo Kumulatif"]
+            ];
+
+            let runningSaldo = 0;
+            transactions.forEach(item => {
+                const d = item.debit || 0;
+                const k = item.kredit || 0;
+                runningSaldo += (d - k);
+                wsData.push([item.tanggal || '', item.keterangan || '', d > 0 ? d : '', k > 0 ? k : '', runningSaldo]);
+            });
+
+            // Add summary row
+            const totalDebit = transactions.reduce((sum, i) => sum + (i.debit || 0), 0);
+            const totalKredit = transactions.reduce((sum, i) => sum + (i.kredit || 0), 0);
+            wsData.push([]);
+            wsData.push(["TOTAL", "", totalDebit, totalKredit, totalDebit - totalKredit]);
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            
+            // Styling column width
+            ws['!cols'] = [ {wch: 15}, {wch: 45}, {wch: 20}, {wch: 20}, {wch: 20} ];
+
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan Keuangan");
+            XLSX.writeFile(wb, "Laporan_Keuangan_Sambal_Nampol_Update.xlsx");
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            renderDashboard();
+        };
+    </script>
+</body>
+</html>
