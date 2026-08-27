@@ -589,11 +589,16 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pembukuan-app-default';
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCQu5m7dHcuYn2tGZxlJmRS59-GgRwjkOs",
+  authDomain: "pembukuan-3e646.firebaseapp.com",
+  projectId: "pembukuan-3e646",
+  storageBucket: "pembukuan-3e646.firebasestorage.app",
+  messagingSenderId: "810082928394",
+  appId: "1:810082928394:web:0bea7dfe91dee81bdd1cf3",
+  measurementId: "G-XS0ZYDKPKY"
+};
 
         const CATEGORIES = {
             pemasukan: ["Gaji pokok", "Sambal Nampol", "Pemasukan Desain dan Web", "Pemasukan Gardener", "Donasi / Persembahan kasih", "Lain lain"],
