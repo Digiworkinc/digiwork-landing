@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Pembukuan Offline</title>
+    <title>Aplikasi Pembukuan Cloud Firestore</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -56,12 +56,12 @@
             <!-- App Logo / Title -->
             <div class="p-5 border-b border-slate-800 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-emerald-500/30">
-                    <i class="fa-solid fa-wallet"></i>
+                    <i class="fa-solid fa-cloud"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg leading-tight">BukuKas Local</h1>
+                    <h1 class="font-bold text-lg leading-tight">BukuKas Cloud</h1>
                     <span class="text-xs text-emerald-400 font-medium flex items-center gap-1">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span> Mode Offline
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span> Sinkronisasi Realtime
                     </span>
                 </div>
             </div>
@@ -83,16 +83,13 @@
                 <button onclick="switchTab('laporan')" id="nav-laporan" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all text-slate-400 hover:text-white hover:bg-slate-800">
                     <i class="fa-solid fa-file-invoice-dollar w-5 text-center"></i> Laporan Detail
                 </button>
-                <button onclick="switchTab('pengaturan')" id="nav-pengaturan" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all text-slate-400 hover:text-white hover:bg-slate-800">
-                    <i class="fa-solid fa-sliders w-5 text-center"></i> Data & Backup
-                </button>
             </nav>
         </div>
 
         <!-- System Quick Info -->
-        <div class="p-4 border-t border-slate-800 text-xs text-slate-400">
-            <p><i class="fa-solid fa-hard-drive mr-1"></i> Data Tersimpan di Local PC</p>
-            <p class="mt-1 text-slate-500">Tidak ada data dikirim ke cloud.</p>
+        <div class="p-4 border-t border-slate-800 text-xs text-slate-400 space-y-1">
+            <p><i class="fa-solid fa-database mr-1"></i> Cloud Firestore Terhubung</p>
+            <p id="auth-status" class="text-emerald-400 font-medium">Autentikasi: Memuat...</p>
         </div>
     </aside>
 
@@ -101,11 +98,10 @@
 
         <!-- ================= DASHBOARD TAB ================= -->
         <section id="tab-dashboard" class="tab-content space-y-6">
-            <!-- Header -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-800">Ringkasan Keuangan</h2>
-                    <p class="text-slate-500 text-sm">Overview pemasukan, pengeluaran, dan status pos hutang Anda.</p>
+                    <p class="text-slate-500 text-sm">Overview pemasukan, pengeluaran, dan status pos hutang Anda dari cloud.</p>
                 </div>
                 <button onclick="openModal('modal-transaksi')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/20 transition-all">
                     <i class="fa-solid fa-plus"></i> Tambah Transaksi
@@ -157,15 +153,12 @@
 
             <!-- Charts Section -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Bar Chart: Cash Flow -->
                 <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
                     <h3 class="font-bold text-slate-800 text-base mb-4">Grafik Arus Kas (Terbaru)</h3>
                     <div class="h-64 relative">
                         <canvas id="chart-cashflow"></canvas>
                     </div>
                 </div>
-
-                <!-- Doughnut Chart: Expense Breakdown -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
                     <h3 class="font-bold text-slate-800 text-base mb-4">Pos Pengeluaran</h3>
                     <div class="h-64 relative flex items-center justify-center">
@@ -206,7 +199,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-800">Transaksi Harian</h2>
-                    <p class="text-slate-500 text-sm">Catat dan kelola riwayat pemasukan dan pengeluaran harian.</p>
+                    <p class="text-slate-500 text-sm">Catat dan kelola riwayat pemasukan dan pengeluaran harian secara realtime.</p>
                 </div>
                 <button onclick="openModal('modal-transaksi')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/20">
                     <i class="fa-solid fa-plus"></i> Input Transaksi Manual
@@ -226,10 +219,8 @@
 
                     <select id="filter-category" onchange="renderTransactionsTable()" class="px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
                         <option value="all">Semua Kategori</option>
-                        <!-- Options filled via JS -->
                     </select>
                 </div>
-
                 <div class="text-xs text-slate-500">
                     Total: <span id="transaksi-count" class="font-bold text-slate-700">0</span> data
                 </div>
@@ -283,10 +274,8 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- File Upload Options -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4 md:col-span-1">
                     <h3 class="font-bold text-slate-800">1. Pilih Sumber Data</h3>
-                    
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 mb-1">Format Berkas</label>
                         <select id="import-source-type" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
@@ -303,12 +292,11 @@
 
                     <div class="p-3 bg-amber-50 rounded-xl border border-amber-100 text-xs text-amber-800 space-y-1">
                         <p class="font-semibold"><i class="fa-solid fa-lightbulb mr-1"></i> Info Format:</p>
-                        <p>- Sistem akan membaca kolom Tanggal, Keterangan, dan Nominal secara otomatis.</p>
-                        <p>- Untuk e-Statement BCA/BRI, posisi Debet/Kredit akan disesuaikan otomatis.</p>
+                        <p>- Sistem membaca kolom Tanggal, Keterangan, dan Nominal secara otomatis.</p>
+                        <p>- Untuk e-Statement BCA/BRI, posisi Debet/Kredit disesuaikan otomatis.</p>
                     </div>
                 </div>
 
-                <!-- Preview & Map Area -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm md:col-span-2 flex flex-col justify-between">
                     <div>
                         <div class="flex justify-between items-center mb-4">
@@ -338,7 +326,7 @@
 
                     <div class="mt-4 pt-4 border-t border-slate-100 flex justify-end">
                         <button onclick="processAndSaveImport()" id="btn-save-import" disabled class="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/20">
-                            <i class="fa-solid fa-file-export"></i> Simpan ke Pembukuan
+                            <i class="fa-solid fa-file-export"></i> Simpan ke Cloud Pembukuan
                         </button>
                     </div>
                 </div>
@@ -373,10 +361,9 @@
 
             <!-- Report Sheet Printable Area -->
             <div id="printable-report" class="bg-white p-8 rounded-2xl border border-slate-200/80 shadow-sm space-y-8">
-                <!-- Report Header -->
                 <div class="border-b border-slate-200 pb-6 flex justify-between items-start">
                     <div>
-                        <h1 class="text-2xl font-bold text-slate-900">LAPORAN PEMBUKUAN KEUANGAN</h1>
+                        <h1 class="text-2xl font-bold text-slate-900">LAPORAN PEMBUKUAN KEUANGAN CLOUD</h1>
                         <p id="report-date-label" class="text-sm text-slate-500 mt-1">Periode: Semua Riwayat</p>
                     </div>
                     <div class="text-right text-xs text-slate-400">
@@ -385,7 +372,7 @@
                     </div>
                 </div>
 
-                <!-- Report Section 1: Alokasi Pemasukan -->
+                <!-- Report Section 1 -->
                 <div>
                     <h3 class="font-bold text-slate-800 text-base mb-3 border-l-4 border-emerald-500 pl-3">1. Alokasi Pos Pemasukan</h3>
                     <table class="w-full text-left text-sm">
@@ -397,9 +384,7 @@
                                 <th class="p-3 text-right">Persentase</th>
                             </tr>
                         </thead>
-                        <tbody id="report-pemasukan-body" class="divide-y divide-slate-100">
-                            <!-- Populated via JS -->
-                        </tbody>
+                        <tbody id="report-pemasukan-body" class="divide-y divide-slate-100"></tbody>
                         <tfoot class="bg-slate-50 font-bold">
                             <tr>
                                 <td class="p-3">TOTAL PEMASUKAN</td>
@@ -411,7 +396,7 @@
                     </table>
                 </div>
 
-                <!-- Report Section 2: Pos Pengeluaran -->
+                <!-- Report Section 2 -->
                 <div>
                     <h3 class="font-bold text-slate-800 text-base mb-3 border-l-4 border-rose-500 pl-3">2. Pos-Pos Kebutuhan (Pengeluaran)</h3>
                     <table class="w-full text-left text-sm">
@@ -423,9 +408,7 @@
                                 <th class="p-3 text-right">Persentase</th>
                             </tr>
                         </thead>
-                        <tbody id="report-pengeluaran-body" class="divide-y divide-slate-100">
-                            <!-- Populated via JS -->
-                        </tbody>
+                        <tbody id="report-pengeluaran-body" class="divide-y divide-slate-100"></tbody>
                         <tfoot class="bg-slate-50 font-bold">
                             <tr>
                                 <td class="p-3">TOTAL PENGELUARAN</td>
@@ -437,7 +420,7 @@
                     </table>
                 </div>
 
-                <!-- Report Section 3: Pos Hutang & Sisa Hutang -->
+                <!-- Report Section 3 -->
                 <div>
                     <h3 class="font-bold text-slate-800 text-base mb-3 border-l-4 border-amber-500 pl-3">3. Status Ringkasan Pos Hutang</h3>
                     <table class="w-full text-left text-sm">
@@ -450,9 +433,7 @@
                                 <th class="p-3 text-center">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="report-hutang-body" class="divide-y divide-slate-100">
-                            <!-- Populated via JS -->
-                        </tbody>
+                        <tbody id="report-hutang-body" class="divide-y divide-slate-100"></tbody>
                         <tfoot class="bg-slate-50 font-bold">
                             <tr>
                                 <td class="p-3">TOTAL REKAPITULASI HUTANG</td>
@@ -467,74 +448,19 @@
             </div>
         </section>
 
-        <!-- ================= PENGATURAN / BACKUP TAB ================= -->
-        <section id="tab-pengaturan" class="tab-content hidden space-y-6">
-            <div>
-                <h2 class="text-2xl font-bold text-slate-800">Pengaturan & Cadangan Data Local</h2>
-                <p class="text-slate-500 text-sm">Data Anda tersimpan di penyimpanan lokal komputer Anda (`localStorage`).</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Export Backup Card -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
-                    <div class="flex items-center gap-3 text-emerald-600">
-                        <i class="fa-solid fa-download text-2xl"></i>
-                        <h3 class="font-bold text-slate-800 text-lg">Export Backup JSON</h3>
-                    </div>
-                    <p class="text-xs text-slate-500 leading-relaxed">
-                        Unduh salinan cadangan lengkap semua data transaksi dan hutang dalam format file JSON. Disarankan dilakukan secara berkala.
-                    </p>
-                    <button onclick="exportJSONBackup()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow-md">
-                        <i class="fa-solid fa-file-arrow-down mr-1"></i> Unduh File Backup (.json)
-                    </button>
-                </div>
-
-                <!-- Import Backup Card -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
-                    <div class="flex items-center gap-3 text-blue-600">
-                        <i class="fa-solid fa-upload text-2xl"></i>
-                        <h3 class="font-bold text-slate-800 text-lg">Pulihkan / Restore Backup</h3>
-                    </div>
-                    <p class="text-xs text-slate-500 leading-relaxed">
-                        Upload kembali file cadangan JSON yang telah Anda unduh sebelumnya untuk memulihkan data pembukuan.
-                    </p>
-                    <input type="file" id="json-backup-input" accept=".json" class="hidden" onchange="importJSONBackup(event)">
-                    <button onclick="document.getElementById('json-backup-input').click()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow-md">
-                        <i class="fa-solid fa-file-arrow-up mr-1"></i> Pilih File Restore (.json)
-                    </button>
-                </div>
-
-                <!-- Danger Zone Card -->
-                <div class="bg-white p-6 rounded-2xl border border-rose-200 shadow-sm space-y-4 md:col-span-2">
-                    <div class="flex items-center gap-3 text-rose-600">
-                        <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
-                        <h3 class="font-bold text-slate-800 text-lg">Zona Bahaya (Reset Data)</h3>
-                    </div>
-                    <p class="text-xs text-slate-500">
-                        Menghapus seluruh transaksi dan hutang dari komputer ini. Tindakan ini tidak dapat dibatalkan kecuali Anda memiliki file backup JSON.
-                    </p>
-                    <button onclick="confirmResetAllData()" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all shadow-md">
-                        <i class="fa-solid fa-trash-can mr-1"></i> Hapus Seluruh Data Local
-                    </button>
-                </div>
-            </div>
-        </section>
-
     </main>
 
     <!-- ================= MODALS SECTION ================= -->
 
     <!-- Modal 1: Tambah/Edit Transaksi -->
     <div id="modal-transaksi" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="modal-transaksi-title" class="font-bold text-lg text-slate-800">Tambah Transaksi Baru</h3>
                 <button onclick="closeModal('modal-transaksi')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             
             <form id="form-transaksi" onsubmit="handleSaveTransaction(event)" class="space-y-4">
-                <input type="hidden" id="trans-id">
-
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Jenis Transaksi</label>
                     <div class="grid grid-cols-2 gap-2">
@@ -560,9 +486,7 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Kategori Pos</label>
-                    <select id="trans-category" required class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
-                        <!-- Populated dynamically based on type -->
-                    </select>
+                    <select id="trans-category" required class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"></select>
                 </div>
 
                 <div>
@@ -583,7 +507,7 @@
         </div>
     </div>
 
-    <!-- Modal 2: Tambah/Edit Hutang -->
+    <!-- Modal 2: Tambah Hutang -->
     <div id="modal-hutang" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
             <div class="flex justify-between items-center mb-4">
@@ -594,24 +518,20 @@
             <form id="form-hutang" onsubmit="handleSaveDebt(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Hutang / Kredit / Pinjaman</label>
-                    <input type="text" id="debt-title" required placeholder="Contoh: Kredit Motor, KPR, Utang Toko" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <input type="text" id="debt-title" required placeholder="Contoh: Kredit Motor, KPR" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500">
                 </div>
-
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Total Plafon / Pokok Hutang (Rp)</label>
                     <input type="number" id="debt-amount" min="1" required placeholder="10000000" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500">
                 </div>
-
                 <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">Tanggal Mulai / Jatuh Tempo</label>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Tanggal Jatuh Tempo</label>
                     <input type="date" id="debt-date" required class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500">
                 </div>
-
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Keterangan Tambahan</label>
-                    <input type="text" id="debt-notes" placeholder="Catatan cicilan, nomor kontrak, dll..." class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <input type="text" id="debt-notes" placeholder="Catatan cicilan..." class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500">
                 </div>
-
                 <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
                     <button type="button" onclick="closeModal('modal-hutang')" class="px-4 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 rounded-xl">Batal</button>
                     <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-md">Simpan Pos Hutang</button>
@@ -630,33 +550,23 @@
             
             <form id="form-bayar-hutang" onsubmit="handlePayDebt(event)" class="space-y-4">
                 <input type="hidden" id="pay-debt-id">
-                
                 <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
                     <p class="text-xs text-slate-500">Nama Hutang:</p>
                     <p id="pay-debt-title" class="font-bold text-slate-800 text-sm"></p>
                     <p class="text-xs text-slate-500 mt-1">Sisa Hutang: <span id="pay-debt-remaining" class="font-semibold text-amber-600">Rp 0</span></p>
                 </div>
-
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Tanggal Pembayaran</label>
                     <input type="date" id="pay-date" required class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
-
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Jumlah Bayar / Cicilan (Rp)</label>
-                    <input type="number" id="pay-amount" min="1" required placeholder="Contoh: 500000" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <input type="number" id="pay-amount" min="1" required placeholder="500000" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
-
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1">Keterangan Pembayaran</label>
-                    <input type="text" id="pay-notes" placeholder="Cicilan ke-1, angsuran bulanan..." class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <input type="text" id="pay-notes" placeholder="Cicilan ke-1..." class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
-
-                <div class="p-3 bg-emerald-50 rounded-xl text-xs text-emerald-800 flex items-start gap-2">
-                    <i class="fa-solid fa-circle-info text-emerald-600 mt-0.5"></i>
-                    <span>Pembayaran ini otomatis dicatat sebagai Pengeluaran dalam pos <strong>"Hutang / kredit"</strong>.</span>
-                </div>
-
                 <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
                     <button type="button" onclick="closeModal('modal-bayar-hutang')" class="px-4 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 rounded-xl">Batal</button>
                     <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md">Proses Pembayaran</button>
@@ -665,7 +575,7 @@
         </div>
     </div>
 
-    <!-- Modal 4: Notification Toast / Custom Alert -->
+    <!-- Modal 4: Notification Toast -->
     <div id="modal-toast" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none">
         <div id="toast-body" class="bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-medium">
             <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
@@ -673,39 +583,24 @@
         </div>
     </div>
 
+    <!-- ================= FIREBASE & APP LOGIC ================= -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <!-- ================= JAVASCRIPT LOGIC ================= -->
-    <script>
-        /**
-         * DEFAULT CONSTANTS & CATEGORIES
-         * Preserving exact requirements requested by user
-         */
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pembukuan-app-default';
+
         const CATEGORIES = {
-            pemasukan: [
-                "Gaji pokok",
-                "Sambal Nampol",
-                "Pemasukan Desain dan Web",
-                "Pemasukan Gardener",
-                "Donasi / Persembahan kasih",
-                "Lain lain"
-            ],
-            pengeluaran: [
-                "Belanja Harian",
-                "Belanja bulanan",
-                "Jajan",
-                "Persembahan",
-                "Tagihan listrik",
-                "Bensin",
-                "Internet",
-                "Hutang / kredit",
-                "Iuran",
-                "Sekolah",
-                "Lain – lain"
-            ]
+            pemasukan: ["Gaji pokok", "Sambal Nampol", "Pemasukan Desain dan Web", "Pemasukan Gardener", "Donasi / Persembahan kasih", "Lain lain"],
+            pengeluaran: ["Belanja Harian", "Belanja bulanan", "Jajan", "Persembahan", "Tagihan listrik", "Bensin", "Internet", "Hutang / kredit", "Iuran", "Sekolah", "Lain – lain"]
         };
 
-        // Application State
-        let appState = {
+        window.appState = {
             transactions: [],
             debts: []
         };
@@ -713,52 +608,62 @@
         let parsedImportData = [];
         let cashflowChart = null;
         let expenseChart = null;
+        let currentUser = null;
 
         window.onload = function() {
-            loadFromLocalStorage();
             initDateInputs();
             populateCategoryDropdowns();
-            renderAllViews();
-            
-            // Set up File Import Listener
+            initFirebaseAndAuth();
             document.getElementById('import-file-input').addEventListener('change', handleExcelImport);
         };
 
-        function saveToLocalStorage() {
-            localStorage.setItem('pembukuan_local_data', JSON.stringify(appState));
+        async function initFirebaseAndAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth error:", err);
+            }
+
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user;
+                if (user) {
+                    document.getElementById('auth-status').innerText = `Terhubung (${user.uid.substring(0, 6)}...)`;
+                    setupRealtimeListeners();
+                } else {
+                    document.getElementById('auth-status').innerText = 'Belum terautentikasi';
+                }
+            });
         }
 
-        function loadFromLocalStorage() {
-            const saved = localStorage.getItem('pembukuan_local_data');
-            if (saved) {
-                try {
-                    appState = JSON.parse(saved);
-                } catch(e) {
-                    console.error('Error loading stored data:', e);
-                }
-            } else {
-                // Initial dummy sample data if empty
-                appState = {
-                    transactions: [
-                        { id: '1', date: getTodayFormatted(), type: 'pemasukan', category: 'Gaji pokok', amount: 5000000, notes: 'Gaji Bulanan' },
-                        { id: '2', date: getTodayFormatted(), type: 'pemasukan', category: 'Sambal Nampol', amount: 850000, notes: 'Penjualan Sambal' },
-                        { id: '3', date: getTodayFormatted(), type: 'pengeluaran', category: 'Belanja Harian', amount: 150000, notes: 'Sayur & Lauk' }
-                    ],
-                    debts: [
-                        { 
-                            id: 'debt_1', 
-                            title: 'Kredit Sepeda Motor', 
-                            totalAmount: 18000000, 
-                            dueDate: '2026-12-31', 
-                            notes: 'Angsuran 15x lagi',
-                            payments: [
-                                { id: 'p1', date: getTodayFormatted(), amount: 1200000, notes: 'Cicilan awal' }
-                            ]
-                        }
-                    ]
-                };
-                saveToLocalStorage();
-            }
+        function setupRealtimeListeners() {
+            if (!currentUser) return;
+
+            // Rule 1 & Rule 2: Public Data Collection for multi-device cloud storage
+            const transColRef = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
+            onSnapshot(transColRef, (snapshot) => {
+                window.appState.transactions = [];
+                snapshot.forEach(docSnap => {
+                    window.appState.transactions.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                renderAllViews();
+            }, (error) => {
+                console.error("Error fetching transactions:", error);
+            });
+
+            const debtsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'debts');
+            onSnapshot(debtsColRef, (snapshot) => {
+                window.appState.debts = [];
+                snapshot.forEach(docSnap => {
+                    window.appState.debts.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                renderAllViews();
+            }, (error) => {
+                console.error("Error fetching debts:", error);
+            });
         }
 
         function getTodayFormatted() {
@@ -775,10 +680,8 @@
         }
 
         function populateCategoryDropdowns() {
-            // Filter dropdown in Transactions tab
             const filterCat = document.getElementById('filter-category');
             filterCat.innerHTML = '<option value="all">Semua Kategori</option>';
-            
             const allCats = [...CATEGORIES.pemasukan, ...CATEGORIES.pengeluaran];
             allCats.forEach(cat => {
                 const opt = document.createElement('option');
@@ -786,24 +689,22 @@
                 opt.textContent = cat;
                 filterCat.appendChild(opt);
             });
-
             updateModalCategoryOptions();
         }
 
-        function updateModalCategoryOptions() {
+        window.updateModalCategoryOptions = function() {
             const type = document.querySelector('input[name="trans-type"]:checked').value;
             const selectCat = document.getElementById('trans-category');
             selectCat.innerHTML = '';
-
             CATEGORIES[type].forEach(cat => {
                 const opt = document.createElement('option');
                 opt.value = cat;
                 opt.textContent = cat;
                 selectCat.appendChild(opt);
             });
-        }
+        };
 
-        function switchTab(tabId) {
+        window.switchTab = function(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-emerald-600', 'text-white', 'shadow-md');
@@ -821,15 +722,10 @@
             if (tabId === 'transaksi') renderTransactionsTable();
             if (tabId === 'hutang') renderDebts();
             if (tabId === 'laporan') generateReport();
-        }
+        };
 
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
+        window.openModal = function(id) { document.getElementById(id).classList.remove('hidden'); };
+        window.closeModal = function(id) { document.getElementById(id).classList.add('hidden'); };
 
         function showToast(message, type = 'success') {
             const toast = document.getElementById('modal-toast');
@@ -863,13 +759,13 @@
             let totalPem = 0;
             let totalPeng = 0;
 
-            appState.transactions.forEach(t => {
+            window.appState.transactions.forEach(t => {
                 if (t.type === 'pemasukan') totalPem += Number(t.amount);
                 if (t.type === 'pengeluaran') totalPeng += Number(t.amount);
             });
 
             let totalRemainingDebt = 0;
-            appState.debts.forEach(d => {
+            window.appState.debts.forEach(d => {
                 const paid = d.payments ? d.payments.reduce((sum, p) => sum + Number(p.amount), 0) : 0;
                 totalRemainingDebt += Math.max(0, Number(d.totalAmount) - paid);
             });
@@ -879,14 +775,13 @@
             document.getElementById('dash-saldo-bersih').innerText = formatRupiah(totalPem - totalPeng);
             document.getElementById('dash-total-hutang').innerText = formatRupiah(totalRemainingDebt);
 
-            // Recent 5 transactions table
             const recentList = document.getElementById('dash-recent-list');
             recentList.innerHTML = '';
-            
-            const sorted = [...appState.transactions].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
-            
+
+            const sorted = [...window.appState.transactions].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+
             if (sorted.length === 0) {
-                recentList.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Belum ada transaksi recorded.</td></tr>`;
+                recentList.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Belum ada transaksi di cloud.</td></tr>`;
             } else {
                 sorted.forEach(t => {
                     const isPem = t.type === 'pemasukan';
@@ -906,7 +801,6 @@
         }
 
         function renderCharts(totalPem, totalPeng) {
-            // Cash Flow Bar Chart
             const ctxCash = document.getElementById('chart-cashflow').getContext('2d');
             if (cashflowChart) cashflowChart.destroy();
             
@@ -928,12 +822,11 @@
                 }
             });
 
-            // Expense Category Doughnut Chart
             const ctxExp = document.getElementById('chart-expenses').getContext('2d');
             if (expenseChart) expenseChart.destroy();
 
             const expCategories = {};
-            appState.transactions.filter(t => t.type === 'pengeluaran').forEach(t => {
+            window.appState.transactions.filter(t => t.type === 'pengeluaran').forEach(t => {
                 expCategories[t.category] = (expCategories[t.category] || 0) + Number(t.amount);
             });
 
@@ -957,40 +850,40 @@
             });
         }
 
-        function handleSaveTransaction(e) {
+        window.handleSaveTransaction = async function(e) {
             e.preventDefault();
+            if (!currentUser) return;
+
             const type = document.querySelector('input[name="trans-type"]:checked').value;
             const date = document.getElementById('trans-date').value;
             const category = document.getElementById('trans-category').value;
             const amount = Number(document.getElementById('trans-amount').value);
             const notes = document.getElementById('trans-notes').value;
 
-            const newTrans = {
-                id: 't_' + Date.now(),
-                date,
-                type,
-                category,
-                amount,
-                notes
-            };
+            const newTrans = { date, type, category, amount, notes };
 
-            appState.transactions.push(newTrans);
-            saveToLocalStorage();
-            closeModal('modal-transaksi');
-            document.getElementById('form-transaksi').reset();
-            initDateInputs();
-            renderAllViews();
-            showToast('Transaksi berhasil disimpan!');
-        }
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), newTrans);
+                closeModal('modal-transaksi');
+                document.getElementById('form-transaksi').reset();
+                initDateInputs();
+                showToast('Transaksi berhasil disimpan ke cloud!');
+            } catch (err) {
+                showToast('Gagal menyimpan transaksi: ' + err.message, 'error');
+            }
+        };
 
-        function deleteTransaction(id) {
-            appState.transactions = appState.transactions.filter(t => t.id !== id);
-            saveToLocalStorage();
-            renderAllViews();
-            showToast('Transaksi telah dihapus.', 'error');
-        }
+        window.deleteTransaction = async function(id) {
+            if (!currentUser) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'transactions', id));
+                showToast('Transaksi telah dihapus dari cloud.', 'error');
+            } catch (err) {
+                showToast('Gagal menghapus transaksi', 'error');
+            }
+        };
 
-        function renderTransactionsTable() {
+        window.renderTransactionsTable = function() {
             const search = document.getElementById('filter-search').value.toLowerCase();
             const type = document.getElementById('filter-type').value;
             const cat = document.getElementById('filter-category').value;
@@ -998,7 +891,7 @@
             const tbody = document.getElementById('transaksi-table-body');
             tbody.innerHTML = '';
 
-            let filtered = appState.transactions.filter(t => {
+            let filtered = window.appState.transactions.filter(t => {
                 const matchSearch = (t.notes || '').toLowerCase().includes(search) || t.category.toLowerCase().includes(search);
                 const matchType = type === 'all' || t.type === type;
                 const matchCat = cat === 'all' || t.category === cat;
@@ -1006,7 +899,6 @@
             });
 
             filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
-
             document.getElementById('transaksi-count').innerText = filtered.length;
 
             if (filtered.length === 0) {
@@ -1029,34 +921,31 @@
                     </tr>
                 `;
             });
-        }
+        };
 
-        function handleSaveDebt(e) {
+        window.handleSaveDebt = async function(e) {
             e.preventDefault();
+            if (!currentUser) return;
+
             const title = document.getElementById('debt-title').value;
             const amount = Number(document.getElementById('debt-amount').value);
             const date = document.getElementById('debt-date').value;
             const notes = document.getElementById('debt-notes').value;
 
-            const newDebt = {
-                id: 'debt_' + Date.now(),
-                title,
-                totalAmount: amount,
-                dueDate: date,
-                notes,
-                payments: []
-            };
+            const newDebt = { title, totalAmount: amount, dueDate: date, notes, payments: [] };
 
-            appState.debts.push(newDebt);
-            saveToLocalStorage();
-            closeModal('modal-hutang');
-            document.getElementById('form-hutang').reset();
-            renderAllViews();
-            showToast('Pos Hutang baru berhasil ditambahkan!');
-        }
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'debts'), newDebt);
+                closeModal('modal-hutang');
+                document.getElementById('form-hutang').reset();
+                showToast('Pos Hutang baru berhasil disimpan ke cloud!');
+            } catch (err) {
+                showToast('Gagal menyimpan pos hutang', 'error');
+            }
+        };
 
-        function openPayDebtModal(debtId) {
-            const debt = appState.debts.find(d => d.id === debtId);
+        window.openPayDebtModal = function(debtId) {
+            const debt = window.appState.debts.find(d => d.id === debtId);
             if (!debt) return;
 
             const paidTotal = debt.payments ? debt.payments.reduce((sum, p) => sum + Number(p.amount), 0) : 0;
@@ -1068,55 +957,60 @@
             document.getElementById('pay-amount').max = remaining;
 
             openModal('modal-bayar-hutang');
-        }
+        };
 
-        function handlePayDebt(e) {
+        window.handlePayDebt = async function(e) {
             e.preventDefault();
+            if (!currentUser) return;
+
             const debtId = document.getElementById('pay-debt-id').value;
             const date = document.getElementById('pay-date').value;
             const amount = Number(document.getElementById('pay-amount').value);
             const notes = document.getElementById('pay-notes').value;
 
-            const debt = appState.debts.find(d => d.id === debtId);
+            const debt = window.appState.debts.find(d => d.id === debtId);
             if (!debt) return;
 
-            // 1. Record payment in debt details
-            if (!debt.payments) debt.payments = [];
-            debt.payments.push({ id: 'p_' + Date.now(), date, amount, notes });
+            const updatedPayments = debt.payments ? [...debt.payments] : [];
+            updatedPayments.push({ id: 'p_' + Date.now(), date, amount, notes });
 
-            // 2. Interrelated logic: Auto create Expense transaction in "Hutang / kredit" pos
-            const autoExpense = {
-                id: 't_debt_pay_' + Date.now(),
-                date,
-                type: 'pengeluaran',
-                category: 'Hutang / kredit',
-                amount,
-                notes: `Pembayaran ${debt.title}: ${notes || 'Angsuran'}`
-            };
-            appState.transactions.push(autoExpense);
+            try {
+                // Update debt payments in cloud
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'debts', debtId), { payments: updatedPayments });
 
-            saveToLocalStorage();
-            closeModal('modal-bayar-hutang');
-            document.getElementById('form-bayar-hutang').reset();
-            renderAllViews();
-            showToast('Pembayaran hutang berhasil dicatat!');
-        }
+                // Auto-create expense transaction
+                const autoExpense = {
+                    date,
+                    type: 'pengeluaran',
+                    category: 'Hutang / kredit',
+                    amount,
+                    notes: `Pembayaran ${debt.title}: ${notes || 'Angsuran'}`
+                };
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), autoExpense);
 
-        function renderDebts() {
+                closeModal('modal-bayar-hutang');
+                document.getElementById('form-bayar-hutang').reset();
+                showToast('Pembayaran hutang berhasil dicatat di cloud!');
+            } catch (err) {
+                showToast('Gagal memproses pembayaran', 'error');
+            }
+        };
+
+        window.renderDebts = function() {
             const container = document.getElementById('debt-cards-container');
             container.innerHTML = '';
 
-            if (appState.debts.length === 0) {
+            if (window.appState.debts.length === 0) {
                 container.innerHTML = `
                     <div class="col-span-full bg-white p-8 rounded-2xl text-center text-slate-400 border border-slate-200">
                         <i class="fa-solid fa-hand-holding-dollar text-4xl mb-2 text-slate-300"></i>
-                        <p>Belum ada pos hutang atau kredit yang didaftarkan.</p>
+                        <p>Belum ada pos hutang atau kredit di cloud.</p>
                     </div>
                 `;
                 return;
             }
 
-            appState.debts.forEach(d => {
+            window.appState.debts.forEach(d => {
                 const paidTotal = d.payments ? d.payments.reduce((sum, p) => sum + Number(p.amount), 0) : 0;
                 const remaining = Math.max(0, Number(d.totalAmount) - paidTotal);
                 const progress = Math.min(100, Math.round((paidTotal / Number(d.totalAmount)) * 100));
@@ -1144,7 +1038,6 @@
                             </div>
                             <p class="text-xs text-slate-400 mb-4">${d.notes || 'Tanpa keterangan'} (Jatuh tempo: ${d.dueDate})</p>
 
-                            <!-- Progress bar -->
                             <div class="space-y-1 mb-4">
                                 <div class="flex justify-between text-xs font-semibold">
                                     <span class="text-slate-500">Terbayar: ${formatRupiah(paidTotal)}</span>
@@ -1156,7 +1049,6 @@
                                 <div class="text-right text-xs text-slate-400">Total Plafon: ${formatRupiah(d.totalAmount)}</div>
                             </div>
 
-                            <!-- History accordion/box -->
                             <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1">
                                 <p class="text-xs font-bold text-slate-500 mb-2">Riwayat Pembayaran:</p>
                                 <div class="max-h-28 overflow-y-auto custom-scrollbar">
@@ -1178,14 +1070,17 @@
                     </div>
                 `;
             });
-        }
+        };
 
-        function deleteDebt(debtId) {
-            appState.debts = appState.debts.filter(d => d.id !== debtId);
-            saveToLocalStorage();
-            renderAllViews();
-            showToast('Pos Hutang dihapus.', 'error');
-        }
+        window.deleteDebt = async function(debtId) {
+            if (!currentUser) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'debts', debtId));
+                showToast('Pos Hutang dihapus dari cloud.', 'error');
+            } catch (err) {
+                showToast('Gagal menghapus pos hutang', 'error');
+            }
+        };
 
         function handleExcelImport(e) {
             const file = e.target.files[0];
@@ -1207,19 +1102,16 @@
                     showToast('Gagal membaca file Excel/CSV: ' + err.message, 'error');
                 }
             };
-
             reader.readAsArrayBuffer(file);
         }
 
         function parseImportedMatrix(rows, sourceType) {
             parsedImportData = [];
-
             if (rows.length < 2) {
                 showToast('File tidak berisi data yang cukup.', 'error');
                 return;
             }
 
-            // Loop through rows skipping headers
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i];
                 if (!row || row.length === 0) continue;
@@ -1231,7 +1123,6 @@
                 let category = 'Lain – lain';
 
                 if (sourceType === 'bca') {
-                    // BCA e-Statement typical columns: [Tanggal, Keterangan, CB, Nominal]
                     date = row[0] ? String(row[0]) : getTodayFormatted();
                     notes = row[1] ? String(row[1]) : 'Mutasi BCA';
                     const typeIndicator = row[2] ? String(row[2]).toUpperCase() : '';
@@ -1239,7 +1130,6 @@
                     type = (typeIndicator === 'CR' || typeIndicator === 'CREDIT') ? 'pemasukan' : 'pengeluaran';
                     category = type === 'pemasukan' ? 'Lain lain' : 'Lain – lain';
                 } else if (sourceType === 'bri') {
-                    // BRI e-Statement typical columns: [Tanggal, Uraian, Debet, Kredit]
                     date = row[0] ? String(row[0]) : getTodayFormatted();
                     notes = row[1] ? String(row[1]) : 'Mutasi BRI';
                     const debet = row[2] ? parseFloat(row[2]) : 0;
@@ -1255,7 +1145,6 @@
                         category = 'Lain – lain';
                     }
                 } else {
-                    // General Excel Format: [Tanggal, Jenis (pemasukan/pengeluaran), Kategori, Keterangan, Jumlah]
                     date = row[0] ? String(row[0]) : getTodayFormatted();
                     type = row[1] ? String(row[1]).toLowerCase() : 'pengeluaran';
                     category = row[2] ? String(row[2]) : (type === 'pemasukan' ? 'Lain lain' : 'Lain – lain');
@@ -1265,7 +1154,6 @@
 
                 if (amount > 0) {
                     parsedImportData.push({
-                        id: 'import_' + Date.now() + '_' + i,
                         date,
                         type: type.includes('pem') || type.includes('in') ? 'pemasukan' : 'pengeluaran',
                         category,
@@ -1274,7 +1162,6 @@
                     });
                 }
             }
-
             renderImportPreview();
         }
 
@@ -1299,7 +1186,7 @@
                         <td class="p-3">${item.date}</td>
                         <td class="p-3"><span class="px-2 py-0.5 text-xs font-semibold rounded-full ${isPem ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${item.type}</span></td>
                         <td class="p-3">
-                            <select onchange="parsedImportData[${index}].category = this.value" class="px-2 py-1 text-xs border rounded bg-white">
+                            <select onchange="window.updateImportCategory(${index}, this.value)" class="px-2 py-1 text-xs border rounded bg-white">
                                 ${catOptions}
                             </select>
                         </td>
@@ -1310,40 +1197,49 @@
             });
         }
 
-        function processAndSaveImport() {
-            if (parsedImportData.length === 0) return;
+        window.updateImportCategory = function(index, value) {
+            if (parsedImportData[index]) {
+                parsedImportData[index].category = value;
+            }
+        };
 
-            appState.transactions.push(...parsedImportData);
-            saveToLocalStorage();
-            
-            showToast(`${parsedImportData.length} data transaksi berhasil diimport!`);
-            parsedImportData = [];
-            renderImportPreview();
-            document.getElementById('import-file-input').value = '';
-            renderAllViews();
-            switchTab('transaksi');
-        }
+        window.processAndSaveImport = async function() {
+            if (parsedImportData.length === 0 || !currentUser) return;
 
-        function generateReport() {
+            try {
+                for (const item of parsedImportData) {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'transactions'), item);
+                }
+
+                showToast(`${parsedImportData.length} data transaksi berhasil diimport ke cloud!`);
+                parsedImportData = [];
+                renderImportPreview();
+                document.getElementById('import-file-input').value = '';
+                switchTab('transaksi');
+            } catch (err) {
+                showToast('Gagal menyimpan data import ke cloud', 'error');
+            }
+        };
+
+        window.generateReport = function() {
             const startVal = document.getElementById('report-start-date').value;
             const endVal = document.getElementById('report-end-date').value;
 
             if (startVal && endVal) {
                 document.getElementById('report-date-label').innerText = `Periode: ${startVal} s/d ${endVal}`;
             } else {
-                document.getElementById('report-date-label').innerText = `Periode: Semua Riwayat Data`;
+                document.getElementById('report-date-label').innerText = `Periode: Semua Riwayat Data Cloud`;
             }
 
-            let filteredTrans = appState.transactions.filter(t => {
+            let filteredTrans = window.appState.transactions.filter(t => {
                 if (startVal && t.date < startVal) return false;
                 if (endVal && t.date > endVal) return false;
                 return true;
             });
 
-            // 1. Report Pemasukan
+            // 1. Pemasukan Report
             const pemMap = {};
             CATEGORIES.pemasukan.forEach(cat => pemMap[cat] = { count: 0, total: 0 });
-            
             let grandTotalPem = 0;
             let grandCountPem = 0;
 
@@ -1357,7 +1253,6 @@
 
             const pemBody = document.getElementById('report-pemasukan-body');
             pemBody.innerHTML = '';
-
             Object.keys(pemMap).forEach(cat => {
                 const item = pemMap[cat];
                 const pct = grandTotalPem > 0 ? ((item.total / grandTotalPem) * 100).toFixed(1) : 0;
@@ -1370,14 +1265,12 @@
                     </tr>
                 `;
             });
-
             document.getElementById('report-pem-count').innerText = grandCountPem;
             document.getElementById('report-pem-total').innerText = formatRupiah(grandTotalPem);
 
-            // 2. Report Pengeluaran
+            // 2. Pengeluaran Report
             const pengMap = {};
             CATEGORIES.pengeluaran.forEach(cat => pengMap[cat] = { count: 0, total: 0 });
-
             let grandTotalPeng = 0;
             let grandCountPeng = 0;
 
@@ -1391,7 +1284,6 @@
 
             const pengBody = document.getElementById('report-pengeluaran-body');
             pengBody.innerHTML = '';
-
             Object.keys(pengMap).forEach(cat => {
                 const item = pengMap[cat];
                 const pct = grandTotalPeng > 0 ? ((item.total / grandTotalPeng) * 100).toFixed(1) : 0;
@@ -1404,25 +1296,22 @@
                     </tr>
                 `;
             });
-
             document.getElementById('report-peng-count').innerText = grandCountPeng;
             document.getElementById('report-peng-total').innerText = formatRupiah(grandTotalPeng);
 
-            // 3. Report Hutang
+            // 3. Hutang Report
             const hutBody = document.getElementById('report-hutang-body');
             hutBody.innerHTML = '';
-
             let grandTotalHut = 0;
             let grandPaidHut = 0;
             let grandRemHut = 0;
 
-            if (appState.debts.length === 0) {
+            if (window.appState.debts.length === 0) {
                 hutBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Tidak ada data pos hutang.</td></tr>`;
             } else {
-                appState.debts.forEach(d => {
+                window.appState.debts.forEach(d => {
                     const paid = d.payments ? d.payments.reduce((sum, p) => sum + Number(p.amount), 0) : 0;
                     const rem = Math.max(0, Number(d.totalAmount) - paid);
-
                     grandTotalHut += Number(d.totalAmount);
                     grandPaidHut += paid;
                     grandRemHut += rem;
@@ -1446,73 +1335,25 @@
             document.getElementById('report-hut-total').innerText = formatRupiah(grandTotalHut);
             document.getElementById('report-hut-paid').innerText = formatRupiah(grandPaidHut);
             document.getElementById('report-hut-rem').innerText = formatRupiah(grandRemHut);
-        }
+        };
 
-        function resetReportFilter() {
+        window.resetReportFilter = function() {
             document.getElementById('report-start-date').value = '';
             document.getElementById('report-end-date').value = '';
             generateReport();
-        }
+        };
 
-        function exportToExcel() {
-            const wsData = [
-                ["TANGGAL", "JENIS", "KATEGORI POS", "KETERANGAN", "JUMLAH (RP)"]
-            ];
-
-            appState.transactions.forEach(t => {
+        window.exportToExcel = function() {
+            const wsData = [["TANGGAL", "JENIS", "KATEGORI POS", "KETERANGAN", "JUMLAH (RP)"]];
+            window.appState.transactions.forEach(t => {
                 wsData.push([t.date, t.type.toUpperCase(), t.category, t.notes || '', t.amount]);
             });
-
             const ws = XLSX.utils.aoa_to_sheet(wsData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Laporan Transaksi");
-
-            XLSX.writeFile(wb, `Laporan_Keuangan_${getTodayFormatted()}.xlsx`);
+            XLSX.writeFile(wb, `Laporan_Keuangan_Cloud_${getTodayFormatted()}.xlsx`);
             showToast('Laporan Excel berhasil diunduh!');
-        }
-
-        function exportJSONBackup() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `Backup_Pembukuan_${getTodayFormatted()}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-            showToast('Backup JSON berhasil diunduh!');
-        }
-
-        function importJSONBackup(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const imported = JSON.parse(e.target.result);
-                    if (imported && imported.transactions && imported.debts) {
-                        appState = imported;
-                        saveToLocalStorage();
-                        renderAllViews();
-                        showToast('Restore data berhasil!');
-                    } else {
-                        showToast('Format file JSON tidak valid.', 'error');
-                    }
-                } catch (err) {
-                    showToast('Gagal membaca file backup JSON.', 'error');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function confirmResetAllData() {
-            if (window.confirm("Apakah Anda yakin ingin menghapus seluruh data transaksi dan hutang dari browser ini?")) {
-                appState = { transactions: [], debts: [] };
-                saveToLocalStorage();
-                renderAllViews();
-                showToast('Seluruh data berhasil dihapus.', 'error');
-            }
-        }
+        };
     </script>
 </body>
 </html>
