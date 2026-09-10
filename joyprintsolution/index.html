@@ -96,27 +96,35 @@
       background-color: #f1f5f9;
       color: #0f172a;
     }
-    html:not(.dark) h1, 
-    html:not(.dark) h2, 
-    html:not(.dark) h3, 
-    html:not(.dark) h4, 
-    html:not(.dark) h5, 
+
+    html:not(.dark) h1,
+    html:not(.dark) h2,
+    html:not(.dark) h3,
+    html:not(.dark) h4,
+    html:not(.dark) h5,
     html:not(.dark) h6 {
       color: #0f172a;
     }
+
     html:not(.dark) th {
       color: #1e293b !important;
       background-color: #f8fafc;
     }
+
     html:not(.dark) label {
       color: #334155 !important;
     }
+
     html:not(.dark) .text-slate-400 {
-      color: #475569 !important; /* Tingkatkan kontras dari abu pudar menjadi abu gelap */
+      color: #475569 !important;
+      /* Tingkatkan kontras dari abu pudar menjadi abu gelap */
     }
+
     html:not(.dark) .text-slate-500 {
-      color: #334155 !important; /* Lebih tegas dan mudah dibaca */
+      color: #334155 !important;
+      /* Lebih tegas dan mudah dibaca */
     }
+
     html:not(.dark) input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="color"]):not([type="file"]),
     html:not(.dark) select,
     html:not(.dark) textarea {
@@ -124,6 +132,7 @@
       color: #0f172a !important;
       border-color: #cbd5e1 !important;
     }
+
     html:not(.dark) input::placeholder,
     html:not(.dark) textarea::placeholder {
       color: #94a3b8 !important;
@@ -134,35 +143,43 @@
       background-color: #0f172a;
       color: #f8fafc;
     }
-    html.dark h1, 
-    html.dark h2, 
-    html.dark h3, 
-    html.dark h4, 
-    html.dark h5, 
+
+    html.dark h1,
+    html.dark h2,
+    html.dark h3,
+    html.dark h4,
+    html.dark h5,
     html.dark h6 {
       color: #f8fafc;
     }
+
     /* Cegah teks slate bernilai gelap tampil gelap di atas background gelap */
     html.dark .text-slate-900,
     html.dark .text-slate-800,
     html.dark .text-slate-700 {
       color: #f1f5f9;
     }
+
     html.dark .text-slate-600 {
       color: #e2e8f0;
     }
+
     html.dark .text-slate-500 {
       color: #cbd5e1;
     }
+
     html.dark .text-slate-400 {
       color: #94a3b8;
     }
+
     html.dark th {
       color: #f1f5f9 !important;
     }
+
     html.dark label {
       color: #e2e8f0 !important;
     }
+
     html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="color"]):not([type="file"]),
     html.dark select,
     html.dark textarea {
@@ -170,6 +187,7 @@
       color: #f8fafc !important;
       border-color: #475569 !important;
     }
+
     html.dark input::placeholder,
     html.dark textarea::placeholder {
       color: #64748b !important;
@@ -287,7 +305,8 @@
       </header>
 
       <!-- Dynamic Page Container -->
-      <main id="content-area" class="flex-1 p-6 overflow-y-auto bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+      <main id="content-area"
+        class="flex-1 p-6 overflow-y-auto bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100">
         <!-- Content dynamic injection -->
       </main>
     </div>
@@ -669,7 +688,7 @@
       try {
         const saved = localStorage.getItem('joy_print_role_passwords');
         if (saved) return JSON.parse(saved);
-      } catch (e) {}
+      } catch (e) { }
       return { admin: 'admin123', user: '1234' };
     };
 
@@ -917,7 +936,7 @@
       state.role = newRole;
       try {
         localStorage.setItem('joy_print_role', newRole);
-      } catch (e) {}
+      } catch (e) { }
       const roleBadge = document.getElementById('role-badge');
       if (roleBadge) {
         roleBadge.innerText = newRole;
@@ -974,11 +993,10 @@
       }
       const toast = document.createElement('div');
       const isSuccess = type === 'success';
-      toast.className = `pointer-events-auto flex items-center space-x-2.5 px-4 py-3 rounded-xl text-xs font-semibold shadow-xl border backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 ${
-        isSuccess 
-          ? 'bg-slate-900/95 text-white border-emerald-500/50 shadow-emerald-500/10' 
-          : 'bg-slate-900/95 text-white border-rose-500/50 shadow-rose-500/10'
-      }`;
+      toast.className = `pointer-events-auto flex items-center space-x-2.5 px-4 py-3 rounded-xl text-xs font-semibold shadow-xl border backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 ${isSuccess
+        ? 'bg-slate-900/95 text-white border-emerald-500/50 shadow-emerald-500/10'
+        : 'bg-slate-900/95 text-white border-rose-500/50 shadow-rose-500/10'
+        }`;
       toast.innerHTML = `
         <i data-lucide="${isSuccess ? 'check-circle-2' : 'alert-circle'}" class="w-4 h-4 ${isSuccess ? 'text-emerald-400' : 'text-rose-400'} shrink-0"></i>
         <span>${msg}</span>
@@ -2748,14 +2766,14 @@
                 Semua Kategori (${state.stok.length})
               </button>
               ${categories.map(kat => {
-                const count = state.stok.filter(s => s.kategori && s.kategori.toLowerCase() === kat.toLowerCase()).length;
-                const isActive = currentCat.toLowerCase() === kat.toLowerCase();
-                return `
+        const count = state.stok.filter(s => s.kategori && s.kategori.toLowerCase() === kat.toLowerCase()).length;
+        const isActive = currentCat.toLowerCase() === kat.toLowerCase();
+        return `
                   <button onclick="filterStokCategory('${kat.replace(/'/g, "\\'")}')" class="px-3.5 py-1.5 rounded-lg font-bold transition shrink-0 ${isActive ? 'bg-cyan-500 text-white shadow-md shadow-cyan-500/20' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'}">
                     ${kat} (${count})
                   </button>
                 `;
-              }).join('')}
+      }).join('')}
             </div>
             <div class="relative min-w-[220px]">
               <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
@@ -3448,7 +3466,7 @@
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">Pembelian Stock Supplier</h3>
-              <p class="text-xs text-slate-600 dark:text-slate-300">Riwayat pengadaan stok barang & sparepart dari distributor.</p>
+              <p class="text-xs text-slate-600 dark:text-slate-300">Pengadaan stok barang & sparepart terhubung langsung ke Master Stok.</p>
             </div>
             <button onclick="openFormPembelianModal()" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-xl font-bold text-sm shadow-md shadow-cyan-500/20 flex items-center space-x-2 transition">
               <i data-lucide="plus" class="w-4 h-4"></i>
@@ -3464,7 +3482,8 @@
                     <th class="p-4">No. Ref</th>
                     <th class="p-4">Tanggal</th>
                     <th class="p-4">Supplier / Vendor</th>
-                    <th class="p-4">Rincian Barang</th>
+                    <th class="p-4">Barang / Stok Terhubung</th>
+                    <th class="p-4 text-center">Jumlah (Qty)</th>
                     <th class="p-4">Total Biaya</th>
                     <th class="p-4">Status</th>
                     <th class="p-4 text-center">Aksi</th>
@@ -3473,15 +3492,25 @@
                 <tbody class="divide-y divide-slate-200 dark:divide-slate-700 text-sm">
                   ${state.pembelian.length === 0 ? `
                     <tr>
-                      <td colspan="7" class="p-8 text-center text-slate-400 text-xs">Belum ada riwayat pembelian stock supplier.</td>
+                      <td colspan="8" class="p-8 text-center text-slate-400 text-xs">Belum ada riwayat pembelian stock supplier.</td>
                     </tr>
                   ` : ''}
-                  ${state.pembelian.map(p => `
+                  ${state.pembelian.map(p => {
+        const linkedStock = state.stok.find(s => s.id === p.stockId);
+        const qty = p.qty || 1;
+        const satuan = linkedStock ? (linkedStock.satuan || 'Pcs') : 'Pcs';
+        return `
                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
                       <td class="p-4 font-mono font-bold text-cyan-500">${p.id}</td>
                       <td class="p-4 text-xs text-slate-400">${p.tanggal}</td>
                       <td class="p-4 font-bold text-slate-800 dark:text-slate-100">${p.supplier}</td>
-                      <td class="p-4 text-xs text-slate-500 max-w-xs truncate" title="${p.barang}">${p.barang}</td>
+                      <td class="p-4 text-xs">
+                        <div class="font-semibold text-slate-800 dark:text-slate-100">${p.barang}</div>
+                        ${p.stockId ? `<span class="inline-block mt-0.5 px-1.5 py-0.5 text-[10px] font-mono font-bold rounded bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">Stok: ${p.stockId}</span>` : ''}
+                      </td>
+                      <td class="p-4 text-center font-bold text-slate-700 dark:text-slate-200">
+                        +${qty} <span class="text-xs font-normal text-slate-400">${satuan}</span>
+                      </td>
                       <td class="p-4 font-bold text-rose-500">${formatRp(p.total)}</td>
                       <td class="p-4">
                         <span class="px-2.5 py-0.5 rounded text-xs font-bold ${p.status === 'Lunas' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}">
@@ -3497,7 +3526,8 @@
                         </button>
                       </td>
                     </tr>
-                  `).join('')}
+                  `;
+      }).join('')}
                 </tbody>
               </table>
             </div>
@@ -3506,13 +3536,66 @@
       `;
     }
 
+    window.toggleBuyMode = function (mode) {
+      window._buyMode = mode;
+      const secExisting = document.getElementById('buy-sec-existing');
+      const secNew = document.getElementById('buy-sec-new');
+      const btnExist = document.getElementById('buy-tab-exist');
+      const btnNew = document.getElementById('buy-tab-new');
+
+      if (mode === 'existing') {
+        secExisting.classList.remove('hidden');
+        secNew.classList.add('hidden');
+        btnExist.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold transition bg-cyan-500 text-white shadow";
+        btnNew.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold transition bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300";
+      } else {
+        secExisting.classList.add('hidden');
+        secNew.classList.remove('hidden');
+        btnExist.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold transition bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300";
+        btnNew.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold transition bg-cyan-500 text-white shadow";
+      }
+    };
+
+    window.onBuyStockSelectChange = function (stockId) {
+      const selected = state.stok.find(s => s.id === stockId);
+      const barangInput = document.getElementById('buy-barang-existing');
+      const hppInput = document.getElementById('buy-hpp-existing');
+
+      if (selected) {
+        if (barangInput) barangInput.value = selected.nama;
+        if (hppInput) hppInput.value = selected.hpp || 0;
+        window.recalcBuyTotalExisting();
+      }
+    };
+
+    window.recalcBuyTotalExisting = function () {
+      const qty = parseFloat(document.getElementById('buy-qty-existing').value) || 0;
+      const hpp = parseFloat(document.getElementById('buy-hpp-existing').value) || 0;
+      const totalInput = document.getElementById('buy-total');
+      if (totalInput && qty > 0 && hpp > 0) {
+        totalInput.value = qty * hpp;
+      }
+    };
+
+    window.recalcBuyTotalNew = function () {
+      const qty = parseFloat(document.getElementById('buy-qty-new').value) || 0;
+      const hpp = parseFloat(document.getElementById('buy-hpp-new').value) || 0;
+      const totalInput = document.getElementById('buy-total');
+      if (totalInput && qty > 0 && hpp > 0) {
+        totalInput.value = qty * hpp;
+      }
+    };
+
     window.openFormPembelianModal = function () {
+      window._buyMode = 'existing';
+      const categories = getKategoriStokList();
+
       openModal(`
         <form onsubmit="simpanPembelianBaru(event)" class="space-y-4">
           <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2.5">
             <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100 flex items-center space-x-2">
               <i data-lucide="truck" class="w-5 h-5 text-cyan-500"></i>
-              <span>Catat Pembelian Restok Baru</span>
+              <span>Catat Pembelian Stock Baru</span>
             </h3>
           </div>
 
@@ -3527,14 +3610,87 @@
             </div>
           </div>
 
-          <div>
-            <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Rincian Item Yang Dibeli *</label>
-            <input type="text" id="buy-barang" placeholder="Contoh: 10 Botol Tinta 003 & 2 Printhead L3110" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" required />
+          <!-- Opsi Sumber Stok: Restok Exisitng vs Barang Baru -->
+          <div class="space-y-1.5">
+            <label class="text-xs text-slate-500 dark:text-slate-400 block font-semibold">Tipe Pengadaan Stok *</label>
+            <div class="flex space-x-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
+              <button type="button" id="buy-tab-exist" onclick="toggleBuyMode('existing')" class="flex-1 py-2 px-3 rounded-lg text-xs font-bold transition bg-cyan-500 text-white shadow">
+                Restok Master Terdaftar
+              </button>
+              <button type="button" id="buy-tab-new" onclick="toggleBuyMode('new')" class="flex-1 py-2 px-3 rounded-lg text-xs font-bold transition bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300">
+                + Tambah Stok Master Baru
+              </button>
+            </div>
+          </div>
+
+          <!-- Section 1: Restok Existing Stock -->
+          <div id="buy-sec-existing" class="space-y-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700">
+            <div>
+              <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Pilih Barang / Sparepart Master *</label>
+              <select id="buy-stock-id" onchange="onBuyStockSelectChange(this.value)" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-semibold">
+                <option value="">-- Pilih Barang dari Stok Master --</option>
+                ${state.stok.map(s => `<option value="${s.id}">${s.nama} (${s.id}) - Stok: ${s.jumlah} ${s.satuan || ''}</option>`).join('')}
+              </select>
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Deskripsi / Nama Item Nota</label>
+              <input type="text" id="buy-barang-existing" placeholder="Nama item pada nota fisik" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-semibold" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Jumlah Pembelian (Qty) *</label>
+                <input type="number" id="buy-qty-existing" min="1" value="1" oninput="recalcBuyTotalExisting()" class="w-full text-sm p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-bold" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Harga Beli Per Unit (HPP Rp)</label>
+                <input type="number" id="buy-hpp-existing" placeholder="0" oninput="recalcBuyTotalExisting()" class="w-full text-sm p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-medium" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Input New Master Stock -->
+          <div id="buy-sec-new" class="hidden space-y-3 p-3 rounded-xl bg-cyan-500/5 border border-cyan-500/20">
+            <div>
+              <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Nama Barang / Sparepart Baru *</label>
+              <input type="text" id="buy-nama-new" placeholder="Contoh: Cartridge Canon PG-810 Original" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-semibold" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Kategori *</label>
+                <input type="text" id="buy-kat-new" list="stk-kategori-presets-buy" placeholder="Tinta / Sparepart / Barang" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-semibold" />
+                <datalist id="stk-kategori-presets-buy">
+                  ${categories.map(k => `<option value="${k}">`).join('')}
+                </datalist>
+              </div>
+              <div>
+                <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Satuan *</label>
+                <input type="text" id="buy-satuan-new" value="Pcs" placeholder="Pcs / Botol / Rim" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Harga Beli (HPP per unit) (Rp) *</label>
+                <input type="number" id="buy-hpp-new" placeholder="0" oninput="recalcBuyTotalNew()" class="w-full text-sm p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-medium" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Harga Jual User (Rp) *</label>
+                <input type="number" id="buy-harga-new" placeholder="0" class="w-full text-sm p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-bold text-emerald-600 dark:text-emerald-400" />
+              </div>
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Jumlah Pembelian (Qty Stok Masuk) *</label>
+              <input type="number" id="buy-qty-new" min="1" value="5" oninput="recalcBuyTotalNew()" class="w-full text-sm p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-bold" />
+            </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Total Pembayaran (Rp) *</label>
+              <label class="text-xs text-slate-500 dark:text-slate-400 block mb-1 font-semibold">Total Pembayaran Nota (Rp) *</label>
               <input type="number" id="buy-total" placeholder="0" class="w-full text-sm p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-bold text-rose-500" required />
             </div>
             <div>
@@ -3551,7 +3707,7 @@
             <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 transition">Batal</button>
             <button type="submit" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md shadow-cyan-500/25 flex items-center space-x-1.5 transition">
               <i data-lucide="check" class="w-4 h-4"></i>
-              <span>Simpan Nota Pembelian</span>
+              <span>Simpan Pembelian & Update Stok</span>
             </button>
           </div>
         </form>
@@ -3561,16 +3717,80 @@
 
     window.simpanPembelianBaru = async function (e) {
       e.preventDefault();
+      const mode = window._buyMode || 'existing';
+      const tanggal = document.getElementById('buy-tanggal').value || new Date().toISOString().split('T')[0];
+      const supplier = document.getElementById('buy-supplier').value.trim();
+      const total = parseFloat(document.getElementById('buy-total').value) || 0;
+      const status = document.getElementById('buy-status').value;
+
+      let stockId = '';
+      let qty = 1;
+      let barangName = '';
+
+      if (mode === 'existing') {
+        stockId = document.getElementById('buy-stock-id').value;
+        qty = parseInt(document.getElementById('buy-qty-existing').value) || 1;
+        barangName = document.getElementById('buy-barang-existing').value.trim();
+
+        if (stockId) {
+          const targetStock = state.stok.find(s => s.id === stockId);
+          if (targetStock) {
+            if (!barangName) barangName = targetStock.nama;
+            const updatedJumlah = (parseInt(targetStock.jumlah) || 0) + qty;
+            const updatePayload = { jumlah: updatedJumlah };
+
+            const newHpp = parseFloat(document.getElementById('buy-hpp-existing').value);
+            if (newHpp && newHpp > 0) updatePayload.hpp = newHpp;
+
+            await dbUpdate('stok', stockId, updatePayload);
+          }
+        }
+        if (!barangName) {
+          barangName = 'Pembelian Restok (' + qty + ' pcs)';
+        }
+      } else {
+        const nama = document.getElementById('buy-nama-new').value.trim() || 'Barang Baru';
+        let kategori = document.getElementById('buy-kat-new').value.trim() || 'Sparepart';
+        const satuan = document.getElementById('buy-satuan-new').value.trim() || 'Pcs';
+        const hpp = parseFloat(document.getElementById('buy-hpp-new').value) || 0;
+        const harga = parseFloat(document.getElementById('buy-harga-new').value) || 0;
+        qty = parseInt(document.getElementById('buy-qty-new').value) || 1;
+
+        if (!state.kategoriStok) state.kategoriStok = ['Tinta', 'Sparepart', 'Barang'];
+        if (!state.kategoriStok.some(k => k.toLowerCase() === kategori.toLowerCase())) {
+          state.kategoriStok.push(kategori);
+        }
+
+        stockId = `BRG-00${state.stok.length + 1}`;
+        const newStokItem = {
+          id: stockId,
+          nama,
+          kategori,
+          satuan,
+          hpp,
+          harga,
+          jumlah: qty,
+          minStok: 3
+        };
+
+        await dbSave('stok', stockId, newStokItem);
+        barangName = nama;
+      }
+
       const id = `BUY-00${state.pembelian.length + 1}`;
       const newPembelian = {
         id,
-        tanggal: document.getElementById('buy-tanggal').value || new Date().toISOString().split('T')[0],
-        supplier: document.getElementById('buy-supplier').value.trim(),
-        barang: document.getElementById('buy-barang').value.trim(),
-        total: parseFloat(document.getElementById('buy-total').value) || 0,
-        status: document.getElementById('buy-status').value
+        tanggal,
+        supplier,
+        barang: barangName,
+        stockId,
+        qty,
+        total,
+        status
       };
+
       await dbSave('pembelian', id, newPembelian);
+      showNotificationToast(`Pembelian ${id} disimpan & stok "${barangName}" bertambah +${qty}!`);
       closeModal();
     };
 
@@ -3586,7 +3806,7 @@
                 <i data-lucide="edit" class="w-5 h-5 text-cyan-500"></i>
                 <span>Edit Pembelian Stock Supplier</span>
               </h3>
-              <p class="text-xs text-slate-600 dark:text-slate-300">Ubah rincian nota belanja, supplier, atau nominal tagihan</p>
+              <p class="text-xs text-slate-600 dark:text-slate-300">Perbarui rincian pembelian atau jumlah quantity stok</p>
             </div>
             <span class="font-mono text-xs bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 px-2 py-0.5 rounded font-bold">${p.id}</span>
           </div>
@@ -3603,23 +3823,36 @@
           </div>
 
           <div>
+            <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Stok Master Terhubung</label>
+            <select id="edit-buy-stock-id" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-semibold">
+              <option value="">-- Tanpa Koneksi Master Stok --</option>
+              ${state.stok.map(s => `<option value="${s.id}" ${s.id === p.stockId ? 'selected' : ''}>${s.nama} (${s.id}) - Stok: ${s.jumlah}</option>`).join('')}
+            </select>
+          </div>
+
+          <div>
             <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Rincian Item Yang Dibeli *</label>
             <input type="text" id="edit-buy-barang" value="${p.barang}" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" required />
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
+              <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Jumlah Pembelian (Qty) *</label>
+              <input type="number" id="edit-buy-qty" min="1" value="${p.qty || 1}" class="w-full text-sm p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-bold" required />
+            </div>
+            <div>
               <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Total Pembayaran (Rp) *</label>
               <input type="number" id="edit-buy-total" value="${p.total}" class="w-full text-sm p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-bold text-rose-500" required />
             </div>
-            <div>
-              <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Status Pembayaran</label>
-              <select id="edit-buy-status" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-semibold">
-                <option value="Lunas" ${p.status === 'Lunas' ? 'selected' : ''}>Lunas</option>
-                <option value="Belum Lunas" ${p.status === 'Belum Lunas' ? 'selected' : ''}>Belum Lunas (Tempo / Hutang)</option>
-                <option value="DP" ${p.status === 'DP' ? 'selected' : ''}>DP (Uang Muka)</option>
-              </select>
-            </div>
+          </div>
+
+          <div>
+            <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Status Pembayaran</label>
+            <select id="edit-buy-status" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-semibold">
+              <option value="Lunas" ${p.status === 'Lunas' ? 'selected' : ''}>Lunas</option>
+              <option value="Belum Lunas" ${p.status === 'Belum Lunas' ? 'selected' : ''}>Belum Lunas (Tempo / Hutang)</option>
+              <option value="DP" ${p.status === 'DP' ? 'selected' : ''}>DP (Uang Muka)</option>
+            </select>
           </div>
 
           <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end space-x-2">
@@ -3636,20 +3869,76 @@
 
     window.simpanEditPembelian = async function (e, id) {
       e.preventDefault();
+      const p = state.pembelian.find(item => item.id === id);
+      if (!p) return;
+
+      const oldStockId = p.stockId;
+      const oldQty = p.qty || 1;
+
+      const newStockId = document.getElementById('edit-buy-stock-id').value;
+      const newQty = parseInt(document.getElementById('edit-buy-qty').value) || 1;
+      const newBarang = document.getElementById('edit-buy-barang').value.trim();
+      const newSupplier = document.getElementById('edit-buy-supplier').value.trim();
+      const newTanggal = document.getElementById('edit-buy-tanggal').value;
+      const newTotal = parseFloat(document.getElementById('edit-buy-total').value) || 0;
+      const newStatus = document.getElementById('edit-buy-status').value;
+
+      if (oldStockId && oldStockId === newStockId) {
+        const deltaQty = newQty - oldQty;
+        if (deltaQty !== 0) {
+          const targetStock = state.stok.find(s => s.id === oldStockId);
+          if (targetStock) {
+            const updatedJumlah = Math.max(0, (parseInt(targetStock.jumlah) || 0) + deltaQty);
+            await dbUpdate('stok', oldStockId, { jumlah: updatedJumlah });
+          }
+        }
+      } else {
+        if (oldStockId) {
+          const oldStock = state.stok.find(s => s.id === oldStockId);
+          if (oldStock) {
+            const updatedJumlah = Math.max(0, (parseInt(oldStock.jumlah) || 0) - oldQty);
+            await dbUpdate('stok', oldStockId, { jumlah: updatedJumlah });
+          }
+        }
+        if (newStockId) {
+          const newStock = state.stok.find(s => s.id === newStockId);
+          if (newStock) {
+            const updatedJumlah = (parseInt(newStock.jumlah) || 0) + newQty;
+            await dbUpdate('stok', newStockId, { jumlah: updatedJumlah });
+          }
+        }
+      }
+
       const updateData = {
-        tanggal: document.getElementById('edit-buy-tanggal').value,
-        supplier: document.getElementById('edit-buy-supplier').value.trim(),
-        barang: document.getElementById('edit-buy-barang').value.trim(),
-        total: parseFloat(document.getElementById('edit-buy-total').value) || 0,
-        status: document.getElementById('edit-buy-status').value
+        tanggal: newTanggal,
+        supplier: newSupplier,
+        barang: newBarang,
+        stockId: newStockId,
+        qty: newQty,
+        total: newTotal,
+        status: newStatus
       };
+
       await dbUpdate('pembelian', id, updateData);
+      showNotificationToast(`Data Pembelian ${id} berhasil diperbarui!`);
       closeModal();
     };
 
     window.hapusPembelian = async function (id) {
-      if (confirm('Yakin ingin menghapus catatan pembelian ini?')) {
+      const p = state.pembelian.find(item => item.id === id);
+      if (!p) return;
+
+      if (confirm(`Yakin ingin menghapus catatan pembelian ${id}?`)) {
+        if (p.stockId && (p.qty || 1) > 0) {
+          const targetStock = state.stok.find(s => s.id === p.stockId);
+          if (targetStock) {
+            const qtyToSubtract = p.qty || 1;
+            const updatedJumlah = Math.max(0, (parseInt(targetStock.jumlah) || 0) - qtyToSubtract);
+            await dbUpdate('stok', p.stockId, { jumlah: updatedJumlah });
+          }
+        }
         await dbDelete('pembelian', id);
+        showNotificationToast(`Catatan pembelian ${id} dihapus & stok disesuaikan kembali.`);
       }
     };
 
@@ -4082,12 +4371,14 @@
           'ID Pembelian': b.id,
           'Tanggal': b.tanggal,
           'Supplier': b.supplier,
+          'ID Stok Master': b.stockId || '',
           'Deskripsi Barang': b.barang,
+          'Jumlah (Qty)': Number(b.qty) || 1,
           'Total (Rp)': Number(b.total) || 0,
           'Status': b.status
         }));
         const wsBuy = XLSX.utils.json_to_sheet(buyRows);
-        wsBuy['!cols'] = [{ wch: 16 }, { wch: 14 }, { wch: 28 }, { wch: 32 }, { wch: 18 }, { wch: 16 }];
+        wsBuy['!cols'] = [{ wch: 16 }, { wch: 14 }, { wch: 28 }, { wch: 18 }, { wch: 32 }, { wch: 14 }, { wch: 18 }, { wch: 16 }];
         XLSX.utils.book_append_sheet(wb, wsBuy, 'Pembelian_Stok');
 
         // 7. KAS MASUK & KELUAR
@@ -4423,7 +4714,9 @@
               id: String(id).trim(),
               tanggal: String(getCol(r, 'Tanggal', 'tanggal') || new Date().toISOString().slice(0, 10)),
               supplier: String(getCol(r, 'Supplier', 'supplier') || 'Supplier'),
+              stockId: String(getCol(r, 'ID Stok Master', 'stockId') || '').trim(),
               barang: String(getCol(r, 'Deskripsi Barang', 'barang') || 'Barang'),
+              qty: parseNum(getCol(r, 'Jumlah (Qty)', 'qty'), 1),
               total: parseNum(getCol(r, 'Total (Rp)', 'total'), 0),
               status: String(getCol(r, 'Status', 'status') || 'Lunas')
             });
