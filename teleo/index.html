@@ -159,9 +159,17 @@
           <button onclick="switchTab('returns')" id="tab-btn-returns"
             class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100 whitespace-nowrap">
             <i data-lucide="rotate-ccw" class="w-4 h-4 text-rose-600"></i>
-            <span>Retur & Batal</span>
+            <span>Pesanan Retur</span>
             <span id="badge-count-returns"
               class="ml-1 bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded-full text-[10px]">0</span>
+          </button>
+
+          <button onclick="switchTab('cancelled')" id="tab-btn-cancelled"
+            class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100 whitespace-nowrap">
+            <i data-lucide="x-circle" class="w-4 h-4 text-amber-600"></i>
+            <span>Pesanan Batal</span>
+            <span id="badge-count-cancelled"
+              class="ml-1 bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full text-[10px]">0</span>
           </button>
 
           <button onclick="switchTab('profit')" id="tab-btn-profit"
@@ -425,12 +433,12 @@
           <div>
             <h3 class="font-bold text-slate-800 text-base flex items-center gap-2 text-rose-700">
               <i data-lucide="rotate-ccw" class="w-5 h-5 text-rose-600"></i>
-              Laporan Kerugian Pesanan Retur & Batal
+              Laporan Kerugian Pesanan Retur
             </h3>
             <p class="text-xs text-slate-500">Mengidentifikasi kerugian dari HPP produk rusak/hilang serta biaya ongkir
               penanganan retur</p>
           </div>
-          <button onclick="exportTableToCSV('table-return-orders', 'Laporan_Pesanan_Retur_Batal')"
+          <button onclick="exportTableToCSV('table-return-orders', 'Laporan_Pesanan_Retur')"
             class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-slate-50 flex items-center gap-1.5 text-slate-700">
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
             Export CSV
@@ -454,6 +462,45 @@
             <tbody id="tbody-return-orders" class="divide-y divide-slate-100 bg-white">
               <tr>
                 <td colspan="7" class="p-4 text-center text-slate-400">Data kosong. Silakan import file Excel.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-content-cancelled" class="tab-panel space-y-4 hidden">
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2 text-amber-700">
+              <i data-lucide="x-circle" class="w-5 h-5 text-amber-600"></i>
+              Laporan Pesanan Batal & Gagal Kirim
+            </h3>
+            <p class="text-xs text-slate-500">Menganalisis order yang dibatalkan atau gagal kirim ke pembeli</p>
+          </div>
+          <button onclick="exportTableToCSV('table-cancelled-orders', 'Laporan_Pesanan_Batal')"
+            class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-slate-50 flex items-center gap-1.5 text-slate-700">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            Export CSV
+          </button>
+        </div>
+
+        <div class="overflow-x-auto rounded-lg border border-slate-200 custom-scrollbar max-h-96">
+          <table id="table-cancelled-orders" class="w-full text-xs text-left text-slate-600 whitespace-nowrap">
+            <thead
+              class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px] sticky top-0">
+              <tr>
+                <th class="p-3">No. Pesanan</th>
+                <th class="p-3">SKU Produk</th>
+                <th class="p-3">Status</th>
+                <th class="p-3 text-center">Qty</th>
+                <th class="p-3 text-right">Total Kerugian</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-cancelled-orders" class="divide-y divide-slate-100 bg-white">
+              <tr>
+                <td colspan="5" class="p-4 text-center text-slate-400">Data kosong. Silakan import file Excel.</td>
               </tr>
             </tbody>
           </table>
@@ -655,7 +702,7 @@
       orders: [],
       returns: [],
       skuStats: {},
-      summary: { total: 0, completed: 0, returned: 0, cancelled: 0, income: 0, hpp: 0, realProfit: 0, lossHPP: 0, lossFee: 0 }
+      summary: { total: 0, completed: 0, returned: 0, cancelled: 0, returnedQty: 0, cancelledQty: 0, income: 0, hpp: 0, realProfit: 0, lossHPP: 0, lossFee: 0 }
     };
     let charts = { growth: null, status: null };
 
@@ -880,21 +927,184 @@
         appData.skuStats = {};
         const sum = appData.summary;
         sum.total = 0; sum.completed = 0; sum.returned = 0; sum.cancelled = 0;
+        sum.returnedQty = 0; sum.cancelledQty = 0;
         sum.income = 0; sum.hpp = 0; sum.realProfit = 0; sum.lossHPP = 0; sum.lossFee = 0;
 
-        // ---- 5. Proses Pesanan Selesai (Order All) ----
+        // globalSeenIds: Set untuk mencegah double-count antar file
+        // File dedicated (Return/Cancelled/Failed) DIPROSES LEBIH DULU karena lebih spesifik
+        // Order All hanya mengisi pesanan yang belum tercatat di file dedicated
+        const globalSeenIds = new Set();
+
+        // ═══════════════════════════════════════════════════════════════
+        // PRIORITAS 1: File Return/Refund (paling spesifik)
+        // ═══════════════════════════════════════════════════════════════
+        if (fileReturn) {
+          const rows = await parseExcel(fileReturn);
+          console.log('[DEBUG] Return file rows:', rows.length);
+          if (rows.length > 0) {
+            console.log('[DEBUG] Return file headers:', Object.keys(rows[0]));
+            const s = rows[0];
+            const cOrdId = findCol(s, ['No. Pesanan', 'No Pesanan', 'Order ID', 'nomor pesanan']);
+            const cSku = findCol(s, ['SKU Referensi', 'SKU Produk', 'SKU', 'Kode', 'Variasi']);
+            const cNama = findCol(s, ['Nama Produk', 'Produk', 'nama produk']);
+            // Shopee return file: "Jumlah Produk Dikembalikan" atau "Jumlah"
+            const cQty = findCol(s, ['Jumlah Produk Dikembalikan', 'Jumlah Produk', 'Jumlah', 'Qty', 'quantity']);
+            const cFee = findCol(s, ['Biaya', 'Fee', 'Ongkir', 'Penalti', 'Biaya Penanganan']);
+            console.log('[DEBUG] Return cols → ordId:', cOrdId, 'sku:', cSku, 'qty:', cQty);
+
+            const orderMap = new Map();
+            rows.forEach(r => {
+              const ordId = cOrdId ? String(r[cOrdId] || '').trim() : '';
+              const sku = cSku ? String(r[cSku] || '').trim() : '';
+              const nama = cNama ? String(r[cNama] || '').trim() : sku;
+              const qty = cQty ? (parseNum(r[cQty]) || 1) : 1;
+              const fee = cFee ? parseNum(r[cFee]) : 0;
+              if (!ordId) return;
+              if (!orderMap.has(ordId)) orderMap.set(ordId, { id: ordId, skus: [], qty: 0, fee, lossHPP: 0 });
+              const order = orderMap.get(ordId);
+              order.skus.push({ sku, nama, qty });
+              order.qty += qty;
+              order.lossHPP += getHpp(sku) * qty * 0.5;
+              if (!appData.skuStats[sku] && sku) {
+                appData.skuStats[sku] = { name: nama || sku, sold: 0, ret: 0, income: 0, hpp: 0, profit: 0 };
+              }
+              if (sku && appData.skuStats[sku]) appData.skuStats[sku].ret += qty;
+            });
+
+            console.log('[DEBUG] Return unique orders found:', orderMap.size);
+            orderMap.forEach(order => {
+              globalSeenIds.add(order.id);
+              sum.total++;
+              sum.returned++;
+              sum.returnedQty += order.qty;
+              sum.lossHPP += order.lossHPP;
+              sum.lossFee += order.fee;
+              sum.realProfit -= (order.lossHPP + order.fee);
+              const skuLabel = order.skus.map(i => i.sku).filter(Boolean).join(', ') || '(tanpa SKU)';
+              appData.returns.push({ id: order.id, sku: skuLabel, status: 'Retur', qty: order.qty, lossHPP: order.lossHPP, fee: order.fee, total: order.lossHPP + order.fee });
+            });
+          }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // PRIORITAS 2: File Cancelled
+        // ═══════════════════════════════════════════════════════════════
+        if (fileCancelled) {
+          const rows = await parseExcel(fileCancelled);
+          console.log('[DEBUG] Cancelled file rows:', rows.length);
+          if (rows.length > 0) {
+            console.log('[DEBUG] Cancelled file headers:', Object.keys(rows[0]));
+            const s = rows[0];
+            const cOrdId = findCol(s, ['No. Pesanan', 'No Pesanan', 'Order ID', 'nomor pesanan']);
+            const cSku = findCol(s, ['SKU Referensi', 'SKU Produk', 'SKU', 'Kode']);
+            const cNama = findCol(s, ['Nama Produk', 'Produk']);
+            const cQty = findCol(s, ['Jumlah', 'Qty', 'quantity']);
+
+            const orderMap = new Map();
+            rows.forEach(r => {
+              const ordId = cOrdId ? String(r[cOrdId] || '').trim() : '';
+              const sku = cSku ? String(r[cSku] || '').trim() : '';
+              const nama = cNama ? String(r[cNama] || '').trim() : sku;
+              const qty = cQty ? (parseNum(r[cQty]) || 1) : 1;
+              if (!ordId) return;
+              if (!orderMap.has(ordId)) orderMap.set(ordId, { id: ordId, skus: [], qty: 0 });
+              const order = orderMap.get(ordId);
+              order.skus.push(sku);
+              order.qty += qty;
+              if (!appData.skuStats[sku] && sku) {
+                appData.skuStats[sku] = { name: nama || sku, sold: 0, ret: 0, income: 0, hpp: 0, profit: 0 };
+              }
+            });
+
+            console.log('[DEBUG] Cancelled unique orders found:', orderMap.size);
+            orderMap.forEach(order => {
+              if (globalSeenIds.has(order.id)) return; // sudah dihitung di Return
+              globalSeenIds.add(order.id);
+              sum.total++;
+              sum.cancelled++;
+              sum.cancelledQty += order.qty;
+              const skuLabel = order.skus.filter(Boolean).join(', ') || '(tanpa SKU)';
+              appData.returns.push({ id: order.id, sku: skuLabel, status: 'Batal', qty: order.qty, lossHPP: 0, fee: 0, total: 0 });
+            });
+          }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // PRIORITAS 3: File Failed Delivery
+        // ═══════════════════════════════════════════════════════════════
+        if (fileFailed) {
+          const rows = await parseExcel(fileFailed);
+          console.log('[DEBUG] Failed file rows:', rows.length);
+          if (rows.length > 0) {
+            console.log('[DEBUG] Failed file headers:', Object.keys(rows[0]));
+            const s = rows[0];
+            const cOrdId = findCol(s, ['No. Pesanan', 'No Pesanan', 'Order ID']);
+            const cSku = findCol(s, ['SKU Referensi', 'SKU Produk', 'SKU', 'Kode']);
+            const cNama = findCol(s, ['Nama Produk', 'Produk']);
+            const cQty = findCol(s, ['Jumlah', 'Qty', 'quantity']);
+            const cFee = findCol(s, ['Biaya', 'Fee', 'Ongkir', 'Penalti']);
+
+            const orderMap = new Map();
+            rows.forEach(r => {
+              const ordId = cOrdId ? String(r[cOrdId] || '').trim() : '';
+              const sku = cSku ? String(r[cSku] || '').trim() : '';
+              const nama = cNama ? String(r[cNama] || '').trim() : sku;
+              const qty = cQty ? (parseNum(r[cQty]) || 1) : 1;
+              const fee = cFee ? parseNum(r[cFee]) : 0;
+              if (!ordId) return;
+              if (!orderMap.has(ordId)) orderMap.set(ordId, { id: ordId, skus: [], qty: 0, fee, lossHPP: 0 });
+              const order = orderMap.get(ordId);
+              order.skus.push(sku);
+              order.qty += qty;
+              order.lossHPP += getHpp(sku) * qty * 0.5;
+              if (!appData.skuStats[sku] && sku) {
+                appData.skuStats[sku] = { name: nama || sku, sold: 0, ret: 0, income: 0, hpp: 0, profit: 0 };
+              }
+              if (sku && appData.skuStats[sku]) appData.skuStats[sku].ret += qty;
+            });
+
+            console.log('[DEBUG] Failed unique orders found:', orderMap.size);
+            orderMap.forEach(order => {
+              if (globalSeenIds.has(order.id)) {
+                // Sudah tercatat di Return — hanya tambahkan kerugian finansial
+                sum.lossHPP += order.lossHPP;
+                sum.lossFee += order.fee;
+                sum.realProfit -= (order.lossHPP + order.fee);
+                return;
+              }
+              globalSeenIds.add(order.id);
+              sum.total++;
+              sum.cancelled++;
+              sum.cancelledQty += order.qty;
+              sum.lossHPP += order.lossHPP;
+              sum.lossFee += order.fee;
+              sum.realProfit -= (order.lossHPP + order.fee);
+              const skuLabel = order.skus.filter(Boolean).join(', ') || '(tanpa SKU)';
+              appData.returns.push({ id: order.id, sku: skuLabel, status: 'Gagal Kirim', qty: order.qty, lossHPP: order.lossHPP, fee: order.fee, total: order.lossHPP + order.fee });
+            });
+          }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // PRIORITAS 4 (terakhir): Order All — hanya mengisi pesanan yang belum tercatat
+        // ═══════════════════════════════════════════════════════════════
         if (fileOrderAll) {
           const rows = await parseExcel(fileOrderAll);
+          console.log('[DEBUG] Order All rows:', rows.length);
           if (rows.length > 0) {
+            console.log('[DEBUG] Order All headers:', Object.keys(rows[0]));
             const s = rows[0];
             const cOrdId = findCol(s, ['No. Pesanan', 'No Pesanan', 'Order ID', 'nomor pesanan']);
             const cStatus = findCol(s, ['Status Pesanan', 'Status', 'Order Status']);
-            const cSku = findCol(s, ['SKU Referensi', 'SKU', 'Kode', 'sku']);
+            const cSku = findCol(s, ['SKU Referensi', 'SKU Produk', 'SKU', 'Kode', 'sku']);
             const cNama = findCol(s, ['Nama Produk', 'Produk', 'nama produk', 'Item Name']);
             const cQty = findCol(s, ['Jumlah', 'Qty', 'quantity', 'jumlah']);
             const cHarga = findCol(s, ['Harga Setelah Diskon', 'Harga', 'Total Harga', 'Subtotal', 'harga']);
             const cTgl = findCol(s, ['Waktu Pesanan', 'Tanggal', 'Waktu', 'Order Time', 'Tgl']);
 
+            // Group baris by Order ID
+            const orderMap = new Map();
+            const unknownStatuses = new Set(); // untuk debug status yang tidak dikenal
             rows.forEach(r => {
               const ordId = cOrdId ? String(r[cOrdId] || '').trim() : '';
               const status = cStatus ? String(r[cStatus] || '').trim() : '';
@@ -903,157 +1113,117 @@
               const qty = cQty ? (parseNum(r[cQty]) || 1) : 1;
               const harga = cHarga ? parseNum(r[cHarga]) : 0;
               const tgl = cTgl ? parseDate(r[cTgl]) : '';
-
               if (!ordId) return;
 
-              // Apakah pesanan selesai?
-              const isSelesai = /selesai|complete|delivered|sukses/i.test(status);
-              if (!isSelesai) return; // Order batal/retur diproses di file terpisah
+              // Klasifikasi status Shopee (diperluas)
+              const isSelesai = /selesai|complete|delivered|sukses|Pesanan Selesai|Order Completed/i.test(status);
+              const isRetur = /retur|return|refund|pengembalian/i.test(status);
+              const isBatal = /batal|cancel|dibatalkan|gagal|failed/i.test(status);
 
-              sum.total++;
-              sum.completed++;
+              let kategori = 'proses';
+              if (isSelesai) kategori = 'selesai';
+              else if (isRetur) kategori = 'retur';
+              else if (isBatal) kategori = 'batal';
 
-              // Dana cair: dari income file jika ada, jika tidak gunakan harga
-              const netIncome = incomeMap[ordId] !== undefined ? incomeMap[ordId] : harga;
-              const hppUnit = getHpp(sku);
-              const totalHpp = hppUnit * qty;
-              const profit = netIncome - totalHpp;
+              // Log status yang tidak dikenal/proses untuk debugging
+              if (kategori === 'proses' && status) unknownStatuses.add(status);
 
-              sum.income += netIncome;
-              sum.hpp += totalHpp;
-              sum.realProfit += profit;
-
-              // SKU stats
-              if (!appData.skuStats[sku]) {
-                appData.skuStats[sku] = { name: nama || sku, sold: 0, ret: 0, income: 0, hpp: 0, profit: 0 };
+              if (!orderMap.has(ordId)) {
+                const netIncome = incomeMap[ordId] !== undefined ? incomeMap[ordId] : (isSelesai ? harga : 0);
+                orderMap.set(ordId, { id: ordId, date: tgl, kategori, income: netIncome, hpp: 0, qty: 0, skus: [] });
               }
-              appData.skuStats[sku].sold += qty;
-              appData.skuStats[sku].income += netIncome;
-              appData.skuStats[sku].hpp += totalHpp;
-              appData.skuStats[sku].profit += profit;
-
-              appData.orders.push({ id: ordId, date: tgl, sku: sku, qty: qty, income: netIncome, hpp: totalHpp, profit: profit });
+              const order = orderMap.get(ordId);
+              const hppBaris = getHpp(sku) * qty;
+              order.skus.push({ sku, nama, qty, hpp: hppBaris });
+              order.qty += qty;
+              order.hpp += hppBaris;
             });
-          }
-        }
 
-        // ---- 6. Proses file Cancelled ----
-        async function processCancelledFile(file, statusLabel) {
-          const rows = await parseExcel(file);
-          if (rows.length === 0) return;
-          const s = rows[0];
-          const cOrdId = findCol(s, ['No. Pesanan', 'No Pesanan', 'Order ID', 'nomor pesanan']);
-          const cSku = findCol(s, ['SKU Referensi', 'SKU', 'Kode']);
-          const cNama = findCol(s, ['Nama Produk', 'Produk']);
-          const cQty = findCol(s, ['Jumlah', 'Qty', 'quantity']);
+            let selesaiCount = 0, skippedCount = 0;
+            orderMap.forEach(order => {
+              // SKIP order yang sudah tercatat di file dedicated (Return/Cancelled/Failed)
+              if (globalSeenIds.has(order.id)) { skippedCount++; return; }
+              globalSeenIds.add(order.id);
+              sum.total++;
 
-          rows.forEach(r => {
-            const ordId = cOrdId ? String(r[cOrdId] || '').trim() : '';
-            const sku = cSku ? String(r[cSku] || '').trim() : '';
-            const nama = cNama ? String(r[cNama] || '').trim() : sku;
-            const qty = cQty ? (parseNum(r[cQty]) || 1) : 1;
-            if (!ordId) return;
+              const skuLabel = order.skus.map(i => i.sku).filter(Boolean).join(', ') || '(tanpa SKU)';
 
-            sum.total++;
-            sum.cancelled++;
+              if (order.kategori === 'selesai') {
+                order.profit = order.income - order.hpp;
+                sum.completed++;
+                sum.income += order.income;
+                sum.hpp += order.hpp;
+                sum.realProfit += order.profit;
+                selesaiCount++;
 
-            // Batal tidak ada income, kerugian hanya HPP (jika barang sudah dikeluarkan)
-            const hppUnit = getHpp(sku);
-            const lossHPP = 0; // Batal umumnya tidak ada kerugian HPP karena barang dikembalikan
-            const ongkir = 0;
+                // Distribusi income ke SKU stats proporsional HPP
+                const totalHppOrder = order.hpp > 0 ? order.hpp : 1;
+                order.skus.forEach(item => {
+                  if (!appData.skuStats[item.sku]) {
+                    appData.skuStats[item.sku] = { name: item.nama || item.sku, sold: 0, ret: 0, income: 0, hpp: 0, profit: 0 };
+                  }
+                  const porsi = order.hpp > 0 ? (item.hpp / totalHppOrder) : (1 / order.skus.length);
+                  const incPorsi = order.income * porsi;
+                  appData.skuStats[item.sku].sold += item.qty;
+                  appData.skuStats[item.sku].hpp += item.hpp;
+                  appData.skuStats[item.sku].income += incPorsi;
+                  appData.skuStats[item.sku].profit += (incPorsi - item.hpp);
+                });
+                appData.orders.push({ id: order.id, date: order.date, sku: skuLabel, qty: order.qty, income: order.income, hpp: order.hpp, profit: order.profit });
 
-            if (!appData.skuStats[sku] && sku) {
-              appData.skuStats[sku] = { name: nama || sku, sold: 0, ret: 0, income: 0, hpp: 0, profit: 0 };
+              } else if (order.kategori === 'retur' || order.kategori === 'batal') {
+                // Batal / Retur dari Order All (tidak ada di file dedicated)
+                if (order.kategori === 'retur') {
+                  sum.returned++;
+                  sum.returnedQty += order.qty;
+                } else {
+                  sum.cancelled++;
+                  sum.cancelledQty += order.qty;
+                }
+                const lossHPP = order.kategori === 'retur' ? order.hpp * 0.5 : 0;
+                sum.lossHPP += lossHPP;
+                sum.realProfit -= lossHPP;
+                order.skus.forEach(item => {
+                  if (!appData.skuStats[item.sku] && item.sku) {
+                    appData.skuStats[item.sku] = { name: item.nama || item.sku, sold: 0, ret: 0, income: 0, hpp: 0, profit: 0 };
+                  }
+                  if (order.kategori === 'retur' && item.sku && appData.skuStats[item.sku]) {
+                    appData.skuStats[item.sku].ret += item.qty;
+                  }
+                });
+                appData.returns.push({ id: order.id, sku: skuLabel, status: order.kategori === 'retur' ? 'Retur' : 'Batal', qty: order.qty, lossHPP: lossHPP, fee: 0, total: lossHPP });
+              }
+              // Jika kategori === 'proses', abaikan (tidak dihitung sebagai profit/loss/batal)
+            });
+            console.log(`[DEBUG] Order All: ${selesaiCount} selesai, ${skippedCount} sudah tercatat di file dedicated`);
+            if (unknownStatuses.size > 0) {
+              console.warn('[DEBUG] Status TIDAK DIKENAL (jatuh ke Batal):', [...unknownStatuses]);
             }
-
-            appData.returns.push({ id: ordId, sku: sku, status: statusLabel, qty: qty, lossHPP: lossHPP, fee: ongkir, total: lossHPP + ongkir });
-          });
-        }
-
-        if (fileCancelled) await processCancelledFile(fileCancelled, 'Batal');
-
-        // ---- 7. Proses file Failed Delivery ----
-        if (fileFailed) {
-          const rows = await parseExcel(fileFailed);
-          if (rows.length > 0) {
-            const s = rows[0];
-            const cOrdId = findCol(s, ['No. Pesanan', 'No Pesanan', 'Order ID']);
-            const cSku = findCol(s, ['SKU Referensi', 'SKU', 'Kode']);
-            const cNama = findCol(s, ['Nama Produk', 'Produk']);
-            const cQty = findCol(s, ['Jumlah', 'Qty', 'quantity']);
-            // Biaya gagal kirim / ongkir penalti
-            const cFee = findCol(s, ['Biaya', 'Fee', 'Ongkir', 'Penalti', 'biaya']);
-
-            rows.forEach(r => {
-              const ordId = cOrdId ? String(r[cOrdId] || '').trim() : '';
-              const sku = cSku ? String(r[cSku] || '').trim() : '';
-              const nama = cNama ? String(r[cNama] || '').trim() : sku;
-              const qty = cQty ? (parseNum(r[cQty]) || 1) : 1;
-              const fee = cFee ? parseNum(r[cFee]) : 0;
-              if (!ordId) return;
-
-              sum.total++;
-              sum.cancelled++;
-
-              const hppUnit = getHpp(sku);
-              const lossHPP = hppUnit * qty * 0.5; // estimasi kerusakan 50% barang gagal kirim
-              const lossFee = fee;
-
-              sum.lossHPP += lossHPP;
-              sum.lossFee += lossFee;
-              sum.realProfit -= (lossHPP + lossFee);
-
-              if (!appData.skuStats[sku] && sku) {
-                appData.skuStats[sku] = { name: nama || sku, sold: 0, ret: 0, income: 0, hpp: 0, profit: 0 };
-              }
-              if (sku && appData.skuStats[sku]) appData.skuStats[sku].ret += qty;
-
-              appData.returns.push({ id: ordId, sku: sku, status: 'Gagal Kirim', qty: qty, lossHPP: lossHPP, fee: lossFee, total: lossHPP + lossFee });
-            });
           }
         }
 
-        // ---- 8. Proses file Return/Refund ----
-        if (fileReturn) {
-          const rows = await parseExcel(fileReturn);
-          if (rows.length > 0) {
-            const s = rows[0];
-            const cOrdId = findCol(s, ['No. Pesanan', 'No Pesanan', 'Order ID']);
-            const cSku = findCol(s, ['SKU Referensi', 'SKU', 'Kode']);
-            const cNama = findCol(s, ['Nama Produk', 'Produk']);
-            const cQty = findCol(s, ['Jumlah', 'Qty', 'quantity']);
-            const cFee = findCol(s, ['Biaya', 'Fee', 'Ongkir', 'Penalti']);
+        // ---- 9. Tampilkan debug panel di UI ----
+        (function showDebugPanel() {
+          let old = document.getElementById('debug-panel-process');
+          if (old) old.remove();
+          const panel = document.createElement('div');
+          panel.id = 'debug-panel-process';
+          panel.style.cssText = 'position:fixed;bottom:4px;left:4px;z-index:9999;background:#1e293b;color:#f8fafc;font-size:11px;padding:12px 16px;border-radius:10px;max-width:380px;font-family:monospace;box-shadow:0 4px 20px rgba(0,0,0,.5);line-height:1.8';
+          const s = appData.summary;
+          panel.innerHTML = `
+            <div style="font-size:13px;font-weight:bold;margin-bottom:6px;border-bottom:1px solid #334155;padding-bottom:6px">📊 Debug Hasil Proses</div>
+            <div>Total Unik Order: <b style="color:#38bdf8">${s.total}</b></div>
+            <div>✅ Selesai (Completed): <b style="color:#4ade80">${s.completed}</b></div>
+            <div>🔄 Retur: <b style="color:#f87171">${s.returned} order (${s.returnedQty} pcs)</b></div>
+            <div>❌ Batal/Gagal: <b style="color:#fbbf24">${s.cancelled} order (${s.cancelledQty} pcs)</b></div>
+            <div style="border-top:1px solid #334155;margin-top:6px;padding-top:6px;font-size:10px;color:#94a3b8">Buka DevTools (F12) → Console untuk list status "proses" yg diabaikan</div>
+            <button onclick="document.getElementById('debug-panel-process').remove()" style="margin-top:8px;background:#334155;border:none;color:#f8fafc;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:10px">Tutup</button>
+          `;
+          document.body.appendChild(panel);
+          setTimeout(() => { if (panel.parentNode) panel.remove(); }, 15000);
+        })();
 
-            rows.forEach(r => {
-              const ordId = cOrdId ? String(r[cOrdId] || '').trim() : '';
-              const sku = cSku ? String(r[cSku] || '').trim() : '';
-              const nama = cNama ? String(r[cNama] || '').trim() : sku;
-              const qty = cQty ? (parseNum(r[cQty]) || 1) : 1;
-              const fee = cFee ? parseNum(r[cFee]) : 0;
-              if (!ordId) return;
-
-              sum.total++;
-              sum.returned++;
-
-              const hppUnit = getHpp(sku);
-              const lossHPP = hppUnit * qty * 0.5; // estimasi barang rusak 50% saat retur
-              const lossFee = fee > 0 ? fee : 0;
-
-              sum.lossHPP += lossHPP;
-              sum.lossFee += lossFee;
-              sum.realProfit -= (lossHPP + lossFee);
-
-              if (!appData.skuStats[sku] && sku) {
-                appData.skuStats[sku] = { name: nama || sku, sold: 0, ret: 0, income: 0, hpp: 0, profit: 0 };
-              }
-              if (sku && appData.skuStats[sku]) appData.skuStats[sku].ret += qty;
-
-              appData.returns.push({ id: ordId, sku: sku, status: 'Retur', qty: qty, lossHPP: lossHPP, fee: lossFee, total: lossHPP + lossFee });
-            });
-          }
-        }
-
-        // ---- 9. Hitung total unit KPI ----
+        // ---- 10. Hitung total unit KPI ----
         const totalUnitSold = appData.orders.reduce((a, o) => a + o.qty, 0);
         document.getElementById('kpi-unit-sold-text').innerHTML = `<span>${totalUnitSold.toLocaleString()} unit barang</span>`;
         const totalUnitCair = appData.orders.reduce((a, o) => a + o.qty, 0);
@@ -1161,7 +1331,7 @@
       document.getElementById('kpi-total-orders').innerText = sum.total.toLocaleString();
       document.getElementById('kpi-completed-orders').innerText = sum.completed.toLocaleString();
       document.getElementById('kpi-return-rate').innerText = sum.total > 0 ? ((sum.returned + sum.cancelled) / sum.total * 100).toFixed(1) + '%' : '0%';
-      document.getElementById('kpi-return-count-text').innerText = `${sum.returned + sum.cancelled} order retur/batal`;
+      document.getElementById('kpi-return-count-text').innerText = `${sum.returned} order (${sum.returnedQty} pcs) retur · ${sum.cancelled} order (${sum.cancelledQty} pcs) batal`;
       document.getElementById('kpi-net-income').innerText = formatRp(sum.income);
       document.getElementById('kpi-total-hpp').innerText = formatRp(sum.hpp);
       document.getElementById('kpi-real-profit').innerText = formatRp(sum.realProfit);
@@ -1171,7 +1341,8 @@
 
       // Update Badges
       document.getElementById('badge-count-completed').innerText = sum.completed;
-      document.getElementById('badge-count-returns').innerText = sum.returned + sum.cancelled;
+      document.getElementById('badge-count-returns').innerText = sum.returned;
+      document.getElementById('badge-count-cancelled').innerText = sum.cancelled;
 
       // Update P&L Tab
       document.getElementById('pnl-income').innerText = formatRp(sum.income);
@@ -1184,6 +1355,7 @@
       // Render Tables
       renderOrdersTable();
       renderReturnsTable();
+      renderCancelledTable();
       renderSKUTableAndHighlights();
 
       // Render Charts
@@ -1214,12 +1386,13 @@
     function renderReturnsTable() {
       const tbody = document.getElementById('tbody-return-orders');
       tbody.innerHTML = '';
-      if (appData.returns.length === 0) {
+      const returns = appData.returns.filter(r => r.status === 'Retur');
+      if (returns.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400">Data kosong.</td></tr>';
         return;
       }
-      appData.returns.forEach(r => {
-        let badge = r.status === 'Retur' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-rose-100 text-rose-700 border-rose-200';
+      returns.forEach(r => {
+        let badge = 'bg-rose-100 text-rose-700 border-rose-200';
         let tr = `<tr class="hover:bg-slate-50 transition-colors">
           <td class="p-3 font-medium text-slate-800">${r.id}</td>
           <td class="p-3"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-[10px] border border-indigo-100">${r.sku}</span></td>
@@ -1227,6 +1400,27 @@
           <td class="p-3 text-center">${r.qty}</td>
           <td class="p-3 text-right text-rose-600">${formatRp(r.lossHPP)}</td>
           <td class="p-3 text-right text-amber-600">${formatRp(r.fee)}</td>
+          <td class="p-3 text-right font-bold text-red-600">${formatRp(r.total)}</td>
+        </tr>`;
+        tbody.innerHTML += tr;
+      });
+    }
+
+    function renderCancelledTable() {
+      const tbody = document.getElementById('tbody-cancelled-orders');
+      tbody.innerHTML = '';
+      const cancelled = appData.returns.filter(r => r.status !== 'Retur');
+      if (cancelled.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">Data kosong.</td></tr>';
+        return;
+      }
+      cancelled.forEach(r => {
+        let badge = 'bg-amber-100 text-amber-700 border-amber-200';
+        let tr = `<tr class="hover:bg-slate-50 transition-colors">
+          <td class="p-3 font-medium text-slate-800">${r.id}</td>
+          <td class="p-3"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-[10px] border border-indigo-100">${r.sku}</span></td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border ${badge}">${r.status}</span></td>
+          <td class="p-3 text-center">${r.qty}</td>
           <td class="p-3 text-right font-bold text-red-600">${formatRp(r.total)}</td>
         </tr>`;
         tbody.innerHTML += tr;
