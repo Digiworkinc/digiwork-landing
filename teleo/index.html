@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="id" class="h-full bg-slate-50">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Teleo Analytics - Sistem Analisis Integrasi Laporan Marketplace</title>
-  
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js -->
@@ -13,7 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  
+
   <script>
     tailwind.config = {
       theme: {
@@ -33,36 +34,59 @@
       }
     }
   </script>
-  
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
     body {
       font-family: 'Inter', sans-serif;
     }
+
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
+
     .custom-scrollbar::-webkit-scrollbar-track {
       background: #f1f5f9;
     }
+
     .custom-scrollbar::-webkit-scrollbar-thumb {
       background: #cbd5e1;
       border-radius: 4px;
     }
+
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
+
     /* Animasi Modal */
-    .modal-enter { opacity: 0; transform: scale(0.95); }
-    .modal-enter-active { opacity: 1; transform: scale(1); transition: all 0.2s ease-out; }
-    .modal-leave { opacity: 1; transform: scale(1); }
-    .modal-leave-active { opacity: 0; transform: scale(0.95); transition: all 0.2s ease-in; }
+    .modal-enter {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    .modal-enter-active {
+      opacity: 1;
+      transform: scale(1);
+      transition: all 0.2s ease-out;
+    }
+
+    .modal-leave {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .modal-leave-active {
+      opacity: 0;
+      transform: scale(0.95);
+      transition: all 0.2s ease-in;
+    }
   </style>
 </head>
 
 <body class="h-full text-slate-800 flex flex-col custom-scrollbar">
-  
+
   <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
@@ -74,29 +98,36 @@
           <div>
             <h1 class="font-bold text-lg leading-none tracking-tight text-white flex items-center gap-2">
               TELEO Analytics
-              <span class="text-[10px] bg-sky-500/20 text-sky-300 font-medium px-2 py-0.5 rounded-full border border-sky-400/30">v2.4 Relational</span>
+              <span
+                class="text-[10px] bg-sky-500/20 text-sky-300 font-medium px-2 py-0.5 rounded-full border border-sky-400/30">v2.4
+                Relational</span>
             </h1>
             <p class="text-xs text-slate-400 mt-0.5">Sistem Integrasi Laporan Order, Income & HPP Marketplace</p>
           </div>
         </div>
-        
+
         <!-- System Controls & Data Status Badge -->
         <div class="flex items-center space-x-3">
-          <div id="data-status-badge" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <div id="data-status-badge"
+            class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span id="data-source-text">Menggunakan Data Realtime</span>
           </div>
-          
-          <button onclick="loadDemoData()" class="hidden md:flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg border border-slate-700 hover:bg-slate-800 text-slate-300 transition-all">
+
+          <button onclick="loadDemoData()"
+            class="hidden md:flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg border border-slate-700 hover:bg-slate-800 text-slate-300 transition-all">
             <i data-lucide="database" class="w-4 h-4"></i>
             <span>Load Demo</span>
           </button>
 
-          <button onclick="toggleUploadModal(true)" class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-sky-600 hover:bg-sky-500 text-white transition-all shadow-sm">
+          <button onclick="toggleUploadModal(true)"
+            class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-sky-600 hover:bg-sky-500 text-white transition-all shadow-sm">
             <i data-lucide="file-up" class="w-4 h-4"></i>
             <span>Import Excel</span>
           </button>
-          <button type="button" id="btn-reset-data" onclick="resetAllData(event)" class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-rose-600 hover:bg-rose-500 text-white transition-all shadow-sm" title="Hapus semua data dan mulai dari awal">
+          <button type="button" id="btn-reset-data" onclick="resetAllData(event)"
+            class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-rose-600 hover:bg-rose-500 text-white transition-all shadow-sm"
+            title="Hapus semua data dan mulai dari awal">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
             <span class="hidden sm:inline">Reset</span>
           </button>
@@ -108,32 +139,39 @@
   <nav class="bg-white border-b border-slate-200 sticky top-16 z-20 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 py-3">
-        
+
         <!-- Navigation Tabs -->
         <div class="flex space-x-1 overflow-x-auto pb-2 md:pb-0 custom-scrollbar text-xs font-medium w-full md:w-auto">
-          <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="tab-btn active px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all font-semibold bg-sky-50 text-sky-700 whitespace-nowrap">
+          <button onclick="switchTab('dashboard')" id="tab-btn-dashboard"
+            class="tab-btn active px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all font-semibold bg-sky-50 text-sky-700 whitespace-nowrap">
             <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
             <span>Dashboard & Pertumbuhan</span>
           </button>
-          
-          <button onclick="switchTab('completed')" id="tab-btn-completed" class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100 whitespace-nowrap">
+
+          <button onclick="switchTab('completed')" id="tab-btn-completed"
+            class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100 whitespace-nowrap">
             <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
             <span>Pesanan Selesai</span>
-            <span id="badge-count-completed" class="ml-1 bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded-full text-[10px]">0</span>
+            <span id="badge-count-completed"
+              class="ml-1 bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded-full text-[10px]">0</span>
           </button>
 
-          <button onclick="switchTab('returns')" id="tab-btn-returns" class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100 whitespace-nowrap">
+          <button onclick="switchTab('returns')" id="tab-btn-returns"
+            class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100 whitespace-nowrap">
             <i data-lucide="rotate-ccw" class="w-4 h-4 text-rose-600"></i>
             <span>Retur & Batal</span>
-            <span id="badge-count-returns" class="ml-1 bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded-full text-[10px]">0</span>
+            <span id="badge-count-returns"
+              class="ml-1 bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded-full text-[10px]">0</span>
           </button>
 
-          <button onclick="switchTab('profit')" id="tab-btn-profit" class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100 whitespace-nowrap">
+          <button onclick="switchTab('profit')" id="tab-btn-profit"
+            class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100 whitespace-nowrap">
             <i data-lucide="wallet" class="w-4 h-4 text-amber-600"></i>
             <span>Laba Bersih & P&L</span>
           </button>
 
-          <button onclick="switchTab('sku')" id="tab-btn-sku" class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100 whitespace-nowrap">
+          <button onclick="switchTab('sku')" id="tab-btn-sku"
+            class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100 whitespace-nowrap">
             <i data-lucide="package-search" class="w-4 h-4 text-indigo-600"></i>
             <span>Kinerja SKU</span>
           </button>
@@ -143,22 +181,24 @@
         <div class="flex items-center gap-2">
           <div class="relative flex-1 md:w-64">
             <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
-            <input type="text" id="global-search-input" onkeyup="applyFilters()" placeholder="Cari Order ID, SKU..." class="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition-all">
+            <input type="text" id="global-search-input" onkeyup="applyFilters()" placeholder="Cari Order ID, SKU..."
+              class="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white transition-all">
           </div>
-          <button onclick="resetFilters()" title="Reset Filter" class="p-2 border border-slate-300 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100">
+          <button onclick="resetFilters()" title="Reset Filter"
+            class="p-2 border border-slate-300 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100">
             <i data-lucide="refresh-cw" class="w-4 h-4"></i>
           </button>
         </div>
-        
+
       </div>
     </div>
   </nav>
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 overflow-y-auto">
-    
+
     <!-- KPI Summary Row -->
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-      
+
       <!-- Total Order -->
       <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-slate-300 transition-all">
         <div class="flex items-center justify-between text-slate-500 mb-1">
@@ -232,7 +272,8 @@
 
     <div id="tab-content-dashboard" class="tab-panel space-y-6">
       <!-- Formula Relay Card Banner -->
-      <div class="bg-sky-50 border border-sky-200 rounded-xl p-4 text-xs text-sky-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+      <div
+        class="bg-sky-50 border border-sky-200 rounded-xl p-4 text-xs text-sky-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
         <div class="flex items-start gap-3">
           <div class="p-2 bg-sky-600 text-white rounded-lg mt-0.5">
             <i data-lucide="git-merge" class="w-5 h-5"></i>
@@ -240,11 +281,14 @@
           <div>
             <h4 class="font-bold text-sm text-sky-950">Aturan Penggabungan & Integrasi Relasi Data</h4>
             <p class="mt-0.5 text-sky-800">
-              Sistem menghubungkan <strong class="underline">Order ID</strong> untuk mengambil Dana Cair dari <em>Income File</em>, dan <strong class="underline">SKU Produk</strong> untuk menarik HPP dari <em>Master HPP Teleo</em>.
+              Sistem menghubungkan <strong class="underline">Order ID</strong> untuk mengambil Dana Cair dari <em>Income
+                File</em>, dan <strong class="underline">SKU Produk</strong> untuk menarik HPP dari <em>Master HPP
+                Teleo</em>.
             </p>
           </div>
         </div>
-        <div class="bg-white border border-sky-300 rounded-lg p-2.5 shadow-xs shrink-0 font-mono text-[11px] text-slate-800">
+        <div
+          class="bg-white border border-sky-300 rounded-lg p-2.5 shadow-xs shrink-0 font-mono text-[11px] text-slate-800">
           <span class="text-emerald-600 font-bold">Laba Bersih Real</span> = Dana Cair - HPP Terjual - Kerugian Retur
         </div>
       </div>
@@ -261,7 +305,8 @@
               </h3>
               <p class="text-xs text-slate-500">Trend harian akumulasi omset cair vs Laba bersih real</p>
             </div>
-            <div class="text-xs bg-slate-100 px-2.5 py-1 rounded-md text-slate-600 font-medium" id="chart-period-badge">Periode Ini</div>
+            <div class="text-xs bg-slate-100 px-2.5 py-1 rounded-md text-slate-600 font-medium" id="chart-period-badge">
+              Periode Ini</div>
           </div>
           <div class="h-64 relative w-full">
             <canvas id="chart-growth-trend"></canvas>
@@ -282,15 +327,18 @@
           </div>
           <div class="mt-4 pt-3 border-t border-slate-100 text-xs space-y-2">
             <div class="flex justify-between text-slate-600">
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>Selesai Cair:</span>
+              <span class="flex items-center gap-1.5"><span
+                  class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>Selesai Cair:</span>
               <span id="chart-legend-completed" class="font-semibold text-slate-900">0 Order</span>
             </div>
             <div class="flex justify-between text-slate-600">
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>Dikembalikan / Rusak:</span>
+              <span class="flex items-center gap-1.5"><span
+                  class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>Dikembalikan / Rusak:</span>
               <span id="chart-legend-return" class="font-semibold text-slate-900">0 Order</span>
             </div>
             <div class="flex justify-between text-slate-600">
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>Batal Dini:</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>Batal
+                Dini:</span>
               <span id="chart-legend-cancelled" class="font-semibold text-slate-900">0 Order</span>
             </div>
           </div>
@@ -309,7 +357,7 @@
             <button onclick="switchTab('sku')" class="text-xs text-sky-600 hover:underline">Lihat Semua</button>
           </div>
           <div class="divide-y divide-slate-100 flex-1 overflow-y-auto" id="top-profit-sku-list">
-             <div class="p-4 text-center text-slate-400 text-xs">Belum ada data diunggah</div>
+            <div class="p-4 text-center text-slate-400 text-xs">Belum ada data diunggah</div>
           </div>
         </div>
 
@@ -323,7 +371,7 @@
             <button onclick="switchTab('sku')" class="text-xs text-rose-600 hover:underline">Evaluasi SKU</button>
           </div>
           <div class="divide-y divide-slate-100 flex-1 overflow-y-auto" id="high-return-sku-list">
-             <div class="p-4 text-center text-slate-400 text-xs">Belum ada data diunggah</div>
+            <div class="p-4 text-center text-slate-400 text-xs">Belum ada data diunggah</div>
           </div>
         </div>
       </div>
@@ -337,9 +385,11 @@
               <i data-lucide="check-check" class="w-5 h-5 text-emerald-600"></i>
               Laporan Detail Pesanan Selesai (Dana Cair)
             </h3>
-            <p class="text-xs text-slate-500">Data pesanan sukses dengan kalkulasi penghasilan cair marketplace & HPP modal produk</p>
+            <p class="text-xs text-slate-500">Data pesanan sukses dengan kalkulasi penghasilan cair marketplace & HPP
+              modal produk</p>
           </div>
-          <button onclick="exportTableToCSV('table-completed-orders', 'Laporan_Pesanan_Selesai')" class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-slate-50 flex items-center gap-1.5 text-slate-700">
+          <button onclick="exportTableToCSV('table-completed-orders', 'Laporan_Pesanan_Selesai')"
+            class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-slate-50 flex items-center gap-1.5 text-slate-700">
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
             Export CSV
           </button>
@@ -347,7 +397,8 @@
 
         <div class="overflow-x-auto rounded-lg border border-slate-200 custom-scrollbar max-h-96">
           <table id="table-completed-orders" class="w-full text-xs text-left text-slate-600 whitespace-nowrap">
-            <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px] sticky top-0">
+            <thead
+              class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px] sticky top-0">
               <tr>
                 <th class="p-3">No. Pesanan</th>
                 <th class="p-3">Tanggal</th>
@@ -359,7 +410,9 @@
               </tr>
             </thead>
             <tbody id="tbody-completed-orders" class="divide-y divide-slate-100 bg-white">
-              <tr><td colspan="7" class="p-4 text-center text-slate-400">Data kosong. Silakan import file Excel.</td></tr>
+              <tr>
+                <td colspan="7" class="p-4 text-center text-slate-400">Data kosong. Silakan import file Excel.</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -374,9 +427,11 @@
               <i data-lucide="rotate-ccw" class="w-5 h-5 text-rose-600"></i>
               Laporan Kerugian Pesanan Retur & Batal
             </h3>
-            <p class="text-xs text-slate-500">Mengidentifikasi kerugian dari HPP produk rusak/hilang serta biaya ongkir penanganan retur</p>
+            <p class="text-xs text-slate-500">Mengidentifikasi kerugian dari HPP produk rusak/hilang serta biaya ongkir
+              penanganan retur</p>
           </div>
-          <button onclick="exportTableToCSV('table-return-orders', 'Laporan_Pesanan_Retur_Batal')" class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-slate-50 flex items-center gap-1.5 text-slate-700">
+          <button onclick="exportTableToCSV('table-return-orders', 'Laporan_Pesanan_Retur_Batal')"
+            class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-slate-50 flex items-center gap-1.5 text-slate-700">
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
             Export CSV
           </button>
@@ -384,7 +439,8 @@
 
         <div class="overflow-x-auto rounded-lg border border-slate-200 custom-scrollbar max-h-96">
           <table id="table-return-orders" class="w-full text-xs text-left text-slate-600 whitespace-nowrap">
-            <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px] sticky top-0">
+            <thead
+              class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px] sticky top-0">
               <tr>
                 <th class="p-3">No. Pesanan</th>
                 <th class="p-3">SKU Produk</th>
@@ -396,7 +452,9 @@
               </tr>
             </thead>
             <tbody id="tbody-return-orders" class="divide-y divide-slate-100 bg-white">
-              <tr><td colspan="7" class="p-4 text-center text-slate-400">Data kosong. Silakan import file Excel.</td></tr>
+              <tr>
+                <td colspan="7" class="p-4 text-center text-slate-400">Data kosong. Silakan import file Excel.</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -448,7 +506,8 @@
 
           <!-- Net Profit -->
           <div class="pt-4 border-t-2 border-slate-800 mt-4">
-            <div class="flex justify-between py-2 text-lg font-bold text-slate-900 bg-emerald-50 p-3 rounded-lg border border-emerald-200">
+            <div
+              class="flex justify-between py-2 text-lg font-bold text-slate-900 bg-emerald-50 p-3 rounded-lg border border-emerald-200">
               <span>Laba Bersih Real (Net Profit)</span>
               <span id="pnl-net-profit" class="text-emerald-700">Rp 0</span>
             </div>
@@ -465,9 +524,11 @@
               <i data-lucide="package-search" class="w-5 h-5 text-indigo-600"></i>
               Evaluasi Kinerja per SKU
             </h3>
-            <p class="text-xs text-slate-500">Menganalisis profitabilitas, popularitas, dan tingkat pengembalian masing-masing produk</p>
+            <p class="text-xs text-slate-500">Menganalisis profitabilitas, popularitas, dan tingkat pengembalian
+              masing-masing produk</p>
           </div>
-          <button onclick="exportTableToCSV('table-sku-performance', 'Evaluasi_SKU')" class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-slate-50 flex items-center gap-1.5 text-slate-700">
+          <button onclick="exportTableToCSV('table-sku-performance', 'Evaluasi_SKU')"
+            class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-slate-50 flex items-center gap-1.5 text-slate-700">
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
             Export CSV
           </button>
@@ -475,7 +536,8 @@
 
         <div class="overflow-x-auto rounded-lg border border-slate-200 custom-scrollbar max-h-[500px]">
           <table id="table-sku-performance" class="w-full text-xs text-left text-slate-600 whitespace-nowrap">
-            <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px] sticky top-0 z-10">
+            <thead
+              class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px] sticky top-0 z-10">
               <tr>
                 <th class="p-3">SKU Produk</th>
                 <th class="p-3 text-center">Terjual (Selesai)</th>
@@ -488,7 +550,9 @@
               </tr>
             </thead>
             <tbody id="tbody-sku-performance" class="divide-y divide-slate-100 bg-white">
-              <tr><td colspan="8" class="p-4 text-center text-slate-400">Data kosong. Silakan import file Excel.</td></tr>
+              <tr>
+                <td colspan="8" class="p-4 text-center text-slate-400">Data kosong. Silakan import file Excel.</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -499,14 +563,17 @@
 
   <div id="upload-modal" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleUploadModal(false)"></div>
-    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white w-[95%] max-w-4xl rounded-2xl shadow-2xl p-6 transition-all modal-enter" id="upload-modal-content">
-      
+    <div
+      class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white w-[95%] max-w-4xl rounded-2xl shadow-2xl p-6 transition-all modal-enter"
+      id="upload-modal-content">
+
       <div class="flex items-center justify-between mb-5 border-b border-slate-100 pb-3">
         <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
           <i data-lucide="file-spreadsheet" class="w-5 h-5 text-sky-600"></i>
           Import 6 File Laporan Integrasi
         </h2>
-        <button onclick="toggleUploadModal(false)" class="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100">
+        <button onclick="toggleUploadModal(false)"
+          class="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -515,49 +582,64 @@
         <!-- 1. Income -->
         <div class="p-3.5 bg-sky-50 rounded-xl border border-sky-100">
           <label class="block text-sm font-semibold text-sky-900 mb-0.5">1. Laporan Pendapatan (Income)</label>
-          <p class="text-[11px] text-sky-700 mb-2 truncate" title="Income.sudah dilepas.id.20260801_20260818.xlsx">Contoh: Income.sudah dilepas.id...</p>
-          <input type="file" id="file-income" accept=".xlsx, .xls, .csv" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-sky-600 file:text-white hover:file:bg-sky-700 transition-colors">
+          <p class="text-[11px] text-sky-700 mb-2 truncate" title="Income.sudah dilepas.id.20260801_20260818.xlsx">
+            Contoh: Income.sudah dilepas.id...</p>
+          <input type="file" id="file-income" accept=".xlsx, .xls, .csv"
+            class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-sky-600 file:text-white hover:file:bg-sky-700 transition-colors">
         </div>
 
         <!-- 2. Order All -->
         <div class="p-3.5 bg-blue-50 rounded-xl border border-blue-100">
           <label class="block text-sm font-semibold text-blue-900 mb-0.5">2. Laporan Semua Pesanan</label>
-          <p class="text-[11px] text-blue-700 mb-2 truncate" title="Order.all.20260801_20260803.xlsx">Contoh: Order.all.20260801...</p>
-          <input type="file" id="file-order-all" accept=".xlsx, .xls, .csv" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition-colors">
+          <p class="text-[11px] text-blue-700 mb-2 truncate" title="Order.all.20260801_20260803.xlsx">Contoh:
+            Order.all.20260801...</p>
+          <input type="file" id="file-order-all" accept=".xlsx, .xls, .csv"
+            class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition-colors">
         </div>
 
         <!-- 3. Order Cancelled -->
         <div class="p-3.5 bg-amber-50 rounded-xl border border-amber-100">
           <label class="block text-sm font-semibold text-amber-900 mb-0.5">3. Laporan Pesanan Batal</label>
-          <p class="text-[11px] text-amber-700 mb-2 truncate" title="Order.cancelled.20260801_20260819_part_1_of_1_2.xlsx">Contoh: Order.cancelled.20260801...</p>
-          <input type="file" id="file-order-cancelled" accept=".xlsx, .xls, .csv" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-700 transition-colors">
+          <p class="text-[11px] text-amber-700 mb-2 truncate"
+            title="Order.cancelled.20260801_20260819_part_1_of_1_2.xlsx">Contoh: Order.cancelled.20260801...</p>
+          <input type="file" id="file-order-cancelled" accept=".xlsx, .xls, .csv"
+            class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-700 transition-colors">
         </div>
 
         <!-- 4. Order Failed Delivery -->
         <div class="p-3.5 bg-orange-50 rounded-xl border border-orange-100">
           <label class="block text-sm font-semibold text-orange-900 mb-0.5">4. Laporan Gagal Kirim</label>
-          <p class="text-[11px] text-orange-700 mb-2 truncate" title="Order.failed_delivery.20260801_20260819_part_1_of_1_2.xlsx">Contoh: Order.failed_delivery.20260801...</p>
-          <input type="file" id="file-order-failed" accept=".xlsx, .xls, .csv" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-orange-600 file:text-white hover:file:bg-orange-700 transition-colors">
+          <p class="text-[11px] text-orange-700 mb-2 truncate"
+            title="Order.failed_delivery.20260801_20260819_part_1_of_1_2.xlsx">Contoh: Order.failed_delivery.20260801...
+          </p>
+          <input type="file" id="file-order-failed" accept=".xlsx, .xls, .csv"
+            class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-orange-600 file:text-white hover:file:bg-orange-700 transition-colors">
         </div>
 
         <!-- 5. Order Return Refund -->
         <div class="p-3.5 bg-rose-50 rounded-xl border border-rose-100">
           <label class="block text-sm font-semibold text-rose-900 mb-0.5">5. Laporan Retur & Pengembalian</label>
-          <p class="text-[11px] text-rose-700 mb-2 truncate" title="Order.return_refund.20260801_20260819_part_1_of_1_2.xls">Contoh: Order.return_refund.20260801...</p>
-          <input type="file" id="file-order-return" accept=".xlsx, .xls, .csv" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-rose-600 file:text-white hover:file:bg-rose-700 transition-colors">
+          <p class="text-[11px] text-rose-700 mb-2 truncate"
+            title="Order.return_refund.20260801_20260819_part_1_of_1_2.xls">Contoh: Order.return_refund.20260801...</p>
+          <input type="file" id="file-order-return" accept=".xlsx, .xls, .csv"
+            class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-rose-600 file:text-white hover:file:bg-rose-700 transition-colors">
         </div>
 
         <!-- 6. Master HPP -->
         <div class="p-3.5 bg-indigo-50 rounded-xl border border-indigo-100">
           <label class="block text-sm font-semibold text-indigo-900 mb-0.5">6. Data Master HPP</label>
-          <p class="text-[11px] text-indigo-700 mb-2 truncate" title="DATA HPP TELEO (8).xlsx">Contoh: DATA HPP TELEO...</p>
-          <input type="file" id="file-hpp" accept=".xlsx, .xls, .csv" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 transition-colors">
+          <p class="text-[11px] text-indigo-700 mb-2 truncate" title="DATA HPP TELEO (8).xlsx">Contoh: DATA HPP TELEO...
+          </p>
+          <input type="file" id="file-hpp" accept=".xlsx, .xls, .csv"
+            class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 transition-colors">
         </div>
       </div>
 
       <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-slate-100">
-        <button onclick="toggleUploadModal(false)" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Batal</button>
-        <button onclick="processUploadedFiles()" class="px-6 py-2 text-sm font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-lg shadow-md shadow-sky-500/30 transition-all flex items-center gap-2">
+        <button onclick="toggleUploadModal(false)"
+          class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Batal</button>
+        <button onclick="processUploadedFiles()"
+          class="px-6 py-2 text-sm font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-lg shadow-md shadow-sky-500/30 transition-all flex items-center gap-2">
           <i data-lucide="cpu" class="w-4 h-4"></i> Proses Integrasi
         </button>
       </div>
@@ -590,7 +672,7 @@
         btn.classList.add('text-slate-600');
       });
       const activeBtn = document.getElementById(`tab-btn-${tabId}`);
-      if(activeBtn) {
+      if (activeBtn) {
         activeBtn.classList.remove('text-slate-600');
         activeBtn.classList.add('bg-sky-50', 'text-sky-700', 'font-semibold');
       }
@@ -615,18 +697,18 @@
 
     // Reset Data
     function resetAllData(e) {
-      if(confirm('Anda yakin ingin menghapus semua data dashboard?')) {
+      if (confirm('Anda yakin ingin menghapus semua data dashboard?')) {
         appData = { orders: [], returns: [], skuStats: {}, summary: { total: 0, completed: 0, returned: 0, cancelled: 0, income: 0, hpp: 0, realProfit: 0, lossHPP: 0, lossFee: 0 } };
         document.getElementById('data-status-badge').classList.add('hidden');
-        
+
         // Mengosongkan ke-6 file input
-        if(document.getElementById('file-income')) document.getElementById('file-income').value = '';
-        if(document.getElementById('file-order-all')) document.getElementById('file-order-all').value = '';
-        if(document.getElementById('file-order-cancelled')) document.getElementById('file-order-cancelled').value = '';
-        if(document.getElementById('file-order-failed')) document.getElementById('file-order-failed').value = '';
-        if(document.getElementById('file-order-return')) document.getElementById('file-order-return').value = '';
-        if(document.getElementById('file-hpp')) document.getElementById('file-hpp').value = '';
-        
+        if (document.getElementById('file-income')) document.getElementById('file-income').value = '';
+        if (document.getElementById('file-order-all')) document.getElementById('file-order-all').value = '';
+        if (document.getElementById('file-order-cancelled')) document.getElementById('file-order-cancelled').value = '';
+        if (document.getElementById('file-order-failed')) document.getElementById('file-order-failed').value = '';
+        if (document.getElementById('file-order-return')) document.getElementById('file-order-return').value = '';
+        if (document.getElementById('file-hpp')) document.getElementById('file-hpp').value = '';
+
         renderDashboard();
       }
     }
@@ -636,15 +718,15 @@
       const table = document.getElementById(tableId);
       let csv = [];
       const rows = table.querySelectorAll('tr');
-      
+
       for (let i = 0; i < rows.length; i++) {
         let row = [], cols = rows[i].querySelectorAll('td, th');
-        for (let j = 0; j < cols.length; j++) 
+        for (let j = 0; j < cols.length; j++)
           row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
         csv.push(row.join(','));
       }
-      
-      const csvFile = new Blob([csv.join('\n')], {type: 'text/csv'});
+
+      const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
       const downloadLink = document.createElement('a');
       downloadLink.download = filename + '.csv';
       downloadLink.href = window.URL.createObjectURL(csvFile);
@@ -654,13 +736,353 @@
       document.body.removeChild(downloadLink);
     }
 
-    // Simulasi Proses Integrasi File (Karena ini mock, kita langsung load demo data kalau tidak ada parser sungguhan yg diakses lokal)
-    function processUploadedFiles() {
-      // Dalam implementasi nyata, di sini akan pakai SheetJS untuk membaca files.
-      // e.g., XLSX.read() -> mapping order dengan master HPP -> set appData -> renderDashboard().
-      alert('Fitur unggah Excel berfungsi pada backend nyata. Memuat demo data sebagai simulasi...');
-      toggleUploadModal(false);
-      loadDemoData();
+    // ========== REAL EXCEL PROCESSING (SheetJS) ==========
+
+    // Helper: baca file sebagai ArrayBuffer
+    function readFileAsArrayBuffer(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = () => reject(new Error('Gagal membaca file: ' + file.name));
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    // Helper: parse file Excel -> array of object rows
+    async function parseExcel(file) {
+      const ab = await readFileAsArrayBuffer(file);
+      const wb = XLSX.read(ab, { type: 'array', cellDates: true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      // header:1 -> array-of-arrays, lalu kita ambil baris pertama sebagai header
+      const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      if (raw.length < 2) return [];
+
+      // Temukan baris header (baris pertama yang tidak kosong)
+      let headerRowIdx = 0;
+      for (let i = 0; i < Math.min(5, raw.length); i++) {
+        if (raw[i].some(c => c !== '')) { headerRowIdx = i; break; }
+      }
+      const headers = raw[headerRowIdx].map(h => String(h).trim());
+      const rows = [];
+      for (let i = headerRowIdx + 1; i < raw.length; i++) {
+        if (raw[i].every(c => c === '' || c === null || c === undefined)) continue;
+        const obj = {};
+        headers.forEach((h, j) => { obj[h] = raw[i][j]; });
+        rows.push(obj);
+      }
+      return rows;
+    }
+
+    // Helper: cari nama kolom dengan fuzzy matching (case-insensitive, partial)
+    function findCol(row, candidates) {
+      const keys = Object.keys(row);
+      for (const cand of candidates) {
+        const found = keys.find(k => k.toLowerCase().includes(cand.toLowerCase()));
+        if (found !== undefined) return found;
+      }
+      return null;
+    }
+
+    // Helper: parse angka dari berbagai format (bisa string dengan titik/koma, atau number)
+    function parseNum(val) {
+      if (val === null || val === undefined || val === '') return 0;
+      if (typeof val === 'number') return val;
+      const s = String(val).replace(/[Rp\s]/g, '').replace(/\./g, '').replace(',', '.');
+      return parseFloat(s) || 0;
+    }
+
+    // Helper: format tanggal menjadi YYYY-MM-DD
+    function parseDate(val) {
+      if (!val) return '';
+      if (val instanceof Date) return val.toISOString().split('T')[0];
+      const s = String(val);
+      // Format: DD/MM/YYYY HH:MM atau YYYY-MM-DD
+      const m1 = s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+      if (m1) return `${m1[3]}-${m1[2]}-${m1[1]}`;
+      const m2 = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+      if (m2) return `${m2[1]}-${m2[2]}-${m2[3]}`;
+      return s.slice(0, 10);
+    }
+
+    // Proses Integrasi File Nyata
+    async function processUploadedFiles() {
+      const fileIncome = document.getElementById('file-income').files[0];
+      const fileOrderAll = document.getElementById('file-order-all').files[0];
+      const fileCancelled = document.getElementById('file-order-cancelled').files[0];
+      const fileFailed = document.getElementById('file-order-failed').files[0];
+      const fileReturn = document.getElementById('file-order-return').files[0];
+      const fileHpp = document.getElementById('file-hpp').files[0];
+
+      // Minimal: butuh setidaknya 1 file untuk diproses
+      const anyFile = fileIncome || fileOrderAll || fileCancelled || fileFailed || fileReturn || fileHpp;
+      if (!anyFile) {
+        alert('Silakan pilih minimal satu file Excel sebelum memproses.');
+        return;
+      }
+
+      // Tampilkan loading state
+      const btnProses = document.querySelector('button[onclick="processUploadedFiles()"]');
+      const origHTML = btnProses.innerHTML;
+      btnProses.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memproses...';
+      btnProses.disabled = true;
+      lucide.createIcons();
+
+      try {
+        // ---- 1. Parse Master HPP (SKU -> harga pokok per unit) ----
+        const hppMap = {}; // key: SKU string (lowercase-trimmed), value: harga pokok
+        if (fileHpp) {
+          const hppRows = await parseExcel(fileHpp);
+          if (hppRows.length > 0) {
+            const sample = hppRows[0];
+            const colSku = findCol(sample, ['SKU', 'Kode', 'sku referensi', 'kode produk', 'variasi']);
+            const colHpp = findCol(sample, ['HPP', 'Harga Pokok', 'Modal', 'Cost', 'Harga Beli', 'harga modal']);
+            hppRows.forEach(r => {
+              const sku = colSku ? String(r[colSku] || '').trim() : '';
+              const hpp = colHpp ? parseNum(r[colHpp]) : 0;
+              if (sku && hpp > 0) hppMap[sku.toLowerCase()] = hpp;
+            });
+          }
+        }
+
+        // ---- 2. Parse Income (Order ID -> net dana cair) ----
+        const incomeMap = {}; // key: order_id, value: net income (dana cair)
+        if (fileIncome) {
+          const incRows = await parseExcel(fileIncome);
+          if (incRows.length > 0) {
+            const sample = incRows[0];
+            const colOrderId = findCol(sample, ['No. Pesanan', 'No Pesanan', 'Order ID', 'order id', 'nomor pesanan', 'No.Pesanan']);
+            // Kolom dana cair bisa: "Dana yang Dicairkan", "Total Penghasilan", "Pendapatan Bersih", "Penghasilan Bersih"
+            const colIncome = findCol(sample, ['Dana yang Dicairkan', 'Total Penghasilan', 'Pendapatan Bersih', 'Penghasilan Bersih', 'Net', 'Income', 'Cair', 'Diterima']);
+            incRows.forEach(r => {
+              const orderId = colOrderId ? String(r[colOrderId] || '').trim() : '';
+              const net = colIncome ? parseNum(r[colIncome]) : 0;
+              if (orderId) incomeMap[orderId] = net;
+            });
+          }
+        }
+
+        // ---- 3. Helper: get HPP dari SKU ----
+        function getHpp(skuRaw) {
+          if (!skuRaw) return 0;
+          const sku = String(skuRaw).trim().toLowerCase();
+          // Coba exact match dulu
+          if (hppMap[sku] !== undefined) return hppMap[sku];
+          // Coba partial match
+          for (const k of Object.keys(hppMap)) {
+            if (sku.includes(k) || k.includes(sku)) return hppMap[k];
+          }
+          return 0;
+        }
+
+        // ---- 4. Reset appData ----
+        appData.orders = [];
+        appData.returns = [];
+        appData.skuStats = {};
+        const sum = appData.summary;
+        sum.total = 0; sum.completed = 0; sum.returned = 0; sum.cancelled = 0;
+        sum.income = 0; sum.hpp = 0; sum.realProfit = 0; sum.lossHPP = 0; sum.lossFee = 0;
+
+        // ---- 5. Proses Pesanan Selesai (Order All) ----
+        if (fileOrderAll) {
+          const rows = await parseExcel(fileOrderAll);
+          if (rows.length > 0) {
+            const s = rows[0];
+            const cOrdId = findCol(s, ['No. Pesanan', 'No Pesanan', 'Order ID', 'nomor pesanan']);
+            const cStatus = findCol(s, ['Status Pesanan', 'Status', 'Order Status']);
+            const cSku = findCol(s, ['SKU Referensi', 'SKU', 'Kode', 'sku']);
+            const cNama = findCol(s, ['Nama Produk', 'Produk', 'nama produk', 'Item Name']);
+            const cQty = findCol(s, ['Jumlah', 'Qty', 'quantity', 'jumlah']);
+            const cHarga = findCol(s, ['Harga Setelah Diskon', 'Harga', 'Total Harga', 'Subtotal', 'harga']);
+            const cTgl = findCol(s, ['Waktu Pesanan', 'Tanggal', 'Waktu', 'Order Time', 'Tgl']);
+
+            rows.forEach(r => {
+              const ordId = cOrdId ? String(r[cOrdId] || '').trim() : '';
+              const status = cStatus ? String(r[cStatus] || '').trim() : '';
+              const sku = cSku ? String(r[cSku] || '').trim() : '';
+              const nama = cNama ? String(r[cNama] || '').trim() : sku;
+              const qty = cQty ? (parseNum(r[cQty]) || 1) : 1;
+              const harga = cHarga ? parseNum(r[cHarga]) : 0;
+              const tgl = cTgl ? parseDate(r[cTgl]) : '';
+
+              if (!ordId) return;
+
+              // Apakah pesanan selesai?
+              const isSelesai = /selesai|complete|delivered|sukses/i.test(status);
+              if (!isSelesai) return; // Order batal/retur diproses di file terpisah
+
+              sum.total++;
+              sum.completed++;
+
+              // Dana cair: dari income file jika ada, jika tidak gunakan harga
+              const netIncome = incomeMap[ordId] !== undefined ? incomeMap[ordId] : harga;
+              const hppUnit = getHpp(sku);
+              const totalHpp = hppUnit * qty;
+              const profit = netIncome - totalHpp;
+
+              sum.income += netIncome;
+              sum.hpp += totalHpp;
+              sum.realProfit += profit;
+
+              // SKU stats
+              if (!appData.skuStats[sku]) {
+                appData.skuStats[sku] = { name: nama || sku, sold: 0, ret: 0, income: 0, hpp: 0, profit: 0 };
+              }
+              appData.skuStats[sku].sold += qty;
+              appData.skuStats[sku].income += netIncome;
+              appData.skuStats[sku].hpp += totalHpp;
+              appData.skuStats[sku].profit += profit;
+
+              appData.orders.push({ id: ordId, date: tgl, sku: sku, qty: qty, income: netIncome, hpp: totalHpp, profit: profit });
+            });
+          }
+        }
+
+        // ---- 6. Proses file Cancelled ----
+        async function processCancelledFile(file, statusLabel) {
+          const rows = await parseExcel(file);
+          if (rows.length === 0) return;
+          const s = rows[0];
+          const cOrdId = findCol(s, ['No. Pesanan', 'No Pesanan', 'Order ID', 'nomor pesanan']);
+          const cSku = findCol(s, ['SKU Referensi', 'SKU', 'Kode']);
+          const cNama = findCol(s, ['Nama Produk', 'Produk']);
+          const cQty = findCol(s, ['Jumlah', 'Qty', 'quantity']);
+
+          rows.forEach(r => {
+            const ordId = cOrdId ? String(r[cOrdId] || '').trim() : '';
+            const sku = cSku ? String(r[cSku] || '').trim() : '';
+            const nama = cNama ? String(r[cNama] || '').trim() : sku;
+            const qty = cQty ? (parseNum(r[cQty]) || 1) : 1;
+            if (!ordId) return;
+
+            sum.total++;
+            sum.cancelled++;
+
+            // Batal tidak ada income, kerugian hanya HPP (jika barang sudah dikeluarkan)
+            const hppUnit = getHpp(sku);
+            const lossHPP = 0; // Batal umumnya tidak ada kerugian HPP karena barang dikembalikan
+            const ongkir = 0;
+
+            if (!appData.skuStats[sku] && sku) {
+              appData.skuStats[sku] = { name: nama || sku, sold: 0, ret: 0, income: 0, hpp: 0, profit: 0 };
+            }
+
+            appData.returns.push({ id: ordId, sku: sku, status: statusLabel, qty: qty, lossHPP: lossHPP, fee: ongkir, total: lossHPP + ongkir });
+          });
+        }
+
+        if (fileCancelled) await processCancelledFile(fileCancelled, 'Batal');
+
+        // ---- 7. Proses file Failed Delivery ----
+        if (fileFailed) {
+          const rows = await parseExcel(fileFailed);
+          if (rows.length > 0) {
+            const s = rows[0];
+            const cOrdId = findCol(s, ['No. Pesanan', 'No Pesanan', 'Order ID']);
+            const cSku = findCol(s, ['SKU Referensi', 'SKU', 'Kode']);
+            const cNama = findCol(s, ['Nama Produk', 'Produk']);
+            const cQty = findCol(s, ['Jumlah', 'Qty', 'quantity']);
+            // Biaya gagal kirim / ongkir penalti
+            const cFee = findCol(s, ['Biaya', 'Fee', 'Ongkir', 'Penalti', 'biaya']);
+
+            rows.forEach(r => {
+              const ordId = cOrdId ? String(r[cOrdId] || '').trim() : '';
+              const sku = cSku ? String(r[cSku] || '').trim() : '';
+              const nama = cNama ? String(r[cNama] || '').trim() : sku;
+              const qty = cQty ? (parseNum(r[cQty]) || 1) : 1;
+              const fee = cFee ? parseNum(r[cFee]) : 0;
+              if (!ordId) return;
+
+              sum.total++;
+              sum.cancelled++;
+
+              const hppUnit = getHpp(sku);
+              const lossHPP = hppUnit * qty * 0.5; // estimasi kerusakan 50% barang gagal kirim
+              const lossFee = fee;
+
+              sum.lossHPP += lossHPP;
+              sum.lossFee += lossFee;
+              sum.realProfit -= (lossHPP + lossFee);
+
+              if (!appData.skuStats[sku] && sku) {
+                appData.skuStats[sku] = { name: nama || sku, sold: 0, ret: 0, income: 0, hpp: 0, profit: 0 };
+              }
+              if (sku && appData.skuStats[sku]) appData.skuStats[sku].ret += qty;
+
+              appData.returns.push({ id: ordId, sku: sku, status: 'Gagal Kirim', qty: qty, lossHPP: lossHPP, fee: lossFee, total: lossHPP + lossFee });
+            });
+          }
+        }
+
+        // ---- 8. Proses file Return/Refund ----
+        if (fileReturn) {
+          const rows = await parseExcel(fileReturn);
+          if (rows.length > 0) {
+            const s = rows[0];
+            const cOrdId = findCol(s, ['No. Pesanan', 'No Pesanan', 'Order ID']);
+            const cSku = findCol(s, ['SKU Referensi', 'SKU', 'Kode']);
+            const cNama = findCol(s, ['Nama Produk', 'Produk']);
+            const cQty = findCol(s, ['Jumlah', 'Qty', 'quantity']);
+            const cFee = findCol(s, ['Biaya', 'Fee', 'Ongkir', 'Penalti']);
+
+            rows.forEach(r => {
+              const ordId = cOrdId ? String(r[cOrdId] || '').trim() : '';
+              const sku = cSku ? String(r[cSku] || '').trim() : '';
+              const nama = cNama ? String(r[cNama] || '').trim() : sku;
+              const qty = cQty ? (parseNum(r[cQty]) || 1) : 1;
+              const fee = cFee ? parseNum(r[cFee]) : 0;
+              if (!ordId) return;
+
+              sum.total++;
+              sum.returned++;
+
+              const hppUnit = getHpp(sku);
+              const lossHPP = hppUnit * qty * 0.5; // estimasi barang rusak 50% saat retur
+              const lossFee = fee > 0 ? fee : 0;
+
+              sum.lossHPP += lossHPP;
+              sum.lossFee += lossFee;
+              sum.realProfit -= (lossHPP + lossFee);
+
+              if (!appData.skuStats[sku] && sku) {
+                appData.skuStats[sku] = { name: nama || sku, sold: 0, ret: 0, income: 0, hpp: 0, profit: 0 };
+              }
+              if (sku && appData.skuStats[sku]) appData.skuStats[sku].ret += qty;
+
+              appData.returns.push({ id: ordId, sku: sku, status: 'Retur', qty: qty, lossHPP: lossHPP, fee: lossFee, total: lossHPP + lossFee });
+            });
+          }
+        }
+
+        // ---- 9. Hitung total unit KPI ----
+        const totalUnitSold = appData.orders.reduce((a, o) => a + o.qty, 0);
+        document.getElementById('kpi-unit-sold-text').innerHTML = `<span>${totalUnitSold.toLocaleString()} unit barang</span>`;
+        const totalUnitCair = appData.orders.reduce((a, o) => a + o.qty, 0);
+        document.getElementById('kpi-completed-units').innerText = `${totalUnitCair.toLocaleString()} unit cair`;
+
+        // ---- 10. Update badge & render ----
+        document.getElementById('data-status-badge').classList.remove('hidden');
+        const filesLoaded = [fileIncome && 'Income', fileOrderAll && 'Order', fileCancelled && 'Batal', fileFailed && 'Gagal Kirim', fileReturn && 'Retur', fileHpp && 'HPP'].filter(Boolean).join(', ');
+        document.getElementById('data-source-text').innerText = `Data Real (${filesLoaded})`;
+
+        toggleUploadModal(false);
+        renderDashboard();
+
+        // Notifikasi sukses
+        const n = document.createElement('div');
+        n.className = 'fixed bottom-4 right-4 z-50 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-lg text-sm font-semibold flex items-center gap-2 transition-all';
+        n.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          Data berhasil diproses! ${sum.total} pesanan ditemukan.`;
+        document.body.appendChild(n);
+        setTimeout(() => n.remove(), 4000);
+
+      } catch (err) {
+        alert('Terjadi kesalahan saat memproses file:\n' + err.message + '\n\nPastikan format file sesuai (Shopee/Marketplace standar).');
+        console.error(err);
+      } finally {
+        btnProses.innerHTML = origHTML;
+        btnProses.disabled = false;
+        lucide.createIcons();
+      }
     }
 
     // Load Demo Data for preview purposes
@@ -670,19 +1092,19 @@
       const skus = ['SKU-TSHIRT-BLK', 'SKU-JEANS-BLU', 'SKU-SNEAKER-WHT', 'SKU-JACKET-OVR', 'SKU-HAT-BSE'];
       const hppMap = { 'SKU-TSHIRT-BLK': 45000, 'SKU-JEANS-BLU': 85000, 'SKU-SNEAKER-WHT': 120000, 'SKU-JACKET-OVR': 110000, 'SKU-HAT-BSE': 25000 };
       const priceMap = { 'SKU-TSHIRT-BLK': 95000, 'SKU-JEANS-BLU': 180000, 'SKU-SNEAKER-WHT': 250000, 'SKU-JACKET-OVR': 220000, 'SKU-HAT-BSE': 60000 };
-      
+
       appData.orders = [];
       appData.returns = [];
       appData.skuStats = {};
-      
+
       let sum = appData.summary;
-      sum.total = 125; sum.completed = 0; sum.returned = 0; sum.cancelled = 0; 
+      sum.total = 125; sum.completed = 0; sum.returned = 0; sum.cancelled = 0;
       sum.income = 0; sum.hpp = 0; sum.realProfit = 0; sum.lossHPP = 0; sum.lossFee = 0;
 
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 15);
 
-      for(let i=1; i<=125; i++) {
+      for (let i = 1; i <= 125; i++) {
         let status = statuses[Math.floor(Math.random() * statuses.length)];
         let sku = skus[Math.floor(Math.random() * skus.length)];
         let qty = Math.floor(Math.random() * 2) + 1;
@@ -690,27 +1112,27 @@
         let price = priceMap[sku];
         let orderDate = new Date(startDate.getTime() + Math.random() * (15 * 24 * 60 * 60 * 1000));
         let dateStr = orderDate.toISOString().split('T')[0];
-        
-        if(!appData.skuStats[sku]) {
+
+        if (!appData.skuStats[sku]) {
           appData.skuStats[sku] = { name: `Produk ${sku.split('-')[1]}`, sold: 0, ret: 0, income: 0, hpp: 0, profit: 0 };
         }
 
-        if(status === 'Selesai') {
+        if (status === 'Selesai') {
           sum.completed++;
           let netIncome = (price * qty) - 5000; // minus admin fee mock
           let totalHpp = hpp * qty;
           let profit = netIncome - totalHpp;
-          
+
           sum.income += netIncome;
           sum.hpp += totalHpp;
           sum.realProfit += profit;
-          
+
           appData.skuStats[sku].sold += qty;
           appData.skuStats[sku].income += netIncome;
           appData.skuStats[sku].hpp += totalHpp;
           appData.skuStats[sku].profit += profit;
 
-          appData.orders.push({ id: `INV-${1000+i}`, date: dateStr, sku: sku, qty: qty, income: netIncome, hpp: totalHpp, profit: profit });
+          appData.orders.push({ id: `INV-${1000 + i}`, date: dateStr, sku: sku, qty: qty, income: netIncome, hpp: totalHpp, profit: profit });
         } else {
           let lossHPP = status === 'Retur' ? (hpp * qty * 0.5) : 0; // asumsi barang rusak 50%
           let ongkir = 12000; // retur fee
@@ -718,23 +1140,23 @@
           sum.lossFee += ongkir;
           sum.realProfit -= (lossHPP + ongkir);
 
-          if(status === 'Retur') { sum.returned++; appData.skuStats[sku].ret += qty; }
+          if (status === 'Retur') { sum.returned++; appData.skuStats[sku].ret += qty; }
           else sum.cancelled++;
-          
-          appData.returns.push({ id: `INV-${1000+i}`, sku: sku, status: status, qty: qty, lossHPP: lossHPP, fee: ongkir, total: lossHPP + ongkir });
+
+          appData.returns.push({ id: `INV-${1000 + i}`, sku: sku, status: status, qty: qty, lossHPP: lossHPP, fee: ongkir, total: lossHPP + ongkir });
         }
       }
 
       document.getElementById('data-status-badge').classList.remove('hidden');
       document.getElementById('data-source-text').innerText = "Data Mockup (Simulasi)";
-      
+
       renderDashboard();
     }
 
     // Render Data to UI
     function renderDashboard() {
       const sum = appData.summary;
-      
+
       // Update KPIs
       document.getElementById('kpi-total-orders').innerText = sum.total.toLocaleString();
       document.getElementById('kpi-completed-orders').innerText = sum.completed.toLocaleString();
@@ -743,7 +1165,7 @@
       document.getElementById('kpi-net-income').innerText = formatRp(sum.income);
       document.getElementById('kpi-total-hpp').innerText = formatRp(sum.hpp);
       document.getElementById('kpi-real-profit').innerText = formatRp(sum.realProfit);
-      
+
       let margin = sum.income > 0 ? (sum.realProfit / sum.income * 100).toFixed(1) : 0;
       document.getElementById('kpi-profit-margin').innerText = margin + '%';
 
@@ -771,11 +1193,11 @@
     function renderOrdersTable() {
       const tbody = document.getElementById('tbody-completed-orders');
       tbody.innerHTML = '';
-      if(appData.orders.length === 0) {
+      if (appData.orders.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400">Data kosong.</td></tr>';
         return;
       }
-      appData.orders.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(o => {
+      appData.orders.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(o => {
         let tr = `<tr class="hover:bg-slate-50 transition-colors">
           <td class="p-3 font-medium text-slate-800">${o.id}</td>
           <td class="p-3">${o.date}</td>
@@ -792,7 +1214,7 @@
     function renderReturnsTable() {
       const tbody = document.getElementById('tbody-return-orders');
       tbody.innerHTML = '';
-      if(appData.returns.length === 0) {
+      if (appData.returns.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400">Data kosong.</td></tr>';
         return;
       }
@@ -815,23 +1237,23 @@
       const tbody = document.getElementById('tbody-sku-performance');
       const topList = document.getElementById('top-profit-sku-list');
       const warnList = document.getElementById('high-return-sku-list');
-      
+
       tbody.innerHTML = ''; topList.innerHTML = ''; warnList.innerHTML = '';
-      
+
       let skuArray = Object.keys(appData.skuStats).map(k => ({ sku: k, ...appData.skuStats[k] }));
-      
-      if(skuArray.length === 0) {
+
+      if (skuArray.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-400">Data kosong.</td></tr>';
         topList.innerHTML = warnList.innerHTML = '<div class="p-4 text-center text-slate-400 text-xs">Belum ada data</div>';
         return;
       }
 
       // Populate Table
-      skuArray.sort((a,b) => b.profit - a.profit).forEach(s => {
+      skuArray.sort((a, b) => b.profit - a.profit).forEach(s => {
         let totalQty = s.sold + s.ret;
         let retRate = totalQty > 0 ? (s.ret / totalQty * 100).toFixed(1) : 0;
         let margin = s.income > 0 ? (s.profit / s.income * 100).toFixed(1) : 0;
-        
+
         let tr = `<tr class="hover:bg-slate-50 transition-colors">
           <td class="p-3 font-medium text-slate-800">${s.sku}<br><span class="text-[10px] text-slate-400 font-normal">${s.name}</span></td>
           <td class="p-3 text-center text-emerald-600 font-medium">${s.sold}</td>
@@ -850,7 +1272,7 @@
         topList.innerHTML += `
           <div class="py-2.5 flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <span class="text-xs font-bold text-slate-400 w-4">${i+1}.</span>
+              <span class="text-xs font-bold text-slate-400 w-4">${i + 1}.</span>
               <div>
                 <p class="text-xs font-semibold text-slate-800">${s.sku}</p>
                 <p class="text-[10px] text-slate-500">${s.sold} Terjual</p>
@@ -861,8 +1283,8 @@
       });
 
       // Populate Warning List (>3% Return Rate)
-      let warnings = skuArray.filter(s => ((s.sold + s.ret) > 0) && (s.ret / (s.sold + s.ret) * 100) > 3).sort((a,b) => b.ret - a.ret);
-      if(warnings.length === 0) warnList.innerHTML = '<div class="p-4 text-center text-emerald-500 text-xs">Semua SKU dalam batas aman.</div>';
+      let warnings = skuArray.filter(s => ((s.sold + s.ret) > 0) && (s.ret / (s.sold + s.ret) * 100) > 3).sort((a, b) => b.ret - a.ret);
+      if (warnings.length === 0) warnList.innerHTML = '<div class="p-4 text-center text-emerald-500 text-xs">Semua SKU dalam batas aman.</div>';
       warnings.forEach(s => {
         let retRate = (s.ret / (s.sold + s.ret) * 100).toFixed(1);
         warnList.innerHTML += `
@@ -884,8 +1306,8 @@
       document.getElementById('chart-legend-cancelled').innerText = sum.cancelled + " Order";
 
       const pieCtx = document.getElementById('chart-status-pie').getContext('2d');
-      if(charts.status) charts.status.destroy();
-      
+      if (charts.status) charts.status.destroy();
+
       charts.status = new Chart(pieCtx, {
         type: 'doughnut',
         data: {
@@ -903,7 +1325,7 @@
       // Data untuk Line Chart (Agregasi harian)
       let dailyData = {};
       appData.orders.forEach(o => {
-        if(!dailyData[o.date]) dailyData[o.date] = { income: 0, profit: 0 };
+        if (!dailyData[o.date]) dailyData[o.date] = { income: 0, profit: 0 };
         dailyData[o.date].income += o.income;
         dailyData[o.date].profit += o.profit;
       });
@@ -913,7 +1335,7 @@
       let profits = dates.map(d => dailyData[d].profit);
 
       const lineCtx = document.getElementById('chart-growth-trend').getContext('2d');
-      if(charts.growth) charts.growth.destroy();
+      if (charts.growth) charts.growth.destroy();
 
       charts.growth = new Chart(lineCtx, {
         type: 'line',
@@ -945,7 +1367,7 @@
           maintainAspectRatio: false,
           plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } } },
           scales: {
-            y: { beginAtZero: true, ticks: { callback: (val) => 'Rp ' + (val/1000) + 'K', font: { size: 10 } } },
+            y: { beginAtZero: true, ticks: { callback: (val) => 'Rp ' + (val / 1000) + 'K', font: { size: 10 } } },
             x: { ticks: { font: { size: 10 } } }
           }
         }
@@ -953,4 +1375,5 @@
     }
   </script>
 </body>
+
 </html>
