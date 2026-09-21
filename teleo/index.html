@@ -175,6 +175,14 @@
                             class="ml-1 bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full text-[10px]">0</span>
                     </button>
 
+                    <button onclick="switchTab('failed')" id="tab-btn-failed"
+                        class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100 whitespace-nowrap">
+                        <i data-lucide="truck" class="w-4 h-4 text-orange-600"></i>
+                        <span>Gagal Kirim</span>
+                        <span id="badge-count-failed"
+                            class="ml-1 bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full text-[10px]">0</span>
+                    </button>
+
                     <button onclick="switchTab('profit')" id="tab-btn-profit"
                         class="tab-btn px-3.5 py-2 rounded-lg flex items-center gap-2 transition-all text-slate-600 hover:bg-slate-100 whitespace-nowrap">
                         <i data-lucide="wallet" class="w-4 h-4 text-amber-600"></i>
@@ -362,6 +370,11 @@
                                 Dini:</span>
                             <span id="chart-legend-cancelled" class="font-semibold text-slate-900">0 Order</span>
                         </div>
+                        <div class="flex justify-between text-slate-600">
+                            <span class="flex items-center gap-1.5"><span
+                                    class="w-2.5 h-2.5 rounded-full bg-orange-500"></span>Gagal Kirim:</span>
+                            <span id="chart-legend-failed" class="font-semibold text-slate-900">0 Order</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -495,9 +508,9 @@
                     <div>
                         <h3 class="font-bold text-slate-800 text-base flex items-center gap-2 text-amber-700">
                             <i data-lucide="x-circle" class="w-5 h-5 text-amber-600"></i>
-                            Laporan Pesanan Batal & Gagal Kirim
+                            Laporan Pesanan Batal
                         </h3>
-                        <p class="text-xs text-slate-500">Menganalisis order yang dibatalkan atau gagal kirim ke pembeli
+                        <p class="text-xs text-slate-500">Menganalisis order yang dibatalkan dari awal
                         </p>
                     </div>
                     <button onclick="exportTableToCSV('table-cancelled-orders', 'Laporan_Pesanan_Batal')"
@@ -523,6 +536,48 @@
                         <tbody id="tbody-cancelled-orders" class="divide-y divide-slate-100 bg-white">
                             <tr>
                                 <td colspan="5" class="p-4 text-center text-slate-400">Data kosong. Silakan import file
+                                    Excel.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-content-failed" class="tab-panel space-y-4 hidden">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base flex items-center gap-2 text-orange-700">
+                            <i data-lucide="truck" class="w-5 h-5 text-orange-600"></i>
+                            Laporan Pesanan Gagal Kirim
+                        </h3>
+                        <p class="text-xs text-slate-500">Menganalisis order yang diretur kurir karena gagal kirim</p>
+                    </div>
+                    <button onclick="exportTableToCSV('table-failed-orders', 'Laporan_Pesanan_Gagal_Kirim')"
+                        class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-slate-50 flex items-center gap-1.5 text-slate-700">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                        Export CSV
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto rounded-lg border border-slate-200 custom-scrollbar max-h-96">
+                    <table id="table-failed-orders" class="w-full text-xs text-left text-slate-600 whitespace-nowrap">
+                        <thead
+                            class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 uppercase tracking-wider text-[11px] sticky top-0">
+                            <tr>
+                                <th class="p-3">No. Pesanan</th>
+                                <th class="p-3">SKU Produk</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3 text-center">Qty</th>
+                                <th class="p-3 text-right text-rose-600">Rugi HPP</th>
+                                <th class="p-3 text-right text-amber-600">Ongkir Retur</th>
+                                <th class="p-3 text-right">Total Kerugian</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-failed-orders" class="divide-y divide-slate-100 bg-white">
+                            <tr>
+                                <td colspan="7" class="p-4 text-center text-slate-400">Data kosong. Silakan import file
                                     Excel.</td>
                             </tr>
                         </tbody>
@@ -1062,8 +1117,8 @@
                 appData.returns = [];
                 appData.skuStats = {};
                 const sum = appData.summary;
-                sum.total = 0; sum.completed = 0; sum.returned = 0; sum.cancelled = 0;
-                sum.returnedQty = 0; sum.cancelledQty = 0;
+                sum.total = 0; sum.completed = 0; sum.returned = 0; sum.cancelled = 0; sum.failed = 0;
+                sum.returnedQty = 0; sum.cancelledQty = 0; sum.failedQty = 0;
                 sum.income = 0; sum.hpp = 0; sum.realProfit = 0; sum.lossHPP = 0; sum.lossFee = 0;
 
                 // globalSeenIds: Set untuk mencegah double-count antar file
@@ -1222,8 +1277,8 @@
                             }
                             globalSeenIds.add(order.id);
                             sum.total++;
-                            sum.cancelled++;
-                            sum.cancelledQty += order.qty;
+                            sum.failed++;
+                            sum.failedQty += order.qty;
                             sum.lossHPP += order.lossHPP;
                             sum.lossFee += order.fee;
                             const skuLabel = order.skus.filter(Boolean).join(', ') || '(tanpa SKU)';
@@ -1418,7 +1473,7 @@
             appData.skuStats = {};
 
             let sum = appData.summary;
-            sum.total = 125; sum.completed = 0; sum.returned = 0; sum.cancelled = 0;
+            sum.total = 125; sum.completed = 0; sum.returned = 0; sum.cancelled = 0; sum.failed = 0;
             sum.income = 0; sum.hpp = 0; sum.realProfit = 0; sum.lossHPP = 0; sum.lossFee = 0;
 
             const startDate = new Date();
@@ -1479,8 +1534,8 @@
             // Update KPIs
             document.getElementById('kpi-total-orders').innerText = sum.total.toLocaleString();
             document.getElementById('kpi-completed-orders').innerText = sum.completed.toLocaleString();
-            document.getElementById('kpi-return-rate').innerText = sum.total > 0 ? ((sum.returned + sum.cancelled) / sum.total * 100).toFixed(1) + '%' : '0%';
-            document.getElementById('kpi-return-count-text').innerText = `${sum.returned} order (${sum.returnedQty} pcs) retur · ${sum.cancelled} order (${sum.cancelledQty} pcs) batal`;
+            document.getElementById('kpi-return-rate').innerText = sum.total > 0 ? ((sum.returned + sum.cancelled + sum.failed) / sum.total * 100).toFixed(1) + '%' : '0%';
+            document.getElementById('kpi-return-count-text').innerText = `${sum.returned} retur · ${sum.cancelled} batal · ${sum.failed} gagal`;
             document.getElementById('kpi-net-income').innerText = formatRp(sum.income);
             document.getElementById('kpi-total-hpp').innerText = formatRp(sum.hpp);
             document.getElementById('kpi-real-profit').innerText = formatRp(sum.realProfit);
@@ -1492,6 +1547,7 @@
             document.getElementById('badge-count-completed').innerText = sum.completed;
             document.getElementById('badge-count-returns').innerText = sum.returned;
             document.getElementById('badge-count-cancelled').innerText = sum.cancelled;
+            document.getElementById('badge-count-failed').innerText = sum.failed;
 
             // Update P&L Tab
             document.getElementById('pnl-income').innerText = formatRp(sum.income);
@@ -1502,6 +1558,7 @@
             renderOrdersTable();
             renderReturnsTable();
             renderCancelledTable();
+            renderFailedTable();
             renderSKUTableAndHighlights();
 
             // Render Charts
@@ -1555,7 +1612,7 @@
         function renderCancelledTable() {
             const tbody = document.getElementById('tbody-cancelled-orders');
             tbody.innerHTML = '';
-            const cancelled = appData.returns.filter(r => r.status !== 'Retur');
+            const cancelled = appData.returns.filter(r => r.status === 'Batal');
             if (cancelled.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">Data kosong.</td></tr>';
                 return;
@@ -1567,6 +1624,29 @@
           <td class="p-3"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-[10px] border border-indigo-100">${r.sku}</span></td>
           <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border ${badge}">${r.status}</span></td>
           <td class="p-3 text-center">${r.qty}</td>
+          <td class="p-3 text-right font-bold text-red-600">${formatRp(r.total)}</td>
+        </tr>`;
+                tbody.innerHTML += tr;
+            });
+        }
+
+        function renderFailedTable() {
+            const tbody = document.getElementById('tbody-failed-orders');
+            tbody.innerHTML = '';
+            const failed = appData.returns.filter(r => r.status === 'Gagal Kirim');
+            if (failed.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400">Data kosong.</td></tr>';
+                return;
+            }
+            failed.forEach(r => {
+                let badge = 'bg-orange-100 text-orange-700 border-orange-200';
+                let tr = `<tr class="hover:bg-slate-50 transition-colors">
+          <td class="p-3 font-medium text-slate-800">${r.id}</td>
+          <td class="p-3"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-[10px] border border-indigo-100">${r.sku}</span></td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border ${badge}">${r.status}</span></td>
+          <td class="p-3 text-center">${r.qty}</td>
+          <td class="p-3 text-right text-rose-600">${formatRp(r.lossHPP)}</td>
+          <td class="p-3 text-right text-amber-600">${formatRp(r.fee)}</td>
           <td class="p-3 text-right font-bold text-red-600">${formatRp(r.total)}</td>
         </tr>`;
                 tbody.innerHTML += tr;
@@ -1644,6 +1724,7 @@
             document.getElementById('chart-legend-completed').innerText = sum.completed + " Order";
             document.getElementById('chart-legend-return').innerText = sum.returned + " Order";
             document.getElementById('chart-legend-cancelled').innerText = sum.cancelled + " Order";
+            document.getElementById('chart-legend-failed').innerText = sum.failed + " Order";
 
             const pieCtx = document.getElementById('chart-status-pie').getContext('2d');
             if (charts.status) charts.status.destroy();
@@ -1651,10 +1732,10 @@
             charts.status = new Chart(pieCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Selesai', 'Retur', 'Batal'],
+                    labels: ['Selesai', 'Retur', 'Batal', 'Gagal Kirim'],
                     datasets: [{
-                        data: [sum.completed, sum.returned, sum.cancelled],
-                        backgroundColor: ['#10b981', '#f43f5e', '#fbbf24'],
+                        data: [sum.completed, sum.returned, sum.cancelled, sum.failed],
+                        backgroundColor: ['#10b981', '#f43f5e', '#fbbf24', '#f97316'],
                         borderWidth: 0,
                         hoverOffset: 4
                     }]
