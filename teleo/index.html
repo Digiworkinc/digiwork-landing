@@ -308,8 +308,7 @@
                 </div>
                 <div
                     class="bg-white border border-sky-300 rounded-lg p-2.5 shadow-xs shrink-0 font-mono text-[11px] text-slate-800">
-                    <span class="text-emerald-600 font-bold">Laba Bersih Real</span> = Dana Cair - HPP Terjual -
-                    Kerugian Retur
+                    <span class="text-emerald-600 font-bold">Laba Bersih Real</span> = Dana Cair - HPP Terjual
                 </div>
             </div>
 
@@ -545,7 +544,7 @@
                         <h4 class="font-bold text-slate-800 mb-2 border-b border-slate-200 pb-1">Pendapatan (Income)
                         </h4>
                         <div class="flex justify-between py-1 text-slate-600">
-                            <span>Pendapatan Cair (Net Income dari Marketplace)</span>
+                            <span>Total Penghasilan Cair (Net Income)</span>
                             <span id="pnl-income" class="font-medium text-slate-800">Rp 0</span>
                         </div>
                     </div>
@@ -555,27 +554,8 @@
                         <h4 class="font-bold text-slate-800 mb-2 border-b border-slate-200 pb-1">Harga Pokok Penjualan
                             (HPP)</h4>
                         <div class="flex justify-between py-1 text-slate-600">
-                            <span>HPP Barang Terjual (Pesanan Selesai)</span>
+                            <span>Total HPP Barang Terjual</span>
                             <span id="pnl-cogs" class="font-medium text-red-600">- Rp 0</span>
-                        </div>
-                        <div
-                            class="flex justify-between py-1 mt-2 font-semibold text-slate-800 bg-slate-50 p-2 rounded">
-                            <span>Laba Kotor (Gross Profit)</span>
-                            <span id="pnl-gross">Rp 0</span>
-                        </div>
-                    </div>
-
-                    <!-- Expenses / Losses -->
-                    <div class="pt-2">
-                        <h4 class="font-bold text-slate-800 mb-2 border-b border-slate-200 pb-1">Beban Operasional &
-                            Kerugian</h4>
-                        <div class="flex justify-between py-1 text-slate-600">
-                            <span>Kerugian HPP (Retur / Barang Hilang)</span>
-                            <span id="pnl-loss-hpp" class="font-medium text-red-600">- Rp 0</span>
-                        </div>
-                        <div class="flex justify-between py-1 text-slate-600">
-                            <span>Biaya Ongkir Retur / Penalti</span>
-                            <span id="pnl-loss-fee" class="font-medium text-red-600">- Rp 0</span>
                         </div>
                     </div>
 
@@ -583,7 +563,7 @@
                     <div class="pt-4 border-t-2 border-slate-800 mt-4">
                         <div
                             class="flex justify-between py-2 text-lg font-bold text-slate-900 bg-emerald-50 p-3 rounded-lg border border-emerald-200">
-                            <span>Laba Bersih Real (Net Profit)</span>
+                            <span>Laba Bersih (Total Penghasilan - HPP)</span>
                             <span id="pnl-net-profit" class="text-emerald-700">Rp 0</span>
                         </div>
                     </div>
@@ -804,12 +784,30 @@
 
             for (let i = 0; i < rows.length; i++) {
                 let row = [], cols = rows[i].querySelectorAll('td, th');
-                for (let j = 0; j < cols.length; j++)
-                    row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
-                csv.push(row.join(','));
+                for (let j = 0; j < cols.length; j++) {
+                    let text = cols[j].innerText;
+
+                    // Bersihkan newline dan spasi berlebih agar rapi di 1 sel
+                    text = text.replace(/\n/g, ' - ').replace(/\s+/g, ' ').trim();
+
+                    // Bersihkan format Rupiah (Rp) menjadi angka murni agar bisa dijumlah di Excel
+                    if (text.includes('Rp')) {
+                        let isMinus = text.includes('-');
+                        let cleanNum = text.replace(/[^0-9]/g, '');
+                        if (cleanNum) {
+                            text = (isMinus ? '-' : '') + cleanNum;
+                        }
+                    }
+
+                    row.push('"' + text.replace(/"/g, '""') + '"');
+                }
+                // Menggunakan titik koma (;) lebih kompatibel dengan Excel setting Indonesia
+                csv.push(row.join(';'));
             }
 
-            const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+            // Tambahkan BOM agar Excel mengenali UTF-8
+            const csvData = '\ufeff' + csv.join('\n');
+            const csvFile = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
             const downloadLink = document.createElement('a');
             downloadLink.download = filename + '.csv';
             downloadLink.href = window.URL.createObjectURL(csvFile);
@@ -835,15 +833,54 @@
         async function parseExcel(file) {
             const ab = await readFileAsArrayBuffer(file);
             const wb = XLSX.read(ab, { type: 'array', cellDates: true });
-            const ws = wb.Sheets[wb.SheetNames[0]];
-            // header:1 -> array-of-arrays, lalu kita ambil baris pertama sebagai header
-            const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+            let bestRaw = [];
+            let bestScore = -1;
+
+            // Cari sheet yang paling mungkin berisi data detail (bukan sekadar sheet Ringkasan/Summary)
+            for (const sheetName of wb.SheetNames) {
+                const ws = wb.Sheets[sheetName];
+                const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+                if (raw.length < 2) continue;
+
+                let score = raw.length; // Base score berdasarkan jumlah baris
+
+                // Tambahan poin besar jika ada kata kunci tabel di 15 baris pertama
+                for (let i = 0; i < Math.min(15, raw.length); i++) {
+                    const rowStr = raw[i].join(' ').toLowerCase();
+                    if (rowStr.includes('pesanan') || rowStr.includes('order') || rowStr.includes('sku') || rowStr.includes('penghasilan')) {
+                        score += 100000;
+                        break;
+                    }
+                }
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestRaw = raw;
+                }
+            }
+
+            const raw = bestRaw;
             if (raw.length < 2) return [];
 
-            // Temukan baris header (baris pertama yang tidak kosong)
+            // Temukan baris header: file marketplace sering punya judul/summary di baris 1-5
+            // Kita cari baris yang punya kata kunci tabel atau jumlah kolom terisi paling banyak (maksimal cek 15 baris pertama)
             let headerRowIdx = 0;
-            for (let i = 0; i < Math.min(5, raw.length); i++) {
-                if (raw[i].some(c => c !== '')) { headerRowIdx = i; break; }
+            let maxCols = 0;
+            for (let i = 0; i < Math.min(15, raw.length); i++) {
+                const filledCols = raw[i].filter(c => c !== null && c !== '').length;
+                const rowStr = raw[i].join(' ').toLowerCase();
+
+                // Deteksi keyword kolom header yang umum
+                if (filledCols >= 3 && (rowStr.includes('pesanan') || rowStr.includes('order') || rowStr.includes('sku') || rowStr.includes('penghasilan'))) {
+                    headerRowIdx = i;
+                    break;
+                }
+
+                if (filledCols > maxCols) {
+                    maxCols = filledCols;
+                    headerRowIdx = i;
+                }
             }
             const headers = raw[headerRowIdx].map(h => String(h).trim());
             const rows = [];
@@ -859,10 +896,19 @@
         // Helper: cari nama kolom dengan fuzzy matching (case-insensitive, partial)
         function findCol(row, candidates) {
             const keys = Object.keys(row);
+
+            // 1. Coba exact match terlebih dahulu agar tidak tertukar (misal "Total Penghasilan" vs "Total Penghasilan Pembeli")
+            for (const cand of candidates) {
+                const found = keys.find(k => k.trim().toLowerCase() === cand.toLowerCase());
+                if (found !== undefined) return found;
+            }
+
+            // 2. Jika tidak ada yang sama persis, baru gunakan partial match (mengandung kata kunci)
             for (const cand of candidates) {
                 const found = keys.find(k => k.toLowerCase().includes(cand.toLowerCase()));
                 if (found !== undefined) return found;
             }
+
             return null;
         }
 
@@ -957,21 +1003,45 @@
                     }
                 }
 
-                // ---- 2. Parse Income (Order ID -> net dana cair) ----
-                const incomeMap = {}; // key: order_id, value: net income (dana cair)
+                // ---- 2. Parse Income secara STATIS sesuai rumus SUMIFS Excel ----
+                const incomeMap = {}; // key: order_id, value: net income
                 if (fileIncome) {
-                    const incRows = await parseExcel(fileIncome);
-                    if (incRows.length > 0) {
-                        const sample = incRows[0];
-                        const colOrderId = findCol(sample, ['No. Pesanan', 'No Pesanan', 'Order ID', 'order id', 'nomor pesanan', 'No.Pesanan']);
-                        // Kolom dana cair bisa: "Dana yang Dicairkan", "Total Penghasilan", "Pendapatan Bersih", "Penghasilan Bersih"
-                        const colIncome = findCol(sample, ['Dana yang Dicairkan', 'Total Penghasilan', 'Pendapatan Bersih', 'Penghasilan Bersih', 'Net', 'Income', 'Cair', 'Diterima']);
-                        incRows.forEach(r => {
-                            const orderId = colOrderId ? String(r[colOrderId] || '').trim() : '';
-                            const net = colIncome ? parseNum(r[colIncome]) : 0;
-                            if (orderId) incomeMap[orderId] = net;
-                        });
-                    }
+                    const ab = await readFileAsArrayBuffer(fileIncome);
+                    const wb = XLSX.read(ab, { type: 'array', cellDates: true });
+
+                    // Harus mencari sheet yang mengandung nama "Penghasilan"
+                    let sheetName = wb.SheetNames.find(n => n.toLowerCase().includes('penghasilan'));
+                    if (!sheetName) sheetName = wb.SheetNames[0]; // fallback darurat jika nama sheet diubah manual
+
+                    const ws = wb.Sheets[sheetName];
+
+                    // Baca murni sebagai array of arrays tanpa memperdulikan header apa pun
+                    const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+                    raw.forEach(row => {
+                        if (!row || row.length === 0) return;
+
+                        // Berdasarkan rumus: SUMIFS(K:K, C:C, [NomorPesanan], B:B, "Order")
+                        // Kolom B (index 1) = Tipe Transaksi
+                        // Kolom C (index 2) = Nomor Pesanan
+                        // Kolom K (index 10) = Total Penghasilan
+
+                        const typeVal = String(row[1] || '').trim().toLowerCase();
+                        const orderIdRaw = String(row[2] || '').replace(/^['`]/, '').trim();
+                        const incomeVal = row[10];
+
+                        // Skip baris kosong atau baris header (jika C isinya tulisan 'No. Pesanan')
+                        if (!orderIdRaw || orderIdRaw.toLowerCase().includes('pesanan')) return;
+
+                        // Abaikan baris jika kolom K kosong
+                        if (incomeVal === '' || incomeVal === null || incomeVal === undefined) return;
+
+                        // Terapkan syarat: B:B = "Order"
+                        if (typeVal === 'order') {
+                            const net = parseNum(incomeVal);
+                            incomeMap[orderIdRaw] = (incomeMap[orderIdRaw] || 0) + net;
+                        }
+                    });
                 }
 
                 // ---- 3. Helper: get HPP dari SKU ----
@@ -1020,7 +1090,8 @@
 
                         const orderMap = new Map();
                         rows.forEach(r => {
-                            const ordId = cOrdId ? String(r[cOrdId] || '').trim() : '';
+                            const rawId = cOrdId ? String(r[cOrdId] || '') : '';
+                            const ordId = rawId.replace(/^['`]/, '').trim();
                             if (!ordId) return;
 
                             // Jika pesanan ada di file Income, berarti retur ditolak/batal dan penjual tetap dibayar. Skip!
@@ -1050,7 +1121,6 @@
                             sum.returnedQty += order.qty;
                             sum.lossHPP += order.lossHPP;
                             sum.lossFee += order.fee;
-                            sum.realProfit -= (order.lossHPP + order.fee);
                             const skuLabel = order.skus.map(i => i.sku).filter(Boolean).join(', ') || '(tanpa SKU)';
                             appData.returns.push({ id: order.id, sku: skuLabel, status: 'Retur', qty: order.qty, lossHPP: order.lossHPP, fee: order.fee, total: order.lossHPP + order.fee });
                         });
@@ -1073,7 +1143,8 @@
 
                         const orderMap = new Map();
                         rows.forEach(r => {
-                            const ordId = cOrdId ? String(r[cOrdId] || '').trim() : '';
+                            const rawId = cOrdId ? String(r[cOrdId] || '') : '';
+                            const ordId = rawId.replace(/^['`]/, '').trim();
                             if (!ordId) return;
                             if (incomeMap[ordId] !== undefined) return; // Dana sudah cair, bukan batal sungguhan
 
@@ -1120,7 +1191,8 @@
 
                         const orderMap = new Map();
                         rows.forEach(r => {
-                            const ordId = cOrdId ? String(r[cOrdId] || '').trim() : '';
+                            const rawId = cOrdId ? String(r[cOrdId] || '') : '';
+                            const ordId = rawId.replace(/^['`]/, '').trim();
                             if (!ordId) return;
                             if (incomeMap[ordId] !== undefined) return; // Dana cair (mungkin kompensasi barang hilang)
 
@@ -1146,7 +1218,6 @@
                                 // Sudah tercatat di Return — hanya tambahkan kerugian finansial
                                 sum.lossHPP += order.lossHPP;
                                 sum.lossFee += order.fee;
-                                sum.realProfit -= (order.lossHPP + order.fee);
                                 return;
                             }
                             globalSeenIds.add(order.id);
@@ -1155,7 +1226,6 @@
                             sum.cancelledQty += order.qty;
                             sum.lossHPP += order.lossHPP;
                             sum.lossFee += order.fee;
-                            sum.realProfit -= (order.lossHPP + order.fee);
                             const skuLabel = order.skus.filter(Boolean).join(', ') || '(tanpa SKU)';
                             appData.returns.push({ id: order.id, sku: skuLabel, status: 'Gagal Kirim', qty: order.qty, lossHPP: order.lossHPP, fee: order.fee, total: order.lossHPP + order.fee });
                         });
@@ -1183,7 +1253,8 @@
                         const orderMap = new Map();
                         const unknownStatuses = new Set(); // untuk debug status yang tidak dikenal
                         rows.forEach(r => {
-                            const ordId = cOrdId ? String(r[cOrdId] || '').trim() : '';
+                            const rawId = cOrdId ? String(r[cOrdId] || '') : '';
+                            const ordId = rawId.replace(/^['`]/, '').trim();
                             const status = cStatus ? String(r[cStatus] || '').trim() : '';
                             const sku = cSku ? String(r[cSku] || '').trim() : '';
                             const nama = cNama ? String(r[cNama] || '').trim() : sku;
@@ -1262,7 +1333,6 @@
                                 }
                                 const lossHPP = order.kategori === 'retur' ? order.hpp * 0.5 : 0;
                                 sum.lossHPP += lossHPP;
-                                sum.realProfit -= lossHPP;
                                 order.skus.forEach(item => {
                                     if (!appData.skuStats[item.sku] && item.sku) {
                                         appData.skuStats[item.sku] = { name: item.nama || item.sku, sold: 0, ret: 0, income: 0, hpp: 0, profit: 0 };
@@ -1388,7 +1458,6 @@
                     let ongkir = 12000; // retur fee
                     sum.lossHPP += lossHPP;
                     sum.lossFee += ongkir;
-                    sum.realProfit -= (lossHPP + ongkir);
 
                     if (status === 'Retur') { sum.returned++; appData.skuStats[sku].ret += qty; }
                     else sum.cancelled++;
@@ -1427,9 +1496,6 @@
             // Update P&L Tab
             document.getElementById('pnl-income').innerText = formatRp(sum.income);
             document.getElementById('pnl-cogs').innerText = "- " + formatRp(sum.hpp);
-            document.getElementById('pnl-gross').innerText = formatRp(sum.income - sum.hpp);
-            document.getElementById('pnl-loss-hpp').innerText = "- " + formatRp(sum.lossHPP);
-            document.getElementById('pnl-loss-fee').innerText = "- " + formatRp(sum.lossFee);
             document.getElementById('pnl-net-profit').innerText = formatRp(sum.realProfit);
 
             // Render Tables
