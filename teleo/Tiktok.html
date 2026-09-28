@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics Dashboard TikTok Shop | Teleo Commerce</title>
+
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- SheetJS (xlsx) CDN for Excel processing -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              tiktok: '#FE2C55'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+
+<body
+  class="min-h-full flex flex-col text-slate-800 antialiased font-sans bg-slate-50 selection:bg-emerald-500 selection:text-white">
+
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+
+      <!-- Top Row: Branding, Quick Tools & Data Actions -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 py-3.5 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center shadow-md text-white shrink-0">
+            <i class="fab fa-tiktok text-xl text-brand-tiktok"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">Teleo TikTok Analytics</h1>
+              <span
+                class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200/60 uppercase">V3.0
+                Sync Order</span>
+            </div>
+            <p class="text-xs text-slate-500">Pusat Audit Finansial, HPP &amp; Settlement Cerdas</p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center flex-wrap gap-4">
+          <div class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 rounded-lg border border-slate-200">
+            <i class="fas fa-headset text-slate-400 text-xs"></i>
+            <span class="text-[11px] font-bold text-slate-600">Bantuan: <a href="https://wa.me/6287878224307"
+                class="text-emerald-600 hover:underline">087878224307</a></span>
+          </div>
+
+          <button id="btn-reset-data"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 border border-slate-200 rounded-lg transition active:scale-95 shadow-sm">
+            <i class="fas fa-trash-can text-slate-400 group-hover:text-rose-500"></i>
+            <span class="hidden sm:inline">Kosongkan</span>
+          </button>
+
+          <button id="btn-open-upload"
+            class="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs sm:text-sm font-bold text-white bg-slate-900 hover:bg-black rounded-lg transition shadow-sm hover:shadow active:scale-95">
+            <i class="fas fa-file-excel text-emerald-400"></i>
+            <span>Upload Data (3 File)</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 py-2.5">
+        <!-- Scrollable Navigation Tabs -->
+        <nav class="flex space-x-1.5 overflow-x-auto no-scrollbar py-1 text-xs font-medium" id="nav-tabs"
+          aria-label="Tabs">
+          <button data-tab="tab-summary"
+            class="tab-btn active px-3 py-2 rounded-lg font-semibold transition-all whitespace-nowrap bg-emerald-600 text-white shadow-sm flex items-center gap-2">
+            <i class="fas fa-chart-pie"></i>
+            <span>Ringkasan Eksekutif</span>
+          </button>
+          <button data-tab="tab-completed"
+            class="tab-btn px-3 py-2 rounded-lg font-semibold transition-all whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center gap-2">
+            <i class="fas fa-list-check"></i>
+            <span>Detail Pesanan &amp; Income</span>
+          </button>
+          <button data-tab="tab-issues"
+            class="tab-btn px-3 py-2 rounded-lg font-semibold transition-all whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center gap-2">
+            <i class="fas fa-exclamation-triangle text-rose-500"></i>
+            <span>Pesanan Bermasalah</span>
+          </button>
+          <button data-tab="tab-pnl"
+            class="tab-btn px-3 py-2 rounded-lg font-semibold transition-all whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center gap-2">
+            <i class="fas fa-calculator text-blue-500"></i>
+            <span>Laba Rugi (P&amp;L)</span>
+          </button>
+          <button data-tab="tab-sku"
+            class="tab-btn px-3 py-2 rounded-lg font-semibold transition-all whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center gap-2">
+            <i class="fas fa-boxes-stacked text-purple-500"></i>
+            <span>Kinerja Produk</span>
+          </button>
+          <button data-tab="tab-master-hpp"
+            class="tab-btn px-3 py-2 rounded-lg font-semibold transition-all whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center gap-2">
+            <i class="fas fa-database text-teal-600"></i>
+            <span>Master HPP</span>
+          </button>
+        </nav>
+
+        <!-- Global Search -->
+        <div class="flex items-center gap-2 w-full md:w-80 shrink-0">
+          <div class="relative w-full">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+              <i class="fas fa-search text-xs"></i>
+            </span>
+            <input type="text" id="global-search" placeholder="Cari Order ID, Produk..."
+              class="w-full pl-8 pr-8 py-1.5 text-xs bg-slate-100 hover:bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 focus:bg-white text-slate-800 transition" />
+            <button id="btn-clear-search"
+              class="hidden absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-600">
+              <i class="fas fa-times-circle text-xs"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <div id="toast-box" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md w-full pointer-events-none">
+    </div>
+
+    <!-- Empty State Guide Banner -->
+    <div id="empty-state-banner"
+      class="p-5 rounded-2xl bg-slate-900 text-white shadow-xl border border-slate-800 relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none">
+      </div>
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+        <div class="flex items-start gap-4">
+          <div
+            class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 text-emerald-400 flex items-center justify-center text-xl shrink-0">
+            <i class="fas fa-folder-open"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+              Sistem Menunggu Input Data Excel
+              <span
+                class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">Harap
+                Unggah 3 File</span>
+            </h3>
+            <p class="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+              Silakan klik tombol upload dan siapkan 3 file spesifik: <strong class="text-emerald-300">Master
+                HPP</strong>, <strong class="text-emerald-300">Laporan Penghasilan &amp; Pesanan (Income)</strong>, dan
+              <strong class="text-emerald-300">Rekap Penghasilan Cair</strong> untuk hasil kalkulasi yang akurat.
+            </p>
+          </div>
+        </div>
+        <button onclick="openUploadModal()"
+          class="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-900 bg-emerald-400 hover:bg-emerald-300 rounded-lg transition shadow-md active:scale-95">
+          <i class="fas fa-cloud-arrow-up"></i> Mulai Unggah
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB: SUMMARY -->
+    <section id="tab-summary" class="tab-content space-y-6">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+
+        <!-- Total Pendapatan (GMV) -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200/90 shadow-sm relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Pendapatan</span>
+            <span class="p-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs"><i class="fas fa-chart-bar"></i></span>
+          </div>
+          <p class="text-base sm:text-xl font-extrabold text-slate-900 mt-2.5 truncate" id="kpi-gmv">Rp 0</p>
+          <p class="text-[10px] text-slate-400 mt-1">Bruto / GMV dari pesanan</p>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>
+        </div>
+
+        <!-- Settlement Cair -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200/90 shadow-sm relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Settlement Cair</span>
+            <span class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-xs"><i class="fas fa-wallet"></i></span>
+          </div>
+          <p class="text-base sm:text-xl font-extrabold text-emerald-600 mt-2.5 truncate" id="kpi-settlement">Rp 0</p>
+          <p class="text-[10px] text-slate-400 mt-1" id="kpi-settlement-desc">Total penyelesaian pembayaran</p>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500"></div>
+        </div>
+
+        <!-- Total HPP Modal -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200/90 shadow-sm relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total HPP Modal</span>
+            <span class="p-1.5 bg-purple-50 text-purple-600 rounded-lg text-xs"><i
+                class="fas fa-boxes-packing"></i></span>
+          </div>
+          <p class="text-base sm:text-xl font-extrabold text-slate-900 mt-2.5 truncate" id="kpi-hpp">Rp 0</p>
+          <p class="text-[10px] text-slate-400 mt-1">Sinkronisasi ID &amp; Item</p>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-purple-500"></div>
+        </div>
+
+        <!-- Fee & Potongan TikTok -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200/90 shadow-sm relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Fee &amp; Potongan</span>
+            <span class="p-1.5 bg-amber-50 text-amber-600 rounded-lg text-xs"><i class="fas fa-receipt"></i></span>
+          </div>
+          <p class="text-base sm:text-xl font-extrabold text-amber-700 mt-2.5 truncate" id="kpi-fee">Rp 0</p>
+          <p class="text-[10px] text-slate-400 mt-1">Total Biaya + Komisi</p>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-amber-500"></div>
+        </div>
+
+        <!-- Laba Bersih -->
+        <div class="bg-slate-900 p-4 rounded-xl shadow-md relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Laba Bersih</span>
+            <span class="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg text-xs"><i
+                class="fas fa-chart-line"></i></span>
+          </div>
+          <p class="text-base sm:text-xl font-black text-white mt-2.5 truncate" id="kpi-net-profit">Rp 0</p>
+          <p class="text-[10px] font-bold text-emerald-500 mt-1" id="kpi-net-margin">Margin: 0%</p>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Daily Trend -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Tren Pendapatan vs Laba</h2>
+              <p class="text-[10px] text-slate-500">Performa harian pesanan</p>
+            </div>
+          </div>
+          <div class="relative h-64 w-full">
+            <canvas id="chart-daily-trend"></canvas>
+          </div>
+        </div>
+
+        <!-- Top Profit Products -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Produk Terjual Terbaik</h2>
+              <p class="text-[10px] text-slate-500">Sinkronisasi ID Pesanan &amp; Item</p>
+            </div>
+          </div>
+          <div class="relative h-48 w-full mb-3">
+            <canvas id="chart-top-profit-sku"></canvas>
+          </div>
+          <div id="top-sku-list" class="divide-y divide-slate-100 text-xs mt-2 overflow-y-auto max-h-32 pr-2"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: PESANAN SELESAI -->
+    <section id="tab-completed" class="tab-content hidden space-y-4">
+      <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">Database Pesanan Selesai</h2>
+            <p class="text-xs text-slate-500">Hanya menampilkan pesanan yang sukses. Data digrup berdasarkan <strong
+                class="text-emerald-600">ID Pesanan</strong>.</p>
+          </div>
+          <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-lg"
+            id="completed-count-label">0 Pesanan Selesai</span>
+        </div>
+        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+          <table class="min-w-full divide-y divide-slate-200 text-[11px] text-left">
+            <thead class="bg-slate-50 text-slate-700 font-bold uppercase tracking-wider">
+              <tr>
+                <th class="px-3 py-3">Order ID / Tgl</th>
+                <th class="px-3 py-3">Detail Produk (Sync HPP)</th>
+                <th class="px-3 py-3 text-center">Total Qty</th>
+                <th class="px-3 py-3 text-right">Pendapatan</th>
+                <th class="px-3 py-3 text-right text-rose-600">Fee Platform</th>
+                <th class="px-3 py-3 text-right text-emerald-700">Settlement</th>
+                <th class="px-3 py-3 text-right">Total HPP</th>
+                <th class="px-3 py-3 text-right text-indigo-700">Laba Bersih</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white" id="tbody-completed">
+              <tr>
+                <td colspan="8" class="py-8 text-center text-slate-400">Belum ada data pesanan</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: PESANAN BERMASALAH (RETUR/BATAL) -->
+    <section id="tab-issues" class="tab-content hidden space-y-4">
+      <div class="bg-white p-5 sm:p-6 rounded-2xl border border-rose-200 shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-base font-bold text-rose-700">Pesanan Bermasalah (Batal / Retur / Gagal Kirim)</h2>
+            <p class="text-xs text-slate-500">Pesanan ini tidak menghasilkan dana cair (Settlement = Rp 0), namun GMV
+              tetap tercatat di sistem.</p>
+          </div>
+          <span class="text-xs font-semibold px-2.5 py-1 bg-rose-100 text-rose-700 rounded-lg" id="issues-count-label">0
+            Pesanan Bermasalah</span>
+        </div>
+        <div class="overflow-x-auto border border-rose-100 rounded-xl">
+          <table class="min-w-full divide-y divide-slate-200 text-[11px] text-left">
+            <thead class="bg-rose-50 text-rose-700 font-bold uppercase tracking-wider">
+              <tr>
+                <th class="px-3 py-3">Order ID / Tgl</th>
+                <th class="px-3 py-3">Status Gagal</th>
+                <th class="px-3 py-3">Detail Produk (Dikembalikan)</th>
+                <th class="px-3 py-3 text-center">Qty Gagal</th>
+                <th class="px-3 py-3 text-right">Potensi Pendapatan</th>
+                <th class="px-3 py-3 text-right text-indigo-600">HPP Terselamatkan</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white" id="tbody-issues">
+              <tr>
+                <td colspan="6" class="py-8 text-center text-slate-400">Belum ada data pesanan bermasalah</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: P&L -->
+    <section id="tab-pnl" class="tab-content hidden space-y-4">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm max-w-3xl mx-auto">
+        <div class="text-center mb-6">
+          <h2 class="text-lg font-bold text-slate-900">Laporan Laba Rugi Eksekutif (P&amp;L)</h2>
+          <p class="text-xs text-slate-500">Kalkulasi 3 file eksklusif</p>
+        </div>
+
+        <div class="space-y-4 text-sm font-medium">
+          <div class="flex justify-between border-b pb-2">
+            <span class="text-slate-700">1. Total Pendapatan Kotor (GMV)</span>
+            <span id="pnl-gmv" class="text-slate-900 font-bold">Rp 0</span>
+          </div>
+          <div class="flex justify-between border-b pb-2 text-rose-600">
+            <span>2. Total Potongan &amp; Komisi Platform</span>
+            <span id="pnl-fee" class="font-bold">- Rp 0</span>
+          </div>
+          <div class="flex justify-between bg-emerald-50 p-3 rounded-lg text-emerald-800">
+            <span>3. Settlement Dicairkan (Income / Rekap Cair)</span>
+            <span id="pnl-settlement" class="font-bold">Rp 0</span>
+          </div>
+          <div class="flex justify-between border-b pb-2 text-purple-700">
+            <span>4. Beban Pokok Penjualan (HPP Total)</span>
+            <span id="pnl-hpp" class="font-bold">- Rp 0</span>
+          </div>
+
+          <div class="flex justify-between bg-slate-900 text-white p-4 rounded-xl mt-4">
+            <span class="font-bold">Laba Bersih Real (Net Profit)</span>
+            <div class="text-right">
+              <span id="pnl-net" class="text-lg font-black text-emerald-400">Rp 0</span>
+              <div id="pnl-margin" class="text-[10px] text-slate-400">Margin: 0%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: SKU KINERJA -->
+    <section id="tab-sku" class="tab-content hidden space-y-4">
+      <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">Kinerja Produk (Sync Order ID)</h2>
+            <p class="text-xs text-slate-500">Rangkuman barang yang dipesan tersinkronisasi HPP per ID Pesanan</p>
+          </div>
+        </div>
+        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+          <table class="min-w-full divide-y divide-slate-200 text-[11px] text-left">
+            <thead class="bg-slate-50 text-slate-700 font-bold uppercase tracking-wider">
+              <tr>
+                <th class="px-3 py-3">Nama Produk / Identifier</th>
+                <th class="px-3 py-3 text-center">Total Terjual (Qty)</th>
+                <th class="px-3 py-3 text-right">HPP Terdigitalisasi (Satuan)</th>
+                <th class="px-3 py-3 text-right text-indigo-700">Estimasi Kontribusi Laba</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white" id="tbody-sku">
+              <tr>
+                <td colspan="4" class="py-8 text-center text-slate-400">Belum ada data produk</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: MASTER HPP -->
+    <section id="tab-master-hpp" class="tab-content hidden space-y-4">
+      <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">Database Master HPP</h2>
+            <p class="text-xs text-slate-500">Digunakan untuk pencocokan teks pintar (Fuzzy Match)</p>
+          </div>
+          <span class="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg" id="hpp-count-label">0
+            Data</span>
+        </div>
+        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+          <table class="min-w-full divide-y divide-slate-200 text-[11px] text-left">
+            <thead class="bg-slate-50 text-slate-700 font-bold uppercase tracking-wider">
+              <tr>
+                <th class="px-3 py-3">Nama Produk</th>
+                <th class="px-3 py-3">Varian</th>
+                <th class="px-3 py-3 text-right">HPP (Modal)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white" id="tbody-master-hpp">
+              <tr>
+                <td colspan="3" class="py-8 text-center text-slate-400">Belum ada data Master HPP</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Upload Modal (Hanya 3 Slot) -->
+  <div id="modal-upload"
+    class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden">
+      <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <h3 class="font-bold text-sm">Unggah 3 File Esensial TikTok</h3>
+        <button onclick="closeUploadModal()" class="text-slate-400 hover:text-white p-1">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800">
+          <strong>Pembaruan:</strong> Sistem sekarang mencocokkan barang yang dipesan dengan <strong>ID Pesanan</strong>
+          secara otomatis untuk mendukung file Order multi-row (1 order pecah beberapa baris).
+        </div>
+
+        <div class="space-y-3">
+          <!-- Slot 1: HPP -->
+          <div class="border-2 border-dashed border-slate-300 rounded-xl p-3 bg-slate-50 relative">
+            <div class="flex items-center gap-2 mb-1">
+              <span
+                class="w-6 h-6 rounded bg-purple-100 text-purple-600 font-bold flex justify-center items-center text-xs">1</span>
+              <h4 class="text-xs font-bold text-slate-800">Master HPP (HPP TikTok new-1.xlsx)</h4>
+            </div>
+            <p class="text-[10px] text-slate-500 mb-2 pl-8">Kolom wajib: Product Name, Variation, HPP</p>
+            <input type="file" id="file-hpp" accept=".xlsx, .xls, .csv"
+              class="w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-bold file:bg-purple-100 file:text-purple-700 ml-8" />
+          </div>
+
+          <!-- Slot 2: Income -->
+          <div class="border-2 border-dashed border-slate-300 rounded-xl p-3 bg-slate-50 relative">
+            <div class="flex items-center gap-2 mb-1">
+              <span
+                class="w-6 h-6 rounded bg-blue-100 text-blue-600 font-bold flex justify-center items-center text-xs">2</span>
+              <h4 class="text-xs font-bold text-slate-800">Laporan Pesanan &amp; Penghasilan (income_ / tiktok 1-7
+                september)</h4>
+            </div>
+            <p class="text-[10px] text-slate-500 mb-2 pl-8">Kolom: ID Pesanan, Total Pendapatan, Nama Produk / Detail
+              Produk, dll.</p>
+            <input type="file" id="file-income" accept=".xlsx, .xls, .csv"
+              class="w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-bold file:bg-blue-100 file:text-blue-700 ml-8" />
+          </div>
+
+          <!-- Slot 3: Rekap Cair -->
+          <div class="border-2 border-dashed border-slate-300 rounded-xl p-3 bg-slate-50 relative">
+            <div class="flex items-center gap-2 mb-1">
+              <span
+                class="w-6 h-6 rounded bg-emerald-100 text-emerald-600 font-bold flex justify-center items-center text-xs">3</span>
+              <h4 class="text-xs font-bold text-slate-800">Rekap Penghasilan Cair (Opsional / Rekonsiliasi)</h4>
+            </div>
+            <p class="text-[10px] text-slate-500 mb-2 pl-8">Kolom wajib: Jumlah penyelesaian pembayaran</p>
+            <input type="file" id="file-cair" accept=".xlsx, .xls, .csv"
+              class="w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-bold file:bg-emerald-100 file:text-emerald-700 ml-8" />
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+        <button onclick="closeUploadModal()"
+          class="px-4 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100">Batal</button>
+        <button id="btn-process-upload"
+          class="px-5 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-black rounded-lg transition flex items-center gap-2">
+          <i class="fas fa-play"></i> Mulai Proses
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State Aplikasi Khusus 3 File
+    const appState = {
+      masterHpp: [],
+      orders: [],
+      rekapCairTotal: 0,
+      charts: { dailyTrend: null, topProfitSku: null },
+      currentSearch: ""
+    };
+
+    function formatIDR(val) {
+      return 'Rp ' + Math.round(val || 0).toLocaleString('id-ID');
+    }
+
+    function showToast(message, type = 'info') {
+      const box = document.getElementById('toast-box');
+      const toast = document.createElement('div');
+      const styles = type === 'error' ? 'bg-rose-600' : type === 'success' ? 'bg-emerald-600' : 'bg-slate-900';
+      toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-medium text-white shadow-lg transition-all duration-300 transform translate-y-3 opacity-0 ${styles}`;
+      toast.innerHTML = `<span>${message}</span>`;
+      box.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.remove('translate-y-3', 'opacity-0'));
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // UI Tab Navigation
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.className = "tab-btn px-3 py-2 rounded-lg font-semibold transition-all whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center gap-2";
+        });
+        btn.className = "tab-btn active px-3 py-2 rounded-lg font-semibold transition-all whitespace-nowrap bg-emerald-600 text-white shadow-sm flex items-center gap-2";
+
+        const tabId = btn.getAttribute('data-tab');
+        document.querySelectorAll('.tab-content').forEach(sec => {
+          sec.classList.toggle('hidden', sec.id !== tabId);
+        });
+      });
+    });
+
+    // Reset Data
+    document.getElementById('btn-reset-data').addEventListener('click', () => {
+      appState.masterHpp = [];
+      appState.orders = [];
+      appState.rekapCairTotal = 0;
+      recalculateAllData();
+      document.getElementById('empty-state-banner').classList.remove('hidden');
+      showToast('Data berhasil dikosongkan.');
+    });
+
+    // Search Feature
+    document.getElementById('global-search').addEventListener('input', (e) => {
+      appState.currentSearch = e.target.value.toLowerCase().trim();
+      document.getElementById('btn-clear-search').classList.toggle('hidden', appState.currentSearch === '');
+      renderTables();
+    });
+    document.getElementById('btn-clear-search').addEventListener('click', () => {
+      document.getElementById('global-search').value = '';
+      appState.currentSearch = '';
+      document.getElementById('btn-clear-search').classList.add('hidden');
+      renderTables();
+    });
+
+    function openUploadModal() { document.getElementById('modal-upload').classList.remove('hidden'); }
+    function closeUploadModal() { document.getElementById('modal-upload').classList.add('hidden'); }
+
+    // Read File Helper
+    function readExcel(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            resolve(XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: '' }));
+          } catch (err) { reject(err); }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    // Pencocokan HPP Cerdas (Fuzzy Match berdasarkan nama/id string)
+    function findBestHppMatch(extractedName) {
+      let bestMatch = 0;
+      let highestScore = 0;
+      const searchStr = extractedName.toLowerCase().trim();
+
+      for (const item of appState.masterHpp) {
+        let score = 0;
+        const name = item.name.toLowerCase().trim();
+        const variant = item.variant.toLowerCase().trim();
+
+        // Exact match with name or ID directly
+        if (searchStr === name) score += 20;
+        if (searchStr === `${name} - ${variant}`) score += 25;
+        if (name !== '' && searchStr.includes(name)) score += 10;
+        if (searchStr !== '' && name.includes(searchStr)) score += 10; // Reverse match
+        if (variant !== '' && searchStr.includes(variant)) score += 5;
+        if (variant !== '' && name !== '' && searchStr.includes(name) && searchStr.includes(variant)) score += 15;
+
+        // Try splitting words
+        const searchWords = searchStr.split(/\s+/);
+        let wordMatches = 0;
+        searchWords.forEach(w => {
+          if (w.length > 2 && (name.includes(w) || variant.includes(w))) wordMatches++;
+        });
+        score += (wordMatches * 2);
+
+        if (score > highestScore && score > 5) {
+          highestScore = score;
+          bestMatch = item.hpp;
+        }
+      }
+      return bestMatch; // Returns 0 if not found
+    }
+
+    // Eksekusi Parsing Data
+    document.getElementById('btn-process-upload').addEventListener('click', async () => {
+      const fHpp = document.getElementById('file-hpp').files[0];
+      const fIncome = document.getElementById('file-income').files[0];
+      const fCair = document.getElementById('file-cair').files[0];
+
+      if (!fIncome && !fHpp) {
+        showToast('Unggah minimal file Income atau HPP.', 'error'); return;
+      }
+
+      const btn = document.getElementById('btn-process-upload');
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+      btn.disabled = true;
+
+      try {
+        // 1. Parsing Master HPP
+        if (fHpp) {
+          const rawRows = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = e => {
+              const data = new Uint8Array(e.target.result);
+              const workbook = XLSX.read(data, { type: 'array' });
+              // Baca sebagai array 2D
+              resolve(XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1, defval: '' }));
+            };
+            reader.readAsArrayBuffer(fHpp);
+          });
+
+          appState.masterHpp = [];
+          for (let r = 1; r < rawRows.length; r++) { // Mulai dari baris ke-2 (index 1) untuk melewati header
+            const row = rawRows[r];
+            if (!Array.isArray(row) || row.length === 0) continue;
+
+            // Kolom A = index 0, Kolom B = index 1 (Nama), Kolom C = index 2 (Varian), Kolom D = index 3 (HPP)
+            let name = String(row[1] || row[0] || '').trim(); // Prioritas Kolom B, fallback Kolom A
+            let variant = String(row[2] || '').trim();
+
+            // Ambil dari Kolom D (index 3), jika kosong coba index lain dari belakang
+            let hppCell = row[3] !== undefined && row[3] !== '' ? row[3] : (row[4] || row[2] || 0);
+
+            let hpp = 0;
+            if (typeof hppCell === 'number') {
+              hpp = hppCell;
+            } else if (typeof hppCell === 'string') {
+              hpp = parseFloat(hppCell.replace(/[^0-9.-]+/g, "")) || 0;
+            }
+
+            if (name !== '' && hpp > 0) {
+              appState.masterHpp.push({ name, variant, hpp });
+            }
+          }
+        }
+
+        // 2. Parsing Rekap Cair (Sebagai rujukan mutlak)
+        if (fCair) {
+          const rows = await readExcel(fCair);
+          appState.rekapCairTotal = rows.reduce((sum, r) => {
+            const keys = Object.keys(r);
+            // Abaikan baris "Total" atau summary di bagian bawah file (harus punya ID Pesanan)
+            const orderKey = keys.find(k => k.toLowerCase().includes('id pesanan') || k.toLowerCase().includes('order id') || k.toLowerCase().includes('no pesanan'));
+            if (orderKey && !r[orderKey]) return sum; // Lewati baris kosong
+            if (orderKey && String(r[orderKey]).toLowerCase().includes('total')) return sum;
+
+            const foundKey = keys.find(k => k.toLowerCase().includes('penyelesaian') || k.toLowerCase().includes('cair') || k.toLowerCase().includes('settlement'));
+            const val = foundKey ? r[foundKey] : 0;
+            return sum + (parseFloat(String(val).replace(/[^0-9.-]+/g, "")) || 0);
+          }, 0);
+        }
+
+        // 3. Parsing Laporan Income & Grouping by Order ID
+        if (fIncome) {
+          const rows = await readExcel(fIncome);
+          const regex = /(.*?)\s*\*\s*(\d+)/g;
+          const orderMap = new Map();
+
+          rows.forEach(r => {
+            const keys = Object.keys(r);
+            const getVal = (possibleNames) => {
+              // Prioritas 1: Cocok persis (Exact Match)
+              let foundKey = keys.find(k => possibleNames.some(p => k.toLowerCase().trim() === p.toLowerCase().trim()));
+
+              // Prioritas 2: Mengandung kata (Includes) jika tidak ada yang persis
+              if (!foundKey) {
+                foundKey = keys.find(k => possibleNames.some(p => k.toLowerCase().includes(p.toLowerCase().trim())));
+              }
+              return foundKey ? r[foundKey] : '';
+            };
+
+            // Kunci utama: Grouping berdasarkan ID Pemesanan
+            const orderId = String(getVal(['ID Pesanan', 'Order ID', 'No Pesanan', 'ID', 'Nomor Pesanan', 'Pesanan']) || '').replace(/^'+/, '').trim();
+            if (!orderId) return; // Lewati baris tanpa ID Pesanan
+
+            // Pengecekan Status Pesanan
+            const rawStatus = String(getVal(['Order Substatus', 'Substatus', 'Status Pesanan', 'Status', 'Order Status']) || '').trim();
+            const status = rawStatus.toLowerCase();
+            // Jika kolom status ada tapi bukan selesai, maka tandai belum selesai
+            const isSelesai = status === '' || status.includes('selesai') || status.includes('completed') || status.includes('delivered') || status.includes('diterima') || status.includes('settled');
+
+            const date = String(getVal(['Waktu pemesanan', 'Tanggal', 'Waktu', 'Date', 'Order Time', 'Created Time']) || '').substring(0, 10);
+
+            let settlement = parseFloat(String(getVal(['Jumlah penyelesaian', 'Settlement', 'Cair', 'Penghasilan Bersih', 'Estimasi Penghasilan', 'Net Income', 'Payout', 'Total Settlement']) || 0).replace(/[^0-9.-]+/g, "")) || 0;
+
+            // Hapus kata kunci yang terlalu luas seperti 'Harga' atau 'Pendapatan' saja agar tidak tertukar dengan 'Harga Satuan' atau 'Pendapatan Bersih'
+            const pendapatan = parseFloat(String(getVal(['Total Pendapatan', 'Total Pesanan', 'Total nilai pesanan', 'GMV', 'Total Harga Barang', 'Subtotal', 'Revenue', 'Order Amount', 'Total Amount']) || 0).replace(/[^0-9.-]+/g, "")) || 0;
+
+            // Jika belum selesai, Dana Cair tidak bisa diambil
+            if (!isSelesai) {
+              settlement = 0;
+            }
+
+            const biaya = parseFloat(String(getVal(['Total Biaya', 'Biaya', 'Fee', 'Potongan', 'Biaya Platform', 'Platform Fee', 'Deduction']) || 0).replace(/[^0-9.-]+/g, "")) || 0;
+            const komisi = parseFloat(String(getVal(['komisi platform', 'Komisi', 'Commission', 'Creator Commission', 'Affiliate']) || 0).replace(/[^0-9.-]+/g, "")) || 0;
+            const fee = biaya + komisi;
+
+            const qtyCol = parseInt(String(getVal(['Kuantitas', 'Jumlah', 'Qty', 'Quantity', 'Item Count']) || 0).replace(/[^0-9]/g, "")) || 1;
+
+            const detailStr = String(getVal(['Detail produk terjual', 'Detail produk', 'Product Details', 'Item Details']) || '');
+            const namaProduk = String(getVal(['Nama Produk', 'Product Name', 'Item Name']) || '');
+            const variasi = String(getVal(['Variasi', 'Variation', 'Varian', 'Nama Variasi', 'SKU Name']) || '');
+            const sku = String(getVal(['SKU', 'Seller SKU', 'SKU Penjual']) || '');
+
+            let rowItems = [];
+            let rowTotalHpp = 0;
+            let rowTotalQty = 0;
+
+            // Prioritas 1: Ekstrak dari Kolom 'Nama Produk' & 'Variasi' (Mendukung laporan yang multi-row per Item)
+            if (namaProduk) {
+              let fullName = namaProduk;
+              if (variasi && variasi !== '-' && variasi.toLowerCase() !== 'null') fullName += ` - ${variasi}`;
+
+              let hppSatuan = findBestHppMatch(fullName) || findBestHppMatch(sku); // Fallback by SKU
+              rowItems.push({ name: fullName, qty: qtyCol, hpp: hppSatuan });
+              rowTotalHpp += (hppSatuan * qtyCol);
+              rowTotalQty += qtyCol;
+            }
+            // Prioritas 2: Ekstrak via Regex dari 'Detail produk terjual' (Jika report menggunakan format jadul "* X")
+            else if (detailStr) {
+              let match;
+              let hasRegexMatch = false;
+              while ((match = regex.exec(detailStr)) !== null) {
+                hasRegexMatch = true;
+                let itemName = match[1].trim().replace(/;$/, '');
+                let qty = parseInt(match[2], 10) || 1;
+                let hppSatuan = findBestHppMatch(itemName);
+
+                rowItems.push({ name: itemName, qty, hpp: hppSatuan });
+                rowTotalHpp += (hppSatuan * qty);
+                rowTotalQty += qty;
+              }
+
+              if (!hasRegexMatch) {
+                let hppFallback = findBestHppMatch(detailStr);
+                rowItems.push({ name: detailStr, qty: qtyCol, hpp: hppFallback });
+                rowTotalHpp += (hppFallback * qtyCol);
+                rowTotalQty += qtyCol;
+              }
+            } else {
+              rowItems.push({ name: 'Item Tidak Diketahui', qty: qtyCol, hpp: 0 });
+              rowTotalQty += qtyCol;
+            }
+
+            // Sync Data per ID Pemesanan (Match Order ID dengan Barang HPP)
+            if (orderMap.has(orderId)) {
+              let existing = orderMap.get(orderId);
+
+              // HPP & Qty dari baris ini ditambahkan ke total Order ID bersangkutan
+              existing.totalHpp += rowTotalHpp;
+              existing.totalQty += rowTotalQty;
+              existing.items.push(...rowItems);
+
+              // Jika nilai Total Pendapatan/Cair berulang di setiap baris untuk satu Order ID,
+              // ambil nilai maksimalnya saja untuk mencegah pembengkakan (double counting).
+              existing.gmv = Math.max(existing.gmv, pendapatan);
+              existing.settlement = Math.max(existing.settlement, settlement);
+              if (Math.abs(fee) > Math.abs(existing.fee)) existing.fee = fee;
+
+              // Hitung ulang laba per ID Pesanan
+              existing.profit = Math.abs(existing.settlement - existing.totalHpp);
+            } else {
+              // Jika Order ID belum ada di map, buat entri baru
+              orderMap.set(orderId, {
+                orderId, date, statusText: rawStatus || (isSelesai ? 'Selesai' : 'Bermasalah'), isSelesai, settlement, gmv: pendapatan, fee, items: rowItems, totalHpp: rowTotalHpp, totalQty: rowTotalQty, profit: Math.abs(settlement - rowTotalHpp)
+              });
+            }
+          });
+
+          // Ubah Map menjadi Array untuk state aplikasi
+          appState.orders = Array.from(orderMap.values());
+        }
+
+        closeUploadModal();
+        document.getElementById('empty-state-banner').classList.add('hidden');
+        recalculateAllData();
+        showToast('Berhasil memproses & mencocokkan HPP berdasarkan ID Pemesanan.', 'success');
+
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      } finally {
+        btn.innerHTML = '<i class="fas fa-play"></i> Mulai Proses';
+        btn.disabled = false;
+      }
+    });
+
+    // Kalkulasi dan Update UI
+    function recalculateAllData() {
+      let tGmv = 0, tSettlement = 0, tFee = 0, tHpp = 0;
+
+      appState.orders.forEach(o => {
+        tGmv += o.gmv;
+        tSettlement += o.settlement;
+        tFee += o.fee;
+        tHpp += o.totalHpp;
+      });
+
+      // Validasi: Gunakan Rekap Cair jika ada, jika tidak gunakan total income
+      const finalSettlement = appState.rekapCairTotal > 0 ? appState.rekapCairTotal : tSettlement;
+      const netProfit = Math.abs(finalSettlement - tHpp);
+      const netMargin = tGmv > 0 ? (netProfit / tGmv) * 100 : 0;
+
+      // Update KPI Cards
+      document.getElementById('kpi-gmv').innerText = formatIDR(tGmv);
+      document.getElementById('kpi-settlement').innerText = formatIDR(finalSettlement);
+      if (appState.rekapCairTotal > 0) document.getElementById('kpi-settlement-desc').innerText = "Divalidasi dari File Rekap Cair";
+      document.getElementById('kpi-hpp').innerText = formatIDR(tHpp);
+      document.getElementById('kpi-fee').innerText = formatIDR(tFee);
+      document.getElementById('kpi-net-profit').innerText = formatIDR(netProfit);
+      document.getElementById('kpi-net-margin').innerText = `Margin: ${netMargin.toFixed(1)}%`;
+
+      // Update P&L 
+      document.getElementById('pnl-gmv').innerText = formatIDR(tGmv);
+      document.getElementById('pnl-fee').innerText = `- ${formatIDR(tFee)}`;
+      document.getElementById('pnl-settlement').innerText = formatIDR(finalSettlement);
+      document.getElementById('pnl-hpp').innerText = `- ${formatIDR(tHpp)}`;
+      document.getElementById('pnl-net').innerText = formatIDR(netProfit);
+      document.getElementById('pnl-margin').innerText = `Margin Aktual: ${netMargin.toFixed(1)}%`;
+
+      renderTables();
+      renderCharts();
+    }
+
+    // Render Semua Tabel
+    function renderTables() {
+      const q = appState.currentSearch;
+
+      // 1. Pesanan (Completed & Others)
+      const tbodyOrders = document.getElementById('tbody-completed');
+      const tbodyIssues = document.getElementById('tbody-issues');
+
+      const filteredOrders = appState.orders.filter(o => !q || o.orderId.includes(q) || o.items.some(i => i.name.toLowerCase().includes(q)));
+
+      const selesaiOrders = filteredOrders.filter(o => o.isSelesai);
+      const bermasalahOrders = filteredOrders.filter(o => !o.isSelesai);
+
+      document.getElementById('completed-count-label').innerHTML = `${selesaiOrders.length} Pesanan Selesai`;
+      if (document.getElementById('issues-count-label')) document.getElementById('issues-count-label').innerHTML = `${bermasalahOrders.length} Pesanan Bermasalah`;
+
+      // Render Tabel Sukses
+      tbodyOrders.innerHTML = selesaiOrders.map(o => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="px-3 py-2">
+            <div class="flex flex-col gap-1 items-start">
+              <span class="font-mono font-bold text-slate-800">${o.orderId}</span>
+              <span class="text-[9px] text-slate-400">${o.date}</span>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-slate-600 max-w-[200px] truncate" title="${o.items.map(i => i.name).join(', ')}">
+            ${o.items.map(i => `<span class="bg-slate-100 px-1 rounded mr-1 whitespace-nowrap">${i.name} (x${i.qty})</span>`).join('')}
+          </td>
+          <td class="px-3 py-2 text-center font-bold">${o.totalQty}</td>
+          <td class="px-3 py-2 text-right font-medium">${formatIDR(o.gmv)}</td>
+          <td class="px-3 py-2 text-right text-rose-600">${formatIDR(o.fee)}</td>
+          <td class="px-3 py-2 text-right text-emerald-700 font-bold bg-emerald-50/40">${formatIDR(o.settlement)}</td>
+          <td class="px-3 py-2 text-right">${formatIDR(o.totalHpp)}</td>
+          <td class="px-3 py-2 text-right font-bold ${o.profit >= 0 ? 'text-indigo-600' : 'text-rose-600'}">${formatIDR(o.profit)}</td>
+        </tr>
+      `).join('') || `<tr><td colspan="8" class="text-center py-6 text-slate-400">Pencarian tidak ditemukan</td></tr>`;
+
+      // Render Tabel Bermasalah
+      if (tbodyIssues) {
+        tbodyIssues.innerHTML = bermasalahOrders.map(o => `
+          <tr class="hover:bg-rose-50/40 transition">
+            <td class="px-3 py-2">
+              <div class="flex flex-col gap-1 items-start">
+                <span class="font-mono font-bold text-slate-800 line-through decoration-rose-400">${o.orderId}</span>
+                <span class="text-[9px] text-slate-400">${o.date}</span>
+              </div>
+            </td>
+            <td class="px-3 py-2">
+              <span class="px-2 py-0.5 bg-rose-100 text-rose-700 rounded text-[9px] font-bold tracking-wider uppercase border border-rose-200">${o.statusText}</span>
+            </td>
+            <td class="px-3 py-2 text-slate-600 max-w-[200px] truncate" title="${o.items.map(i => i.name).join(', ')}">
+              ${o.items.map(i => `<span class="bg-slate-100/50 px-1 rounded mr-1 whitespace-nowrap opacity-75">${i.name} (x${i.qty})</span>`).join('')}
+            </td>
+            <td class="px-3 py-2 text-center font-bold text-slate-500">${o.totalQty}</td>
+            <td class="px-3 py-2 text-right font-medium text-slate-400 italic line-through" title="GMV Tidak Cair">${formatIDR(o.gmv)}</td>
+            <td class="px-3 py-2 text-right font-bold text-indigo-600" title="Barang kembali ke gudang">${formatIDR(o.totalHpp)}</td>
+          </tr>
+        `).join('') || `<tr><td colspan="6" class="text-center py-6 text-slate-400">Tidak ada pesanan bermasalah</td></tr>`;
+      }
+
+      // 2. Kinerja SKU/Produk Ekstrak
+      const prodMap = {};
+      appState.orders.forEach(o => {
+        const orderApportionProfit = o.totalQty > 0 ? o.profit / o.totalQty : 0;
+        o.items.forEach(i => {
+          if (!prodMap[i.name]) prodMap[i.name] = { qty: 0, hpp: i.hpp, profit: 0 };
+          prodMap[i.name].qty += i.qty;
+          prodMap[i.name].profit += (orderApportionProfit * i.qty); // aproksimasi laba per item
+        });
+      });
+
+      const tbodySku = document.getElementById('tbody-sku');
+      const prodArray = Object.keys(prodMap).map(k => ({ name: k, ...prodMap[k] })).filter(p => !q || p.name.toLowerCase().includes(q)).sort((a, b) => b.qty - a.qty);
+
+      tbodySku.innerHTML = prodArray.map(p => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="px-3 py-2 font-medium text-slate-800">${p.name}</td>
+          <td class="px-3 py-2 text-center font-bold">${p.qty}</td>
+          <td class="px-3 py-2 text-right">${formatIDR(p.hpp)}</td>
+          <td class="px-3 py-2 text-right font-bold text-indigo-700 bg-indigo-50/30">${formatIDR(p.profit)}</td>
+        </tr>
+      `).join('') || `<tr><td colspan="4" class="text-center py-6 text-slate-400">Tidak ada produk</td></tr>`;
+
+      // 3. Master HPP
+      const tbodyHpp = document.getElementById('tbody-master-hpp');
+      const filteredHpp = appState.masterHpp.filter(h => !q || h.name.toLowerCase().includes(q) || h.variant.toLowerCase().includes(q));
+      document.getElementById('hpp-count-label').innerText = filteredHpp.length + ' Data';
+
+      tbodyHpp.innerHTML = filteredHpp.map(h => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="px-3 py-2 font-medium">${h.name}</td>
+          <td class="px-3 py-2 text-slate-600">${h.variant || '-'}</td>
+          <td class="px-3 py-2 text-right font-bold text-teal-700">${formatIDR(h.hpp)}</td>
+        </tr>
+      `).join('') || `<tr><td colspan="3" class="text-center py-6 text-slate-400">Data Master HPP Kosong</td></tr>`;
+    }
+
+    // Charting
+    function renderCharts() {
+      // 1. Tren Harian
+      const ctxTrend = document.getElementById('chart-daily-trend');
+      if (appState.charts.dailyTrend) appState.charts.dailyTrend.destroy();
+
+      const dateMap = {};
+      appState.orders.forEach(o => {
+        if (!dateMap[o.date]) dateMap[o.date] = { gmv: 0, profit: 0 };
+        dateMap[o.date].gmv += o.gmv;
+        dateMap[o.date].profit += o.profit;
+      });
+      const dates = Object.keys(dateMap).sort();
+
+      appState.charts.dailyTrend = new Chart(ctxTrend, {
+        type: 'line',
+        data: {
+          labels: dates.length ? dates : ['No Data'],
+          datasets: [
+            { label: 'GMV', data: dates.map(d => dateMap[d].gmv), borderColor: '#0f172a', tension: 0.3 },
+            { label: 'Laba Bersih', data: dates.map(d => dateMap[d].profit), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.3 }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => 'Rp ' + (v / 1000).toFixed(0) + 'k' } } } }
+      });
+
+      // 2. Top Produk Ekstrak
+      const prodMap = {};
+      appState.orders.forEach(o => {
+        const orderApportionProfit = o.totalQty > 0 ? o.profit / o.totalQty : 0;
+        o.items.forEach(i => {
+          if (!prodMap[i.name]) prodMap[i.name] = { profit: 0, qty: 0 };
+          prodMap[i.name].profit += (orderApportionProfit * i.qty);
+          prodMap[i.name].qty += i.qty;
+        });
+      });
+      const topProd = Object.keys(prodMap).map(k => ({ name: k, ...prodMap[k] })).sort((a, b) => b.profit - a.profit).slice(0, 5);
+
+      const ctxProd = document.getElementById('chart-top-profit-sku');
+      if (appState.charts.topProfitSku) appState.charts.topProfitSku.destroy();
+
+      appState.charts.topProfitSku = new Chart(ctxProd, {
+        type: 'bar',
+        data: {
+          labels: topProd.map(p => p.name.substring(0, 15) + '...'),
+          datasets: [{ data: topProd.map(p => p.profit), backgroundColor: '#10b981', borderRadius: 4 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 9 } } } } }
+      });
+
+      // Update the mini list
+      document.getElementById('top-sku-list').innerHTML = topProd.map(p => `
+        <div class="py-1.5 flex justify-between items-center">
+          <span class="truncate max-w-[200px] text-slate-700">${p.name}</span>
+          <div class="text-right">
+            <span class="font-bold text-emerald-600 block leading-tight">${formatIDR(p.profit)}</span>
+            <span class="text-[9px] text-slate-400">Terjual: ${p.qty}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+
+</html>
