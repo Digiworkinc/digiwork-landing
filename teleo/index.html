@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Laporan Bisnis | Digiwork Inc</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
+        
+        body { 
+            /* Latar belakang gradient elegan */
+            background-color: #050505; 
+            background-image: radial-gradient(circle at 50% 0%, #161622 0%, #050505 70%);
+            color: #ffffff; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-1 { animation: fadeInUp 0.8s ease-out forwards; opacity: 0; }
+        .animate-fade-in-2 { animation: fadeInUp 0.8s ease-out 0.2s forwards; opacity: 0; }
+        .animate-fade-in-3 { animation: fadeInUp 0.8s ease-out 0.4s forwards; opacity: 0; }
+        
+        /* Efek cahaya redup di latar belakang */
+        .bg-glow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 60%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between items-center relative overflow-x-hidden">
+    
+    <!-- Canvas Starfield Background -->
+    <canvas id="starfield" class="fixed inset-0 w-full h-full pointer-events-none" style="z-index: 0;"></canvas>
+
+    <div class="bg-glow top-0 left-1/4 animate-pulse" style="animation-duration: 4s;"></div>
+    <div class="bg-glow bottom-0 right-1/4 animate-pulse" style="animation-duration: 5s;"></div>
+
+    <!-- Judul Utama -->
+    <div class="w-full pt-16 z-10 text-center animate-fade-in-1 px-4">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">
+            Tool Laporan Bisnis
+        </h1>
+        <div class="w-16 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent mx-auto rounded-full mt-4"></div>
+    </div>
+
+    <main class="w-full max-w-3xl flex flex-col gap-6 items-center justify-center p-6 z-10 flex-grow">
+        
+        <!-- Link TikTok -->
+        <a href="https://digiwork.web.id/teleo/Tiktok.html" target="_blank" 
+           class="animate-fade-in-2 w-full group relative flex flex-col sm:flex-row items-center sm:items-start p-6 sm:p-8 bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.04] hover:border-[#00f2fe]/40 rounded-3xl transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(0,242,254,0.15)] overflow-hidden">
+            <div class="w-16 h-16 sm:mr-6 mb-4 sm:mb-0 flex-shrink-0 text-white/30 group-hover:text-[#00f2fe] group-hover:scale-110 transition-all duration-500 ease-out flex items-center justify-center bg-white/[0.02] rounded-2xl group-hover:bg-[#00f2fe]/10">
+                <!-- Icon TikTok -->
+                <svg fill="currentColor" viewBox="0 0 448 512" class="w-7 h-7">
+                    <path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/>
+                </svg>
+            </div>
+            <div class="text-center sm:text-left flex-grow">
+                <h2 class="text-xl sm:text-2xl font-semibold text-white/90 group-hover:text-white transition-colors duration-300 tracking-wide">Portal Laporan TikTok</h2>
+            </div>
+            <!-- Icon Panah Meluncur Animasi -->
+            <div class="hidden sm:flex self-center opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300 text-[#00f2fe] ml-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </div>
+        </a>
+
+        <a href="https://digiwork.web.id/teleo/shopee.html" target="_blank" 
+           class="animate-fade-in-3 w-full group relative flex flex-col sm:flex-row items-center sm:items-start p-6 sm:p-8 bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.04] hover:border-[#ee4d2d]/40 rounded-3xl transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(238,77,45,0.15)] overflow-hidden">
+            <div class="w-16 h-16 sm:mr-6 mb-4 sm:mb-0 flex-shrink-0 text-white/30 group-hover:text-[#ee4d2d] group-hover:scale-110 transition-all duration-500 ease-out flex items-center justify-center bg-white/[0.02] rounded-2xl group-hover:bg-[#ee4d2d]/10">
+                <!-- Icon Shopee -->
+                <svg fill="currentColor" viewBox="0 0 24 24" class="w-8 h-8">
+                    <path d="M19 6h-3c0-2.21-1.79-4-4-4S8 3.79 8 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm7 16H5V8h3v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h3v12z"/>
+                    <circle cx="12" cy="14" r="3" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="text-center sm:text-left flex-grow">
+                <h2 class="text-xl sm:text-2xl font-semibold text-white/90 group-hover:text-white transition-colors duration-300 tracking-wide">Portal Laporan Shopee</h2>
+            </div>
+            <!-- Icon Panah Meluncur Animasi -->
+            <div class="hidden sm:flex self-center opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300 text-[#ee4d2d] ml-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </div>
+        </a>
+
+    </main>
+
+    <footer class="w-full z-10 py-6 text-white/50 text-xs sm:text-sm font-light tracking-wide px-4 pb-8 flex justify-center items-center">
+        <div class="flex flex-wrap justify-center items-center gap-x-4 gap-y-3">
+            
+            <!-- Creator -->
+            <div class="flex items-center gap-1.5 hover:text-white/80 transition-colors cursor-default">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+                </svg>
+                <span>create by Digiwork inc</span>
+            </div>
+            
+            <span class="hidden md:inline-block text-white/20">|</span>
+
+            <!-- Phone -->
+            <a href="https://wa.me/6285113766797" target="_blank" class="flex items-center gap-1.5 hover:text-[#25D366] transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-2.896-1.596-5.432-4.132-7.028-7.028l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
+                </svg>
+                <span>+62 851-1376-6797</span>
+            </a>
+
+            <span class="hidden md:inline-block text-white/20">|</span>
+
+            <!-- Website -->
+            <a href="https://digiwork.web.id" target="_blank" class="flex items-center gap-1.5 hover:text-[#00f2fe] transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
+                </svg>
+                <span>https://digiwork.web.id</span>
+            </a>
+
+            <span class="hidden md:inline-block text-white/20">|</span>
+
+            <!-- Email -->
+            <a href="mailto:digiwork.inc@gmail.com" class="flex items-center gap-1.5 hover:text-[#ea4335] transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                </svg>
+                <span>digiwork.inc@gmail.com</span>
+            </a>
+
+        </div>
+    </footer>
+
+    <!-- Script Bintang Bergerak (Starfield Animation) -->
+    <script>
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let stars = [];
+
+        function initStars() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            stars = [];
+            // Menyesuaikan jumlah bintang agar tidak berat di HP
+            const numStars = width < 768 ? 75 : 200;
+            for (let i = 0; i < numStars; i++) {
+                stars.push(new Star());
+            }
+        }
+
+        class Star {
+            constructor() {
+                this.reset();
+                this.z = Math.random() * width; // Kedalaman awal diacak
+            }
+            reset() {
+                this.x = (Math.random() - 0.5) * 2 * width;
+                this.y = (Math.random() - 0.5) * 2 * height;
+                this.z = width;
+                this.size = Math.random() * 1.2; // Ukuran bintang bervariasi
+            }
+            update() {
+                this.z -= 0.4; // Kecepatan mendekat (0.4 = pelan dan elegan)
+                if (this.z <= 0) {
+                    this.reset();
+                }
+            }
+            draw() {
+                // Konversi koordinat 3D ke layar 2D
+                let x = (this.x / this.z) * width + width / 2;
+                let y = (this.y / this.z) * height + height / 2;
+                let radius = (1 - this.z / width) * this.size * 2; // Bintang membesar saat dekat
+                let opacity = (1 - this.z / width); // Bintang semakin terang saat dekat
+
+                // Jika keluar dari layar, reset ke belakang
+                if (x < 0 || x > width || y < 0 || y > height) {
+                    this.reset();
+                    return;
+                }
+
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+                ctx.fill();
+            }
+        }
+
+        function animateStars() {
+            ctx.clearRect(0, 0, width, height);
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+            requestAnimationFrame(animateStars);
+        }
+
+        window.addEventListener('resize', initStars);
+        window.addEventListener('load', () => {
+            initStars();
+            animateStars();
+        });
+    </script>
+</body>
+</html>
