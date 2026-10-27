@@ -3837,77 +3837,187 @@
       renderPage();
     };
 
+    window._currentDtfItems = [];
+
     window.toggleDtfCustomerMode = function (mode) {
-      const existingBox = document.getElementById('dtf-cust-existing-box');
-      if (existingBox) {
-        if (mode === 'new') {
-          existingBox.classList.add('hidden');
-          const namaInput = document.getElementById('dtf-cust-nama');
-          const telpInput = document.getElementById('dtf-cust-telp');
-          if (namaInput) namaInput.value = '';
-          if (telpInput) telpInput.value = '';
-        } else {
-          existingBox.classList.remove('hidden');
+      const selectBox = document.getElementById('dtf-cust-select-container');
+      const namaInput = document.getElementById('dtf-cust-nama');
+      const telpInput = document.getElementById('dtf-cust-telp');
+      const selectCust = document.getElementById('dtf-cust-select');
+
+      if (mode === 'lama') {
+        if (selectBox) selectBox.classList.remove('hidden');
+        if (selectCust && selectCust.value) {
+          onSelectDtfExistingCustomer(selectCust);
+        }
+      } else {
+        if (selectBox) selectBox.classList.add('hidden');
+        if (selectCust) selectCust.value = '';
+        if (namaInput) {
+          namaInput.value = '';
+          namaInput.readOnly = false;
+        }
+        if (telpInput) {
+          telpInput.value = '';
+          telpInput.readOnly = false;
         }
       }
     };
 
-    window.onSelectDTFCustomer = function (sel) {
-      if (!sel || !sel.value) return;
-      const opt = sel.selectedOptions[0];
-      const nama = opt.getAttribute('data-nama') || '';
-      const telp = opt.getAttribute('data-telp') || '';
+    window.onSelectDtfExistingCustomer = function (el) {
+      const opt = el.options[el.selectedIndex];
       const namaInput = document.getElementById('dtf-cust-nama');
       const telpInput = document.getElementById('dtf-cust-telp');
-      if (namaInput) namaInput.value = nama;
-      if (telpInput) telpInput.value = telp;
-    };
-
-    window.onDtfSatuanChange = function (satuan) {
-      const label1 = document.getElementById('dtf-satuan-label-1');
-      const label2 = document.getElementById('dtf-satuan-label-2');
-      const badge = document.getElementById('dtf-satuan-badge');
-      const hargaInput = document.getElementById('dtf-harga-satuan');
-      const chipsBox = document.getElementById('dtf-preset-chips');
-
-      if (satuan === 'cm') {
-        if (label1) label1.innerText = 'Centimeter';
-        if (label2) label2.innerText = 'Centimeter';
-        if (badge) badge.innerText = 'cm';
-        if (hargaInput && (hargaInput.value === '55000' || hargaInput.value === '50000')) {
-          hargaInput.value = '550';
-        }
-        if (chipsBox) {
-          chipsBox.innerHTML = `
-                        <button type="button" onclick="setDtfUkuranPreset(50)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">50 cm</button>
-                        <button type="button" onclick="setDtfUkuranPreset(100)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">100 cm</button>
-                        <button type="button" onclick="setDtfUkuranPreset(130)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">130 cm</button>
-                        <button type="button" onclick="setDtfUkuranPreset(150)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">150 cm</button>
-                        <button type="button" onclick="setDtfUkuranPreset(200)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">200 cm</button>
-                    `;
+      if (opt && opt.value) {
+        const found = (state.pelanggan || []).find(p => p.id === opt.value);
+        if (found) {
+          if (namaInput) {
+            namaInput.value = found.nama;
+            namaInput.readOnly = true;
+          }
+          if (telpInput) {
+            telpInput.value = found.telepon || '';
+            telpInput.readOnly = true;
+          }
         }
       } else {
-        if (label1) label1.innerText = 'Meter';
-        if (label2) label2.innerText = 'Meter';
+        if (namaInput) {
+          namaInput.value = '';
+          namaInput.readOnly = false;
+        }
+        if (telpInput) {
+          telpInput.value = '';
+          telpInput.readOnly = false;
+        }
+      }
+    };
+
+    window.buildDtfStokOptions = function (selectedId = '') {
+      const stokList = (state.stok || []).filter(s =>
+        (s.kategori && s.kategori.toLowerCase().includes('dtf')) ||
+        (s.nama && s.nama.toLowerCase().includes('dtf')) ||
+        (s.nama && s.nama.toLowerCase().includes('film'))
+      );
+      const otherList = (state.stok || []).filter(s => !stokList.includes(s));
+
+      let html = '<option value="__custom__">⚙️ Jasa Cetak Khusus (Tanpa Potong Stok)</option>';
+      if (stokList.length > 0) {
+        html += '<optgroup label="Bahan Film & DTF Tersedia">';
+        html += stokList.map(s => `
+          <option value="${s.id}" data-nama="${s.nama}" data-harga="${s.harga || 55000}" data-hpp="${s.hpp || 0}" data-satuan="${s.satuan || 'meter'}" data-stok="${s.jumlah || 0}" ${s.id === selectedId ? 'selected' : ''}>
+            ${s.nama} (${s.id}) - Stok: ${s.jumlah || 0} ${s.satuan || 'm'} [${formatRp(s.harga || 55000)}]
+          </option>
+        `).join('');
+        html += '</optgroup>';
+      }
+      if (otherList.length > 0) {
+        html += '<optgroup label="Stok Lainnya">';
+        html += otherList.map(s => `
+          <option value="${s.id}" data-nama="${s.nama}" data-harga="${s.harga || 0}" data-hpp="${s.hpp || 0}" data-satuan="${s.satuan || 'pcs'}" data-stok="${s.jumlah || 0}" ${s.id === selectedId ? 'selected' : ''}>
+            ${s.nama} (${s.id}) - Stok: ${s.jumlah || 0}
+          </option>
+        `).join('');
+        html += '</optgroup>';
+      }
+      return html;
+    };
+
+    window.onSelectDtfAddItem = function (selectEl, isEdit = false) {
+      const prefix = isEdit ? 'dtf-edit-add' : 'dtf-add';
+      const val = selectEl.value;
+      const customBox = document.getElementById(`${prefix}-custom-box`);
+      const stockBadge = document.getElementById(`${prefix}-stock-badge`);
+      const hppHidden = document.getElementById(`${prefix}-hpp-hidden`);
+      const hargaInput = document.getElementById(`${prefix}-harga`);
+      const satuanSelect = document.getElementById(`${prefix}-satuan`);
+
+      if (val === '__custom__') {
+        if (customBox) customBox.classList.remove('hidden');
+        if (stockBadge) stockBadge.classList.add('hidden');
+        if (hppHidden) hppHidden.value = 0;
+        updateDtfAddPreview(isEdit);
+        return;
+      }
+
+      if (customBox) customBox.classList.add('hidden');
+      const item = (state.stok || []).find(s => s.id === val);
+      if (item) {
+        if (hppHidden) hppHidden.value = item.hpp || 0;
+        if (hargaInput && (!hargaInput.value || hargaInput.value === '0' || hargaInput.value === '55000')) {
+          hargaInput.value = item.harga || 55000;
+        }
+        if (satuanSelect && item.satuan) {
+          const sLower = item.satuan.toLowerCase();
+          if (sLower.includes('meter') || sLower === 'm') satuanSelect.value = 'meter';
+          else if (sLower.includes('cm')) satuanSelect.value = 'cm';
+          else if (sLower.includes('roll')) satuanSelect.value = 'roll';
+          else satuanSelect.value = 'pcs';
+          onDtfAddSatuanChange(satuanSelect.value, isEdit);
+        }
+
+        const isLow = (item.jumlah || 0) <= (item.minStok || 0);
+        if (stockBadge) {
+          stockBadge.classList.remove('hidden');
+          stockBadge.innerHTML = `
+            <div class="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5">
+              <div class="flex items-center space-x-2">
+                <span class="px-2 py-0.5 rounded-md font-mono font-bold text-xs bg-cyan-500/20 text-cyan-700 dark:text-cyan-300">📦 ${item.id}</span>
+                <span class="font-bold text-slate-800 dark:text-slate-100">${item.nama}</span>
+                <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold">${item.kategori || 'Bahan'}</span>
+              </div>
+              <div class="flex items-center space-x-3 text-[11px]">
+                <span class="text-slate-500">Stok Tersedia: <strong class="${isLow ? 'text-rose-500 font-black' : 'text-emerald-500 font-bold'}">${item.jumlah || 0} ${item.satuan || 'meter'}</strong></span>
+                ${isEdit ? `<span class="text-slate-500">HPP: <strong class="text-slate-800 dark:text-slate-200 font-bold">${formatRp(item.hpp || 0)}</strong>/${item.satuan || 'm'}</span>` : ''}
+              </div>
+            </div>
+          `;
+        }
+      }
+      updateDtfAddPreview(isEdit);
+      updateGrandTotalDtf(isEdit);
+    };
+
+    window.onDtfAddSatuanChange = function (satuan, isEdit = false) {
+      const prefix = isEdit ? 'dtf-edit-add' : 'dtf-add';
+      const badge = document.getElementById(`${prefix}-satuan-badge`);
+      const chips = document.getElementById(`${prefix}-preset-chips`);
+      const hargaInput = document.getElementById(`${prefix}-harga`);
+
+      if (satuan === 'meter') {
         if (badge) badge.innerText = 'm';
+        if (chips) {
+          chips.innerHTML = `
+            <button type="button" onclick="setDtfUkuranPreset(0.5, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">0.5 m</button>
+            <button type="button" onclick="setDtfUkuranPreset(1.0, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">1.0 m</button>
+            <button type="button" onclick="setDtfUkuranPreset(1.3, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">1.3 m</button>
+            <button type="button" onclick="setDtfUkuranPreset(2.0, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">2.0 m</button>
+            <button type="button" onclick="setDtfUkuranPreset(3.2, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">3.2 m</button>
+            <button type="button" onclick="setDtfUkuranPreset(5.0, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">5.0 m</button>
+          `;
+        }
         if (hargaInput && (hargaInput.value === '550' || hargaInput.value === '500')) {
           hargaInput.value = '55000';
         }
-        if (chipsBox) {
-          chipsBox.innerHTML = `
-                        <button type="button" onclick="setDtfUkuranPreset(0.5)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">0.5 m</button>
-                        <button type="button" onclick="setDtfUkuranPreset(1.0)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">1.0 m</button>
-                        <button type="button" onclick="setDtfUkuranPreset(1.3)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">1.3 m</button>
-                        <button type="button" onclick="setDtfUkuranPreset(2.0)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">2.0 m</button>
-                        <button type="button" onclick="setDtfUkuranPreset(3.2)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">3.2 m</button>
-                        <button type="button" onclick="setDtfUkuranPreset(5.0)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">5.0 m</button>
-                    `;
+      } else if (satuan === 'cm') {
+        if (badge) badge.innerText = 'cm';
+        if (chips) {
+          chips.innerHTML = `
+            <button type="button" onclick="setDtfUkuranPreset(50, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">50 cm</button>
+            <button type="button" onclick="setDtfUkuranPreset(100, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">100 cm</button>
+            <button type="button" onclick="setDtfUkuranPreset(130, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">130 cm</button>
+            <button type="button" onclick="setDtfUkuranPreset(200, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">200 cm</button>
+          `;
         }
+        if (hargaInput && (hargaInput.value === '55000' || hargaInput.value === '50000')) {
+          hargaInput.value = '550';
+        }
+      } else {
+        if (badge) badge.innerText = satuan;
+        if (chips) chips.innerHTML = '';
       }
-      hitungDTFLive();
+      updateDtfAddPreview(isEdit);
+      updateGrandTotalDtf(isEdit);
     };
-
-    window._currentDtfItems = [];
 
     window.setDtfUkuranPreset = function (val, isEdit = false) {
       const prefix = isEdit ? 'dtf-edit-add' : 'dtf-add';
@@ -3915,63 +4025,14 @@
       if (input) {
         input.value = val;
         updateDtfAddPreview(isEdit);
+        updateGrandTotalDtf(isEdit);
       }
     };
-
-    window.setDtfBayarPreset = function (type, isEdit = false) {
-      const prefix = isEdit ? 'dtf-edit' : 'dtf';
-      const totalVal = parseFloat(document.getElementById(`${prefix}-total-val`)?.value) || 0;
-      const bayarInput = document.getElementById(`${prefix}-bayar`);
-      if (!bayarInput) return;
-
-      if (type === 'lunas') {
-        bayarInput.value = totalVal;
-      } else if (type === 'dp50') {
-        bayarInput.value = Math.round(totalVal / 2);
-      } else if (type === 'nol') {
-        bayarInput.value = 0;
-      }
-      updateGrandTotalDtf(isEdit);
-    };
-
-    function buildDtfStokOptions(selectedId) {
-      const bahanDTFItems = (state.stok || []).filter(s =>
-        (s.kategori && s.kategori.toLowerCase().includes('dtf')) ||
-        (s.nama && s.nama.toLowerCase().includes('dtf')) ||
-        (s.nama && s.nama.toLowerCase().includes('film'))
-      );
-      const otherItems = (state.stok || []).filter(s => !bahanDTFItems.includes(s));
-
-      let html = `<option value="" ${!selectedId ? 'selected' : ''}>-- Cetak Khusus / Tanpa Potong Stok Bahan --</option>`;
-
-      if (bahanDTFItems.length > 0) {
-        html += `<optgroup label="⭐ Bahan & Film DTF (Katalog Stok)">`;
-        bahanDTFItems.forEach(st => {
-          const isSel = selectedId === st.id ? 'selected' : '';
-          html += `<option value="${st.id}" ${isSel}>[${st.id}] ${st.nama} — Sisa: ${st.jumlah} ${st.satuan || 'Meter'}</option>`;
-        });
-        html += `</optgroup>`;
-      }
-
-      if (otherItems.length > 0) {
-        html += `<optgroup label="📦 Stok Barang / Sparepart Lainnya">`;
-        otherItems.forEach(st => {
-          const isSel = selectedId === st.id ? 'selected' : '';
-          html += `<option value="${st.id}" ${isSel}>[${st.id}] ${st.nama} (${st.kategori}) — Sisa: ${st.jumlah} ${st.satuan || 'Unit'}</option>`;
-        });
-        html += `</optgroup>`;
-      }
-
-      return html;
-    }
-
     function renderDtfItemsTableHtml(items, isEdit = false) {
       if (!items || items.length === 0) {
         return `
-          <div class="p-6 text-center rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/40 text-slate-400">
-            <i data-lucide="layers" class="w-8 h-8 mx-auto mb-1.5 text-cyan-500 opacity-60"></i>
-            <p class="text-xs font-bold text-slate-700 dark:text-slate-200">Belum ada item film dalam daftar pesanan</p>
-            <p class="text-[11px] text-slate-400 mt-0.5">Pilih item film pada form tambah di bawah, lalu klik tombol <strong>"+ Tambah Item Ini ke Daftar"</strong>.</p>
+          <div class="p-4 text-center text-xs text-slate-400 italic bg-slate-900 rounded-xl border border-dashed border-slate-700/80">
+            Belum ada item film. Tambahkan minimal 1 item film menggunakan form di bawah.
           </div>
         `;
       }
@@ -3981,60 +4042,52 @@
       const totalModal = items.reduce((sum, i) => sum + (i.subtotalModal || 0), 0);
 
       return `
-        <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+        <div class="border border-slate-700/80 rounded-xl overflow-hidden bg-slate-900 shadow-md">
           <table class="w-full text-left text-xs">
-            <thead class="bg-slate-100 dark:bg-slate-750 text-slate-600 dark:text-slate-300 font-bold uppercase text-[10px]">
+            <thead class="bg-slate-950 text-cyan-400 font-bold border-b border-slate-800 text-[11px] uppercase tracking-wider">
               <tr>
-                <th class="p-2.5 text-center w-8">#</th>
-                <th class="p-2.5">Item / Bahan Film DTF</th>
-                <th class="p-2.5 text-center">Ukuran / Qty</th>
-                <th class="p-2.5 text-right">Harga Jual</th>
-                <th class="p-2.5 text-right">Subtotal Omset</th>
-                <th class="p-2.5 text-right">Modal Bahan (HPP)</th>
-                <th class="p-2.5 text-center w-10">Aksi</th>
+                <th class="p-2.5">Bahan / Film DTF</th>
+                <th class="p-2.5 text-center w-28">Ukuran / Qty</th>
+                <th class="p-2.5 text-right w-28">Harga Satuan</th>
+                <th class="p-2.5 text-right w-32">Subtotal</th>
+                <th class="p-2.5 text-center w-10"></th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60 font-medium">
+            <tbody class="divide-y divide-slate-800 bg-slate-900 text-slate-100 font-medium">
               ${items.map((it, idx) => `
-                <tr class="hover:bg-slate-50 dark:hover:bg-slate-750/50 transition">
-                  <td class="p-2.5 text-center text-slate-400 text-[11px] font-mono">${idx + 1}</td>
-                  <td class="p-2.5">
-                    <div class="font-bold text-slate-800 dark:text-slate-100 flex items-center space-x-1.5 flex-wrap">
-                      ${it.stokId ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">📦 ${it.stokId}</span>` : ''}
-                      <span>${it.nama}</span>
+                <tr class="hover:bg-slate-800/60 transition">
+                  <td class="p-2.5 font-semibold text-slate-100">
+                    <div class="flex items-center space-x-1.5 flex-wrap">
+                      ${it.stokId ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">📦 ${it.stokId}</span>` : '<span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">Custom</span>'}
+                      <span class="text-white font-bold">${it.nama}</span>
                     </div>
-                    ${it.catatanDesain ? `<div class="text-[10px] text-slate-400 italic mt-0.5">Ket: ${it.catatanDesain}</div>` : ''}
+                    ${it.catatanDesain ? `<div class="text-[10px] text-slate-400 mt-0.5 italic">Catatan: ${it.catatanDesain}</div>` : ''}
                   </td>
                   <td class="p-2.5 text-center whitespace-nowrap">
-                    <span class="px-2 py-0.5 rounded-md font-bold bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-mono">
+                    <span class="px-2 py-0.5 rounded-md font-bold bg-slate-800 text-cyan-300 border border-slate-700 font-mono">
                       ${it.jumlah} ${it.satuan}
                     </span>
                   </td>
-                  <td class="p-2.5 text-right font-mono text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                  <td class="p-2.5 text-right font-mono text-slate-300 whitespace-nowrap">
                     ${formatRp(it.hargaSatuan)}
                   </td>
-                  <td class="p-2.5 text-right font-mono font-bold text-cyan-600 dark:text-cyan-400 whitespace-nowrap">
+                  <td class="p-2.5 text-right font-mono font-bold text-cyan-400 whitespace-nowrap">
                     ${formatRp(it.subtotal)}
                   </td>
-                  <td class="p-2.5 text-right font-mono whitespace-nowrap">
-                    <span class="text-rose-500 font-bold block">${formatRp(it.subtotalModal || 0)}</span>
-                    ${it.hppSatuan > 0 ? `<span class="text-[9px] text-slate-400">@ ${formatRp(it.hppSatuan)}/${it.satuan}</span>` : ''}
-                  </td>
                   <td class="p-2.5 text-center">
-                    <button type="button" onclick="hapusItemDtf(${idx}, ${isEdit})" class="p-1 rounded-lg text-rose-500 hover:bg-rose-500/10 transition" title="Hapus Item Ini">
+                    <button type="button" onclick="hapusItemDtf(${idx}, ${isEdit})" class="p-1 rounded text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 transition" title="Hapus item ini">
                       <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                     </button>
                   </td>
                 </tr>
               `).join('')}
             </tbody>
-            <tfoot class="bg-slate-50 dark:bg-slate-750/70 border-t border-slate-200 dark:border-slate-700 text-[11px] font-bold">
+            <tfoot class="bg-slate-950 border-t border-slate-800 text-[11px] font-bold text-slate-300">
               <tr>
-                <td colspan="2" class="p-2.5 text-slate-600 dark:text-slate-300 text-right uppercase tracking-wider">Total (${items.length} Item):</td>
-                <td class="p-2.5 text-center text-slate-800 dark:text-slate-200 font-mono">${typeof totalQty === 'number' ? totalQty.toLocaleString('id-ID', { maximumFractionDigits: 2 }) : totalQty}</td>
+                <td class="p-2.5 text-slate-300 text-right uppercase tracking-wider">Total (${items.length} Item):</td>
+                <td class="p-2.5 text-center text-white font-mono">${typeof totalQty === 'number' ? totalQty.toLocaleString('id-ID', { maximumFractionDigits: 2 }) : totalQty}</td>
                 <td></td>
-                <td class="p-2.5 text-right text-cyan-600 dark:text-cyan-400 font-mono">${formatRp(totalOmset)}</td>
-                <td class="p-2.5 text-right text-rose-500 font-mono">${formatRp(totalModal)}</td>
+                <td class="p-2.5 text-right text-cyan-400 font-mono font-black">${formatRp(totalOmset)}</td>
                 <td></td>
               </tr>
             </tfoot>
@@ -4043,62 +4096,14 @@
       `;
     }
 
-    window.onSelectDtfAddItem = function (sel, isEdit = false) {
-      if (!sel) return;
-      const prefix = isEdit ? 'dtf-edit-add' : 'dtf-add';
-      const val = sel.value;
-      const hppHidden = document.getElementById(`${prefix}-hpp-hidden`);
-      const infoBox = document.getElementById(`${prefix}-stock-badge`);
-      const hargaInput = document.getElementById(`${prefix}-harga`);
-      const customBox = document.getElementById(`${prefix}-custom-box`);
-
-      if (!val) {
-        if (hppHidden) hppHidden.value = 0;
-        if (infoBox) {
-          infoBox.classList.add('hidden');
-          infoBox.innerHTML = '';
-        }
-        if (customBox) customBox.classList.remove('hidden');
-        updateDtfAddPreview(isEdit);
-        return;
-      }
-
-      const item = (state.stok || []).find(s => s.id === val);
-      if (!item) return;
-
-      if (customBox) customBox.classList.add('hidden');
-      if (hppHidden) hppHidden.value = item.hpp || 0;
-
-      if (item.harga && item.harga > 0 && hargaInput) {
-        hargaInput.value = item.harga;
-      }
-
-      if (infoBox) {
-        infoBox.classList.remove('hidden');
-        const isLow = (item.jumlah || 0) <= (item.minStok || 0);
-        infoBox.innerHTML = `
-          <div class="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5">
-            <div class="flex items-center space-x-2">
-              <span class="px-2 py-0.5 rounded-md font-mono font-bold text-xs bg-cyan-500/20 text-cyan-700 dark:text-cyan-300">📦 ${item.id}</span>
-              <span class="font-bold text-slate-800 dark:text-slate-100">${item.nama}</span>
-              <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold">${item.kategori}</span>
-            </div>
-            <div class="flex items-center space-x-3 text-[11px]">
-              <span class="text-slate-500">Stok Tersedia: <strong class="${isLow ? 'text-rose-500 font-black' : 'text-emerald-500 font-bold'}">${item.jumlah || 0} ${item.satuan || 'Meter'}</strong></span>
-              <span class="text-slate-500">Modal Pokok (HPP): <strong class="text-slate-800 dark:text-slate-200 font-bold">${formatRp(item.hpp || 0)}</strong>/${item.satuan || 'meter'}</span>
-            </div>
-          </div>
-        `;
-      }
-
-      updateDtfAddPreview(isEdit);
-    };
-
     window.updateDtfAddPreview = function (isEdit = false) {
       const prefix = isEdit ? 'dtf-edit-add' : 'dtf-add';
       const jumlahInput = document.getElementById(`${prefix}-jumlah`);
       const hargaInput = document.getElementById(`${prefix}-harga`);
       const hppHidden = document.getElementById(`${prefix}-hpp-hidden`);
+      const selectEl = document.getElementById(`${prefix}-item-select`);
+      const warningEl = document.getElementById(`${prefix}-stock-warning`);
+      const warningText = document.getElementById(`${prefix}-stock-warning-text`);
 
       const jumlah = parseFloat(jumlahInput?.value) || 0;
       const harga = parseFloat(hargaInput?.value) || 0;
@@ -4118,66 +4123,109 @@
         labaEl.innerText = formatRp(laba);
         labaEl.className = `font-mono font-bold ${laba >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
       }
-    };
 
-    window.onDtfAddSatuanChange = function (satuan, isEdit = false) {
-      const prefix = isEdit ? 'dtf-edit-add' : 'dtf-add';
-      const badge = document.getElementById(`${prefix}-satuan-badge`);
-      const chipsBox = document.getElementById(`${prefix}-preset-chips`);
-      const hargaInput = document.getElementById(`${prefix}-harga`);
+      // Deteksi & Peringatan Jika Pesanan Melebihi Sisa Stok Fisik
+      if (selectEl && selectEl.value !== '__custom__') {
+        const stokId = selectEl.value;
+        const itemStok = (state.stok || []).find(s => s.id === stokId);
+        const sisaStok = itemStok ? (parseFloat(itemStok.jumlah) || 0) : 0;
+        const sudahDiKeranjang = (window._currentDtfItems || [])
+          .filter(i => i.stokId === stokId)
+          .reduce((sum, i) => sum + (parseFloat(i.jumlah) || 0), 0);
+        const totalDiminta = sudahDiKeranjang + jumlah;
 
-      if (badge) badge.innerText = satuan === 'cm' ? 'cm' : (satuan === 'pcs' ? 'pcs' : (satuan === 'roll' ? 'roll' : 'm'));
-
-      if (satuan === 'cm') {
-        if (hargaInput && (hargaInput.value === '55000' || hargaInput.value === '50000')) {
-          hargaInput.value = '550';
-        }
-        if (chipsBox) {
-          chipsBox.innerHTML = `
-            <button type="button" onclick="setDtfUkuranPreset(50, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">50 cm</button>
-            <button type="button" onclick="setDtfUkuranPreset(100, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">100 cm</button>
-            <button type="button" onclick="setDtfUkuranPreset(130, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">130 cm</button>
-            <button type="button" onclick="setDtfUkuranPreset(150, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">150 cm</button>
-            <button type="button" onclick="setDtfUkuranPreset(200, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">200 cm</button>
-          `;
+        if (totalDiminta > sisaStok) {
+          if (warningEl && warningText) {
+            const satuan = document.getElementById(`${prefix}-satuan`)?.value || itemStok?.satuan || 'meter';
+            const selisih = (totalDiminta - sisaStok).toLocaleString('id-ID', { maximumFractionDigits: 2 });
+            warningText.innerHTML = `⚠️ <strong>Peringatan Stok Kurang:</strong> Pesanan (${totalDiminta} ${satuan}${sudahDiKeranjang > 0 ? ` [${sudahDiKeranjang} di daftar + ${jumlah} baru]` : ''}) MELEBIHI sisa stok fisik (<strong>${sisaStok} ${satuan}</strong>). Kurang ${selisih} ${satuan}!`;
+            warningEl.classList.remove('hidden');
+          }
+          if (jumlahInput) {
+            jumlahInput.classList.add('border-amber-500', 'bg-amber-500/10', 'text-amber-600', 'dark:text-amber-400');
+            jumlahInput.classList.remove('border-cyan-500/50');
+          }
+        } else {
+          if (warningEl) warningEl.classList.add('hidden');
+          if (jumlahInput) {
+            jumlahInput.classList.remove('border-amber-500', 'bg-amber-500/10', 'text-amber-600', 'dark:text-amber-400');
+            jumlahInput.classList.add('border-cyan-500/50');
+          }
         }
       } else {
-        if (hargaInput && hargaInput.value === '550') {
-          hargaInput.value = '55000';
-        }
-        if (chipsBox) {
-          chipsBox.innerHTML = `
-            <button type="button" onclick="setDtfUkuranPreset(0.5, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">0.5 m</button>
-            <button type="button" onclick="setDtfUkuranPreset(1.0, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">1.0 m</button>
-            <button type="button" onclick="setDtfUkuranPreset(1.3, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">1.3 m</button>
-            <button type="button" onclick="setDtfUkuranPreset(2.0, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">2.0 m</button>
-            <button type="button" onclick="setDtfUkuranPreset(3.2, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">3.2 m</button>
-            <button type="button" onclick="setDtfUkuranPreset(5.0, ${isEdit})" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">5.0 m</button>
-          `;
+        if (warningEl) warningEl.classList.add('hidden');
+        if (jumlahInput) {
+          jumlahInput.classList.remove('border-amber-500', 'bg-amber-500/10', 'text-amber-600', 'dark:text-amber-400');
+          jumlahInput.classList.add('border-cyan-500/50');
         }
       }
-      updateDtfAddPreview(isEdit);
     };
 
     window.tambahItemDtf = function (isEdit = false) {
       const prefix = isEdit ? 'dtf-edit-add' : 'dtf-add';
-      const sel = document.getElementById(`${prefix}-item-select`);
-      const stokId = (sel?.value || '').trim();
-      const itemStok = (state.stok || []).find(s => s.id === stokId);
-      const customNama = (document.getElementById(`${prefix}-custom-nama`)?.value || '').trim();
+      const selectEl = document.getElementById(`${prefix}-item-select`);
+      const customNamaInput = document.getElementById(`${prefix}-custom-nama`);
+      const hppHidden = document.getElementById(`${prefix}-hpp-hidden`);
+      const satuanSelect = document.getElementById(`${prefix}-satuan`);
+      const jumlahInput = document.getElementById(`${prefix}-jumlah`);
+      const hargaInput = document.getElementById(`${prefix}-harga`);
+      const catatanInput = document.getElementById(`${prefix}-catatan`);
 
-      const nama = itemStok ? itemStok.nama : (customNama || 'Cetak Film DTF Meteran');
-      const satuan = document.getElementById(`${prefix}-satuan`)?.value || 'meter';
-      const jumlah = parseFloat(document.getElementById(`${prefix}-jumlah`)?.value) || 1.0;
-      const hargaSatuan = parseFloat(document.getElementById(`${prefix}-harga`)?.value) || 0;
-      const catatanDesain = (document.getElementById(`${prefix}-catatan`)?.value || '').trim();
+      let stokId = '';
+      let nama = '';
+      let hppSatuan = parseFloat(hppHidden?.value) || 0;
 
+      if (selectEl && selectEl.value === '__custom__') {
+        nama = (customNamaInput?.value || '').trim() || 'Cetak Film DTF Khusus';
+        stokId = '';
+        hppSatuan = 0;
+      } else if (selectEl) {
+        stokId = selectEl.value;
+        const opt = selectEl.options[selectEl.selectedIndex];
+        nama = opt ? (opt.getAttribute('data-nama') || opt.text) : 'Bahan Film DTF';
+        const optHpp = parseFloat(opt?.getAttribute('data-hpp'));
+        if (!isNaN(optHpp)) hppSatuan = optHpp;
+      }
+
+      const jumlah = parseFloat(jumlahInput?.value) || 0;
       if (jumlah <= 0) {
-        alert('Kuantitas / ukuran cetak harus lebih dari 0!');
+        alert('Ukuran / jumlah cetak harus lebih dari 0!');
+        if (jumlahInput) jumlahInput.focus();
         return;
       }
 
-      const hppSatuan = itemStok ? (itemStok.hpp || 0) : 0;
+      const satuan = satuanSelect?.value || 'meter';
+      const hargaSatuan = parseFloat(hargaInput?.value) || 0;
+      const catatanDesain = (catatanInput?.value || '').trim();
+
+      // Cek Peringatan Stok Melebihi saat tombol tambah item ditekan
+      if (stokId) {
+        const itemStok = (state.stok || []).find(s => s.id === stokId);
+        if (itemStok) {
+          const sisaStok = parseFloat(itemStok.jumlah) || 0;
+          const sudahDiKeranjang = (window._currentDtfItems || [])
+            .filter(i => i.stokId === stokId)
+            .reduce((sum, i) => sum + (parseFloat(i.jumlah) || 0), 0);
+          const totalDiminta = sudahDiKeranjang + jumlah;
+
+          if (totalDiminta > sisaStok) {
+            const satuanLabel = itemStok.satuan || satuan;
+            const selisih = (totalDiminta - sisaStok).toLocaleString('id-ID', { maximumFractionDigits: 2 });
+            alert(
+              `❌ PEMESANAN TIDAK DAPAT DIPROSES!\n\n` +
+              `Jumlah pesanan melebihi stok yang tersedia di toko:\n` +
+              `• Bahan: ${itemStok.nama} (${stokId})\n` +
+              `• Sisa Stok Toko: ${sisaStok} ${satuanLabel}\n` +
+              `• Total Diminta: ${totalDiminta} ${satuanLabel}` + (sudahDiKeranjang > 0 ? ` (${sudahDiKeranjang} di daftar + ${jumlah} baru)` : '') + `\n` +
+              `• Kekurangan: ${selisih} ${satuanLabel}\n\n` +
+              `Pemesanan melebihi stok tidak dapat diproses. Silakan sesuaikan jumlah pesanan dengan stok yang ada.`
+            );
+            if (jumlahInput) jumlahInput.focus();
+            return;
+          }
+        }
+      }
+
       const subtotal = Math.round(jumlah * hargaSatuan);
       const subtotalModal = Math.round(jumlah * hppSatuan);
       const labaKotor = subtotal - subtotalModal;
@@ -4199,9 +4247,10 @@
         catatanDesain
       });
 
-      // Clear adder input fields
-      const catatanInput = document.getElementById(`${prefix}-catatan`);
+      // Reset input form tambah
       if (catatanInput) catatanInput.value = '';
+      if (customNamaInput) customNamaInput.value = '';
+      if (jumlahInput) jumlahInput.value = '1.0';
 
       const container = document.getElementById(isEdit ? 'dtf-edit-items-container' : 'dtf-items-container');
       if (container) {
@@ -4210,7 +4259,7 @@
       }
 
       updateGrandTotalDtf(isEdit);
-      showNotificationToast(`Item "${nama}" (+${jumlah} ${satuan}) ditambahkan!`);
+      showNotificationToast(`Item "${nama}" (+${jumlah} ${satuan}) berhasil ditambahkan ke daftar!`);
     };
 
     window.hapusItemDtf = function (idx, isEdit = false) {
@@ -4225,47 +4274,69 @@
         }
 
         updateGrandTotalDtf(isEdit);
-        showNotificationToast(`Item "${removed.nama}" dihapus dari pesanan.`);
+        showNotificationToast(`Item "${removed.nama}" dihapus.`);
       }
     };
 
     window.updateGrandTotalDtf = function (isEdit = false) {
       const prefix = isEdit ? 'dtf-edit' : 'dtf';
-      const items = window._currentDtfItems || [];
+      const addPrefix = isEdit ? 'dtf-edit-add' : 'dtf-add';
 
-      const totalOmset = items.reduce((sum, i) => sum + (i.subtotal || 0), 0);
-      const totalModal = items.reduce((sum, i) => sum + (i.subtotalModal || 0), 0);
-      const totalLaba = totalOmset - totalModal;
-      const marginPct = totalOmset > 0 ? Math.round((totalLaba / totalOmset) * 100) : 0;
+      const items = window._currentDtfItems || [];
+      let totalOmset = 0;
+      let totalModal = 0;
+      let formulaText = '';
+
+      if (items.length > 0) {
+        totalOmset = items.reduce((sum, it) => sum + (it.subtotal || 0), 0);
+        totalModal = items.reduce((sum, it) => sum + (it.subtotalModal || 0), 0);
+        const totalQty = items.reduce((sum, it) => sum + (parseFloat(it.jumlah) || 0), 0);
+        formulaText = `${items.length} Item Film (${totalQty.toLocaleString('id-ID', { maximumFractionDigits: 2 })} Total Ukuran)`;
+      } else {
+        const jumlahInput = document.getElementById(`${addPrefix}-jumlah`);
+        const hargaInput = document.getElementById(`${addPrefix}-harga`);
+        const hppHidden = document.getElementById(`${addPrefix}-hpp-hidden`);
+        const satuanSelect = document.getElementById(`${addPrefix}-satuan`);
+
+        const jumlah = parseFloat(jumlahInput?.value) || 0;
+        const harga = parseFloat(hargaInput?.value) || 0;
+        const hpp = parseFloat(hppHidden?.value) || 0;
+        const satuan = satuanSelect?.value || 'meter';
+
+        totalOmset = Math.round(jumlah * harga);
+        totalModal = Math.round(jumlah * hpp);
+        formulaText = `${jumlah} ${satuan} @ ${formatRp(harga)}`;
+      }
 
       const totalPreview = document.getElementById(`${prefix}-total-preview`);
-      const totalHidden = document.getElementById(`${prefix}-total-val`);
-      const formulaEl = document.getElementById(`${prefix}-calc-formula`);
+      const calcFormula = document.getElementById(`${prefix}-calc-formula`);
+      const totalVal = document.getElementById(`${prefix}-total-val`);
+
       const modalPreview = document.getElementById(`${prefix}-modal-preview`);
       const modalFormula = document.getElementById(`${prefix}-modal-formula`);
-      const modalHidden = document.getElementById(`${prefix}-total-modal-val`);
+      const totalModalVal = document.getElementById(`${prefix}-total-modal-val`);
+
       const labaPreview = document.getElementById(`${prefix}-laba-preview`);
       const marginPreview = document.getElementById(`${prefix}-margin-preview`);
 
-      if (totalHidden) totalHidden.value = totalOmset;
       if (totalPreview) totalPreview.innerText = formatRp(totalOmset);
-      if (formulaEl) formulaEl.innerText = `${items.length} Item Film DTF`;
+      if (calcFormula) calcFormula.innerText = formulaText;
+      if (totalVal) totalVal.value = totalOmset;
 
-      if (modalHidden) modalHidden.value = totalModal;
       if (modalPreview) modalPreview.innerText = formatRp(totalModal);
-      if (modalFormula) modalFormula.innerText = totalModal > 0 ? `Modal bahan (${items.length} item)` : 'Tanpa modal bahan';
+      if (modalFormula) modalFormula.innerText = `Bahan fisik & HPP`;
+      if (totalModalVal) totalModalVal.value = totalModal;
 
-      if (labaPreview) {
-        labaPreview.innerText = formatRp(totalLaba);
-        labaPreview.className = `text-sm sm:text-base font-black font-mono ${totalLaba >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
-      }
-      if (marginPreview) {
-        marginPreview.innerText = `${marginPct}% Margin`;
-        marginPreview.className = `text-[10px] font-bold px-1.5 py-0.5 rounded ${totalLaba >= 0 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600'}`;
-      }
+      const totalLaba = totalOmset - totalModal;
+      const marginPersen = totalOmset > 0 ? Math.round((totalLaba / totalOmset) * 100) : 0;
+      if (labaPreview) labaPreview.innerText = formatRp(totalLaba);
+      if (marginPreview) marginPreview.innerText = `Margin: ${marginPersen}%`;
 
       // Pembayaran & Sisa
       const bayarInput = document.getElementById(`${prefix}-bayar`);
+      if (!isEdit && window._dtfBayarAutoSync && bayarInput) {
+        bayarInput.value = totalOmset;
+      }
       const bayar = parseFloat(bayarInput?.value) || 0;
       const sisa = Math.max(0, totalOmset - bayar);
 
@@ -4275,17 +4346,16 @@
 
       if (sisaBox && sisaText && sisaNominal) {
         if (sisa <= 0) {
-          const lebih = bayar - totalOmset;
           sisaBox.className = "p-2.5 rounded-lg border text-xs flex items-center justify-between bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300";
-          sisaText.innerHTML = lebih > 0 ? `Status: <strong>LUNAS</strong> (Kelebihan: ${formatRp(lebih)})` : 'Status: <strong>LUNAS</strong> (Tidak ada sisa tagihan)';
-          sisaNominal.innerText = 'Rp 0';
+          sisaText.innerText = "LUNAS (Tidak ada sisa tagihan)";
+          sisaNominal.innerText = "Rp 0";
         } else if (bayar > 0) {
           sisaBox.className = "p-2.5 rounded-lg border text-xs flex items-center justify-between bg-cyan-500/10 border-cyan-500/30 text-cyan-700 dark:text-cyan-300";
-          sisaText.innerHTML = `Status: <strong>DP / Titip</strong> (Sisa belum dibayar: ${formatRp(sisa)})`;
+          sisaText.innerText = "DP / TITIP BAYAR (Sisa Piutang):";
           sisaNominal.innerText = formatRp(sisa);
         } else {
           sisaBox.className = "p-2.5 rounded-lg border text-xs flex items-center justify-between bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300";
-          sisaText.innerHTML = `Status: <strong>BELUM BAYAR</strong> (Sisa tagihan: ${formatRp(sisa)})`;
+          sisaText.innerText = "BELUM BAYAR (Sisa Piutang):";
           sisaNominal.innerText = formatRp(sisa);
         }
       }
@@ -4294,154 +4364,130 @@
     window.openFormDTFModal = function () {
       const defaultItem = (state.stok || []).find(s =>
         (s.kategori && s.kategori.toLowerCase().includes('dtf')) ||
-        (s.nama && s.nama.toLowerCase().includes('dtf'))
+        (s.nama && s.nama.toLowerCase().includes('dtf')) ||
+        (s.nama && s.nama.toLowerCase().includes('film'))
       ) || ((state.stok || []).length > 0 ? state.stok[0] : null);
 
       const defaultHarga = defaultItem && defaultItem.harga ? defaultItem.harga : 55000;
-      const defaultHpp = defaultItem && defaultItem.hpp ? defaultItem.hpp : 0;
+      const defaultHpp = defaultItem && defaultItem.hpp ? defaultItem.hpp : 18000;
       const defaultStokId = defaultItem ? defaultItem.id : '';
       const isLow = defaultItem ? (defaultItem.jumlah || 0) <= (defaultItem.minStok || 0) : false;
 
-      // Inisialisasi daftar item dengan 1 item awal default
-      if (defaultItem) {
-        window._currentDtfItems = [{
-          stokId: defaultItem.id,
-          nama: defaultItem.nama,
-          satuan: defaultItem.satuan || 'meter',
-          jumlah: 1.0,
-          hargaSatuan: defaultHarga,
-          subtotal: defaultHarga,
-          hppSatuan: defaultHpp,
-          subtotalModal: defaultHpp,
-          labaKotor: defaultHarga - defaultHpp,
-          catatanDesain: ''
-        }];
-      } else {
-        window._currentDtfItems = [];
-      }
+      window._dtfBayarAutoSync = true;
+      window._currentDtfItems = [];
+      const nextId = `DTF-2026-00${(state.dtf || []).length + 1}`;
 
       openModal(`
         <form onsubmit="simpanOrderDTF(event)" class="space-y-4 max-h-[85vh] overflow-y-auto pr-1">
-          <!-- Header -->
+          <!-- Header Modal -->
           <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2.5">
             <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 text-white flex items-center justify-center font-bold">
-                <i data-lucide="layers" class="w-4 h-4"></i>
-              </div>
-              <div>
-                <h3 class="font-bold text-base text-slate-800 dark:text-slate-100">Buat Order Cetak Film DTF Baru</h3>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400">Mendukung multi-item pemesanan film terhubung langsung dengan kode barang stok</p>
-              </div>
+              <span class="font-mono text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-bold">${nextId}</span>
+              <h3 class="font-bold text-base text-slate-800 dark:text-slate-100">Buat Order Cetak Film DTF Baru</h3>
             </div>
           </div>
 
-          <!-- Bagian 1: Data Pemesan -->
-          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
+          <!-- Bagian 1: Data Pemesan & Pelanggan -->
+          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 flex items-center space-x-1.5">
                 <i data-lucide="user" class="w-4 h-4"></i>
-                <span>1. Data Pemesan / Pelanggan</span>
+                <span>1. Data Pemesan & Pelanggan</span>
               </span>
-              <div class="flex items-center space-x-2 text-xs">
-                <label class="inline-flex items-center space-x-1 cursor-pointer">
-                  <input type="radio" name="dtf-cust-mode" value="existing" checked onchange="toggleDtfCustomerMode('existing')" />
-                  <span>Pilih Pelanggan</span>
+              <div class="flex items-center space-x-3 text-xs">
+                <label class="inline-flex items-center space-x-1.5 cursor-pointer">
+                  <input type="radio" name="dtf-customer-type" value="baru" checked onchange="toggleDtfCustomerMode('baru')" class="text-cyan-500 focus:ring-cyan-400" />
+                  <span class="font-medium text-slate-700 dark:text-slate-300">Pelanggan Baru</span>
                 </label>
-                <label class="inline-flex items-center space-x-1 cursor-pointer">
-                  <input type="radio" name="dtf-cust-mode" value="new" onchange="toggleDtfCustomerMode('new')" />
-                  <span>Pelanggan Baru</span>
+                <label class="inline-flex items-center space-x-1.5 cursor-pointer">
+                  <input type="radio" name="dtf-customer-type" value="lama" onchange="toggleDtfCustomerMode('lama')" class="text-cyan-500 focus:ring-cyan-400" />
+                  <span class="font-medium text-slate-700 dark:text-slate-300">Pelanggan Terdaftar</span>
                 </label>
               </div>
             </div>
 
-            <div id="dtf-cust-existing-box">
-              <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Pilih dari Daftar Pelanggan:</label>
-              <select id="dtf-cust-select" onchange="onSelectDTFCustomer(this)" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-semibold">
+            <!-- Pilih Pelanggan Terdaftar (Hidden default) -->
+            <div id="dtf-cust-select-container" class="hidden">
+              <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Cari / Pilih Dari Database Pelanggan</label>
+              <select id="dtf-cust-select" onchange="onSelectDtfExistingCustomer(this)" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500">
                 <option value="">-- Pilih Pelanggan Terdaftar --</option>
                 ${(state.pelanggan || []).map(p => `
-                  <option value="${p.id}" data-nama="${p.nama}" data-telp="${p.telepon || ''}">${p.nama} (${p.telepon || '-'})</option>
+                  <option value="${p.id}" data-telp="${p.telepon || ''}">${p.nama} (${p.telepon || '-'})</option>
                 `).join('')}
               </select>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Nama Pemesan *</label>
-                <input type="text" id="dtf-cust-nama" placeholder="Contoh: Budi Santoso / Kaos Distro Jogja" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-semibold" required />
+                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Nama Pemesan / Brand *</label>
+                <input type="text" id="dtf-cust-nama" placeholder="Contoh: Budi Distro / Toko Sablon Jaya" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500" required />
               </div>
               <div>
-                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Nomor WhatsApp / Telp</label>
-                <input type="tel" id="dtf-cust-telp" placeholder="08xxxxxxxxxx" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
+                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Nomor WhatsApp / Telp (Untuk Kirim Nota)</label>
+                <input type="tel" id="dtf-cust-telp" placeholder="Contoh: 08123456789" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
               </div>
             </div>
           </div>
 
-          <!-- Bagian 2: Daftar Item Pembuatan Film DTF -->
+          <!-- Bagian 2: Tambah & Daftar Item Cetak Film DTF -->
           <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 flex items-center space-x-1.5">
                 <i data-lucide="layers" class="w-4 h-4"></i>
-                <span>2. Daftar Item Pembuatan Film DTF</span>
+                <span>2. Tambah & Daftar Item Cetak Film DTF</span>
               </span>
-              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
-                Multi-Item Aktif
+              <span class="text-[11px] font-bold text-cyan-500 flex items-center space-x-1">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                <span>Bisa Tambah Banyak Item</span>
               </span>
             </div>
 
-            <!-- Tabel Daftar Item Yang Telah Ditambahkan -->
-            <div id="dtf-items-container">
-              ${renderDtfItemsTableHtml(window._currentDtfItems, false)}
-            </div>
-
-            <!-- Form Tambah Item Film Baru (Adder) -->
-            <div class="p-3.5 rounded-xl bg-gradient-to-r from-cyan-500/5 via-blue-500/5 to-slate-50 dark:from-cyan-500/10 dark:via-blue-500/10 dark:to-slate-850 border border-cyan-500/25 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-cyan-700 dark:text-cyan-300 flex items-center space-x-1.5 uppercase tracking-wider">
-                  <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                  <span>Tambah Item Film Baru</span>
-                </span>
-                <span class="text-[10px] text-slate-400 font-medium">Bisa menambahkan banyak item</span>
+            <!-- Form Baris Tambah Item -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2.5 shadow-sm">
+              <div class="text-[11px] font-bold text-slate-700 dark:text-slate-200 flex items-center justify-between">
+                <span>Tambah Item Cetak Film DTF:</span>
+                <span class="text-[10px] text-slate-400 font-normal">Pilih bahan & ukuran, lalu klik "+ Tambah Item"</span>
               </div>
 
-              <!-- Pilihan Item Film dari Stok -->
+              <!-- Pilihan Bahan / Jasa -->
               <div>
-                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">
-                  Pilih Bahan / Film DTF (Kode Barang Stok) *
-                </label>
-                <select id="dtf-add-item-select" onchange="onSelectDtfAddItem(this, false)" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500">
+                <label class="text-[10px] font-semibold text-slate-500 block mb-1">Pilih Bahan / Film DTF (Kode Stok)</label>
+                <select id="dtf-add-item-select" onchange="onSelectDtfAddItem(this, false)" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500">
                   ${buildDtfStokOptions(defaultStokId)}
                 </select>
               </div>
 
-              <!-- Badge Info Stok & Modal Pokok Otomatis -->
+              <!-- Badge Info Stok Tersedia -->
               <div id="dtf-add-stock-badge" class="${defaultItem ? '' : 'hidden'}">
                 ${defaultItem ? `
-                  <div class="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5">
-                    <div class="flex items-center space-x-2">
-                      <span class="px-2 py-0.5 rounded-md font-mono font-bold text-xs bg-cyan-500/20 text-cyan-700 dark:text-cyan-300">📦 ${defaultItem.id}</span>
+                  <div class="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-xs flex items-center justify-between">
+                    <div class="flex items-center space-x-1.5">
+                      <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-700 dark:text-cyan-300">📦 ${defaultItem.id}</span>
                       <span class="font-bold text-slate-800 dark:text-slate-100">${defaultItem.nama}</span>
-                      <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold">${defaultItem.kategori}</span>
                     </div>
-                    <div class="flex items-center space-x-3 text-[11px]">
-                      <span class="text-slate-500">Stok Tersedia: <strong class="${isLow ? 'text-rose-500 font-black' : 'text-emerald-500 font-bold'}">${defaultItem.jumlah || 0} ${defaultItem.satuan || 'Meter'}</strong></span>
-                      <span class="text-slate-500">Modal Pokok (HPP): <strong class="text-slate-800 dark:text-slate-200 font-bold">${formatRp(defaultItem.hpp || 0)}</strong>/${defaultItem.satuan || 'meter'}</span>
-                    </div>
+                    <span class="text-[11px] text-slate-500">Stok Tersedia: <strong class="${isLow ? 'text-rose-500 font-black' : 'text-emerald-500 font-bold'}">${defaultItem.jumlah || 0} ${defaultItem.satuan || 'Meter'}</strong></span>
                   </div>
                 ` : ''}
               </div>
 
+              <!-- Warning Stok Melebihi (Live Alert) -->
+              <div id="dtf-add-stock-warning" class="hidden p-2.5 rounded-xl bg-amber-500/15 border-2 border-amber-500/50 text-amber-900 dark:text-amber-200 text-xs flex items-center space-x-2">
+                <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500 shrink-0"></i>
+                <span id="dtf-add-stock-warning-text" class="font-bold"></span>
+              </div>
+
               <!-- Custom Jasa jika user memilih tanpa stok -->
               <div id="dtf-add-custom-box" class="hidden">
-                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Nama Jasa Cetak Khusus</label>
+                <label class="text-[10px] font-semibold text-slate-500 block mb-1">Nama Jasa Cetak Khusus</label>
                 <input type="text" id="dtf-add-custom-nama" placeholder="Contoh: Cetak DTF Bahan Bawa Sendiri" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500" />
               </div>
 
               <input type="hidden" id="dtf-add-hpp-hidden" value="${defaultHpp}" />
 
               <!-- Input Satuan, Ukuran/Jumlah, dan Harga Jual -->
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 <div>
-                  <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Satuan *</label>
+                  <label class="text-[10px] font-semibold text-slate-500 block mb-1">Satuan</label>
                   <select id="dtf-add-satuan" onchange="onDtfAddSatuanChange(this.value, false)" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500">
                     <option value="meter" selected>Meter (m)</option>
                     <option value="cm">Centimeter (cm)</option>
@@ -4451,80 +4497,60 @@
                 </div>
 
                 <div>
-                  <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">
-                    Ukuran / Jumlah *
-                  </label>
+                  <label class="text-[10px] font-semibold text-slate-500 block mb-1">Ukuran / Qty</label>
                   <div class="relative">
-                    <input type="number" id="dtf-add-jumlah" step="0.01" min="0.01" value="1.0" oninput="updateDtfAddPreview(false)" class="w-full text-xs p-2 rounded-lg border-2 border-cyan-500/50 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-black text-center focus:outline-none focus:border-cyan-500" required />
+                    <input type="number" id="dtf-add-jumlah" step="0.01" min="0.01" value="1.0" oninput="updateDtfAddPreview(false); updateGrandTotalDtf(false);" class="w-full text-xs p-2 rounded-lg border-2 border-cyan-500/50 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-black text-center focus:outline-none focus:border-cyan-500" />
                     <span id="dtf-add-satuan-badge" class="absolute right-2.5 top-2 text-[10px] font-bold text-slate-400">m</span>
-                  </div>
-                  <div class="flex flex-wrap gap-1 mt-1.5" id="dtf-add-preset-chips">
-                    <button type="button" onclick="setDtfUkuranPreset(0.5, false)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">0.5 m</button>
-                    <button type="button" onclick="setDtfUkuranPreset(1.0, false)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">1.0 m</button>
-                    <button type="button" onclick="setDtfUkuranPreset(1.3, false)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">1.3 m</button>
-                    <button type="button" onclick="setDtfUkuranPreset(2.0, false)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">2.0 m</button>
-                    <button type="button" onclick="setDtfUkuranPreset(3.2, false)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">3.2 m</button>
-                    <button type="button" onclick="setDtfUkuranPreset(5.0, false)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-semibold hover:bg-cyan-500 hover:text-white transition">5.0 m</button>
                   </div>
                 </div>
 
                 <div>
-                  <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">
-                    Harga Jual Satuan (Rp) *
-                  </label>
+                  <label class="text-[10px] font-semibold text-slate-500 block mb-1">Harga Jual Satuan (Rp)</label>
                   <div class="relative">
                     <span class="absolute left-2.5 top-2 text-[10px] font-bold text-slate-400">Rp</span>
-                    <input type="number" id="dtf-add-harga" step="500" min="0" value="${defaultHarga}" oninput="updateDtfAddPreview(false)" class="w-full pl-7 pr-2 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold text-right focus:outline-none focus:border-cyan-500" required />
+                    <input type="number" id="dtf-add-harga" step="500" min="0" value="${defaultHarga}" oninput="updateDtfAddPreview(false); updateGrandTotalDtf(false);" class="w-full pl-7 pr-2 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold text-right focus:outline-none focus:border-cyan-500" />
                   </div>
-                  <span class="text-[10px] text-slate-400 mt-0.5 block">Harga per meter / satuan</span>
                 </div>
               </div>
 
-              <!-- Catatan Desain Item Ini -->
-              <div>
-                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Catatan Desain / Layout File (Opsional)</label>
-                <input type="text" id="dtf-add-catatan" placeholder="Contoh: File 'kaos-depan.png', 300dpi, layout rapat" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
+              <!-- Preset Ukuran Cepat -->
+              <div class="flex items-center space-x-1.5 flex-wrap text-[10px]">
+                <span class="text-slate-400 font-semibold">Preset Cepat:</span>
+                <div class="flex flex-wrap gap-1" id="dtf-add-preset-chips">
+                  <button type="button" onclick="setDtfUkuranPreset(0.5, false)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-semibold hover:bg-cyan-500 hover:text-white transition">0.5 m</button>
+                  <button type="button" onclick="setDtfUkuranPreset(1.0, false)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-semibold hover:bg-cyan-500 hover:text-white transition">1.0 m</button>
+                  <button type="button" onclick="setDtfUkuranPreset(1.3, false)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-semibold hover:bg-cyan-500 hover:text-white transition">1.3 m</button>
+                  <button type="button" onclick="setDtfUkuranPreset(2.0, false)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-semibold hover:bg-cyan-500 hover:text-white transition">2.0 m</button>
+                  <button type="button" onclick="setDtfUkuranPreset(3.2, false)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-semibold hover:bg-cyan-500 hover:text-white transition">3.2 m</button>
+                  <button type="button" onclick="setDtfUkuranPreset(5.0, false)" class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-semibold hover:bg-cyan-500 hover:text-white transition">5.0 m</button>
+                </div>
               </div>
 
-              <!-- Preview Subtotal Adder & Tombol Tambah Item -->
-              <div class="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                <div class="text-xs space-x-2 flex items-center flex-wrap">
-                  <span class="text-slate-500">Subtotal Jual: <strong id="dtf-add-subtotal-preview" class="font-mono text-cyan-600 dark:text-cyan-400 font-bold">${formatRp(defaultHarga)}</strong></span>
-                  <span class="text-slate-300 dark:text-slate-600">•</span>
-                  <span class="text-slate-500">Modal HPP: <strong id="dtf-add-modal-preview" class="font-mono text-rose-500 font-bold">${formatRp(defaultHpp)}</strong></span>
-                  <span class="text-slate-300 dark:text-slate-600">•</span>
-                  <span class="text-slate-500">Laba: <strong id="dtf-add-laba-preview" class="font-mono text-emerald-500 font-bold">${formatRp(defaultHarga - defaultHpp)}</strong></span>
-                </div>
-                <button type="button" onclick="tambahItemDtf(false)" class="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md shadow-cyan-500/20 flex items-center justify-center space-x-1.5 transition">
-                  <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                  <span>+ Tambah Item Ini ke Daftar</span>
+              <!-- Catatan Desain & Tombol Tambah Item -->
+              <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
+                <input type="text" id="dtf-add-catatan" placeholder="Catatan desain / file / ukuran cetak item ini (opsional)..." class="flex-1 text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
+                <button type="button" onclick="tambahItemDtf(false)" class="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-xs transition shrink-0 shadow-md shadow-cyan-500/20 flex items-center justify-center space-x-1.5" title="Tambah Item ke Daftar">
+                  <i data-lucide="plus" class="w-4 h-4"></i>
+                  <span>+ Tambah Item</span>
                 </button>
               </div>
             </div>
 
-            <!-- Ringkasan Nilai Akumulasi & Laba DTF -->
-            <div class="p-3 rounded-xl bg-gradient-to-r from-cyan-500/10 via-emerald-500/10 to-blue-500/10 border border-cyan-500/30 grid grid-cols-1 sm:grid-cols-3 gap-2 text-center sm:text-left">
-              <div>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold block">1. Total Tagihan (Omset)</span>
-                <span id="dtf-total-preview" class="text-sm sm:text-base font-black text-cyan-600 dark:text-cyan-400 font-mono">Rp 0</span>
-                <span id="dtf-calc-formula" class="text-[10px] text-slate-400 font-mono block truncate">Total seluruh item</span>
-                <input type="hidden" id="dtf-total-val" value="0" />
-              </div>
+            <!-- Table Container (Diletakkan di bawah menu Tambah Item) -->
+            <div id="dtf-items-container">
+              ${renderDtfItemsTableHtml(window._currentDtfItems, false)}
+            </div>
 
+            <!-- Ringkasan Total Tagihan -->
+            <div class="p-3.5 rounded-xl bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 flex flex-col sm:flex-row items-center justify-between gap-2">
               <div>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold block">2. Total Modal Bahan (HPP)</span>
-                <span id="dtf-modal-preview" class="text-sm sm:text-base font-black text-rose-500 font-mono">Rp 0</span>
-                <span id="dtf-modal-formula" class="text-[10px] text-slate-400 block truncate">Otomatis dari stok</span>
-                <input type="hidden" id="dtf-total-modal-val" value="0" />
+                <span class="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold block">Total Tagihan (Biaya Cetak)</span>
+                <span id="dtf-calc-formula" class="text-xs text-slate-400 font-mono block truncate">1.0 meter @ ${formatRp(defaultHarga)}</span>
               </div>
-
-              <div>
-                <div class="flex items-center justify-between sm:justify-start space-x-1.5">
-                  <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold block">3. Total Estimasi Laba</span>
-                  <span id="dtf-margin-preview" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500">Margin</span>
-                </div>
-                <span id="dtf-laba-preview" class="text-sm sm:text-base font-black text-emerald-500 font-mono">Rp 0</span>
-                <span class="text-[10px] text-slate-400 block">Omset dikurangi modal bahan</span>
+              <div class="text-right">
+                <span id="dtf-total-preview" class="text-xl sm:text-2xl font-black text-cyan-600 dark:text-cyan-400 font-mono">${formatRp(defaultHarga)}</span>
+                <input type="hidden" id="dtf-total-val" value="${defaultHarga}" />
+                <input type="hidden" id="dtf-total-modal-val" value="${defaultHpp}" />
               </div>
             </div>
 
@@ -4533,13 +4559,13 @@
               <label class="inline-flex items-center space-x-2 cursor-pointer text-xs">
                 <input type="checkbox" id="dtf-potong-stok" checked class="rounded text-cyan-500 focus:ring-cyan-400" />
                 <span class="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
-                  Otomatis potong stok bahan film di toko sesuai masing-masing item dalam pesanan
+                  Sinkronkan & potong stok fisik bahan film di toko secara otomatis
                 </span>
               </label>
             </div>
           </div>
 
-          <!-- Bagian 3: Pembayaran & Pengerjaan -->
+          <!-- Bagian 3: Pembayaran & Status Pengerjaan -->
           <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-3">
             <span class="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 flex items-center space-x-1.5">
               <i data-lucide="wallet" class="w-4 h-4"></i>
@@ -4548,57 +4574,49 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Uang Yang Dibayarkan (Rp) *</label>
-                <div class="relative">
-                  <span class="absolute left-2.5 top-2 text-[10px] font-bold text-slate-400">Rp</span>
-                  <input type="number" id="dtf-bayar" step="500" min="0" value="${defaultHarga}" oninput="updateGrandTotalDtf(false)" class="w-full pl-7 pr-2 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500" required />
-                </div>
-                <div class="flex items-center space-x-1.5 mt-1.5">
-                  <button type="button" onclick="setDtfBayarPreset('lunas', false)" class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[10px] font-bold hover:bg-emerald-500/20">Lunas</button>
-                  <button type="button" onclick="setDtfBayarPreset('dp50', false)" class="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 text-[10px] font-bold hover:bg-cyan-500/20">DP 50%</button>
-                  <button type="button" onclick="setDtfBayarPreset('nol', false)" class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 text-[10px] font-bold hover:bg-rose-500/20">Belum Bayar</button>
-                </div>
+                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Total Uang Yang Dibayar (Rp)</label>
+                <input type="number" id="dtf-bayar" step="500" min="0" value="${defaultHarga}" oninput="window._dtfBayarAutoSync = false; updateGrandTotalDtf(false)" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500" required />
               </div>
-
               <div>
                 <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Metode Pembayaran</label>
-                <select id="dtf-metode" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500">
-                  <option value="Tunai">💵 Tunai / Cash</option>
-                  <option value="Transfer">🏦 Transfer Bank</option>
-                  <option value="QRIS">📱 QRIS / E-Wallet</option>
+                <select id="dtf-metode" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:border-cyan-500">
+                  <option value="Tunai" selected>Tunai (Cash)</option>
+                  <option value="Transfer BCA">Transfer BCA</option>
+                  <option value="Transfer Mandiri">Transfer Mandiri</option>
+                  <option value="QRIS">QRIS</option>
                 </select>
-                <div class="mt-2">
-                  <label class="inline-flex items-center space-x-1.5 cursor-pointer text-xs">
-                    <input type="checkbox" id="dtf-catat-kas" checked class="rounded text-cyan-500" />
-                    <span class="text-[11px] text-slate-600 dark:text-slate-300">Catat penerimaan uang ke Kas Toko</span>
-                  </label>
-                </div>
               </div>
             </div>
 
             <div id="dtf-sisa-box" class="p-2.5 rounded-lg border text-xs flex items-center justify-between bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300">
-              <span id="dtf-sisa-text">Status: <strong>LUNAS</strong> (Tidak ada sisa tagihan)</span>
+              <span id="dtf-sisa-text">LUNAS (Tidak ada sisa tagihan)</span>
               <span id="dtf-sisa-nominal" class="font-bold">Rp 0</span>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <div>
-                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Status Pengerjaan Cetak</label>
+                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Status Pengerjaan Awal</label>
                 <select id="dtf-status-pengerjaan" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500">
-                  <option value="Antrian" selected>🟡 Antrian (Belum Mulai)</option>
-                  <option value="Sedang Cetak">🔵 Sedang Dicetak Mesin DTF</option>
-                  <option value="Selesai">🟢 Selesai (Siap Diambil)</option>
-                  <option value="Diambil">✅ Sudah Diambil Pemesan</option>
+                  <option value="Antrian" selected>🟡 Antrian</option>
+                  <option value="Sedang Cetak">🔵 Sedang Cetak</option>
+                  <option value="Selesai">🟢 Selesai (Siap Ambil)</option>
+                  <option value="Diambil">✅ Sudah Diambil</option>
                 </select>
               </div>
-              <div>
-                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Catatan Tambahan Nota</label>
-                <input type="text" id="dtf-catatan-order" placeholder="Catatan umum transaksi / pengiriman..." class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
+              <div class="flex items-center pt-5">
+                <label class="inline-flex items-center space-x-2 cursor-pointer text-xs">
+                  <input type="checkbox" id="dtf-catat-kas" checked class="rounded text-cyan-500 focus:ring-cyan-400" />
+                  <span class="text-slate-600 dark:text-slate-300 font-medium">Catat uang masuk ke Kas Toko</span>
+                </label>
               </div>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Catatan Tambahan Nota</label>
+              <input type="text" id="dtf-catatan-order" placeholder="Catatan tambahan pesanan..." class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
             </div>
           </div>
 
-          <!-- Footer Actions -->
           <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end space-x-2">
             <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 transition">Batal</button>
             <button type="submit" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md shadow-cyan-500/25 flex items-center space-x-1.5 transition">
@@ -4608,16 +4626,13 @@
           </div>
         </form>
       `);
+      updateDtfAddPreview(false);
       updateGrandTotalDtf(false);
       lucide.createIcons();
     };
 
     window.simpanOrderDTF = async function (e) {
       e.preventDefault();
-      if (!window._currentDtfItems || window._currentDtfItems.length === 0) {
-        alert('Daftar item film masih kosong! Tambahkan minimal 1 item film ke dalam pesanan.');
-        return;
-      }
 
       const nama = (document.getElementById('dtf-cust-nama')?.value || '').trim();
       if (!nama) {
@@ -4643,11 +4658,66 @@
         }
       }
 
-      const items = [...window._currentDtfItems];
-      const totalBiaya = items.reduce((sum, i) => sum + (i.subtotal || 0), 0);
-      const totalModal = items.reduce((sum, i) => sum + (i.subtotalModal || 0), 0);
+      let items = [...(window._currentDtfItems || [])];
+
+      // Jika belum ada item di daftar tapi baris input terisi, otomatis masukkan item tersebut
+      if (items.length === 0) {
+        const selectEl = document.getElementById('dtf-add-item-select');
+        const customNamaInput = document.getElementById('dtf-add-custom-nama');
+        const hppHidden = document.getElementById('dtf-add-hpp-hidden');
+        const satuanSelect = document.getElementById('dtf-add-satuan');
+        const jumlahInput = document.getElementById('dtf-add-jumlah');
+        const hargaInput = document.getElementById('dtf-add-harga');
+        const catatanDesainInput = document.getElementById('dtf-add-catatan');
+
+        let stokId = '';
+        let namaItem = '';
+        let hppSatuan = parseFloat(hppHidden?.value) || 0;
+
+        if (selectEl && selectEl.value === '__custom__') {
+          namaItem = (customNamaInput?.value || '').trim() || 'Cetak Film DTF Khusus';
+          stokId = '';
+          hppSatuan = 0;
+        } else if (selectEl) {
+          stokId = selectEl.value;
+          const opt = selectEl.options[selectEl.selectedIndex];
+          namaItem = opt ? (opt.getAttribute('data-nama') || opt.text.split('(')[0].trim()) : 'Bahan Film DTF';
+          const optHpp = parseFloat(opt?.getAttribute('data-hpp'));
+          if (!isNaN(optHpp)) hppSatuan = optHpp;
+        }
+
+        const jumlah = parseFloat(jumlahInput?.value) || 0;
+        if (jumlah > 0) {
+          const satuan = satuanSelect?.value || 'meter';
+          const hargaSatuan = parseFloat(hargaInput?.value) || 0;
+          const catatanDesain = (catatanDesainInput?.value || '').trim();
+          const subtotal = Math.round(jumlah * hargaSatuan);
+          const subtotalModal = Math.round(jumlah * hppSatuan);
+
+          items.push({
+            stokId,
+            nama: namaItem,
+            satuan,
+            jumlah,
+            hargaSatuan,
+            subtotal,
+            hppSatuan,
+            subtotalModal,
+            labaKotor: subtotal - subtotalModal,
+            catatanDesain
+          });
+        }
+      }
+
+      if (items.length === 0) {
+        alert('Mohon masukkan atau tambahkan minimal 1 item cetak film DTF!');
+        return;
+      }
+
+      const totalBiaya = items.reduce((sum, it) => sum + (it.subtotal || 0), 0);
+      const totalModal = items.reduce((sum, it) => sum + (it.subtotalModal || 0), 0);
       const labaKotor = totalBiaya - totalModal;
-      const totalJumlah = items.reduce((sum, i) => sum + (parseFloat(i.jumlah) || 0), 0);
+      const totalJumlah = items.reduce((sum, it) => sum + (parseFloat(it.jumlah) || 0), 0);
       const potongStok = document.getElementById('dtf-potong-stok')?.checked ?? true;
 
       const bayar = parseFloat(document.getElementById('dtf-bayar')?.value) || 0;
@@ -4661,6 +4731,38 @@
       const dtfId = `DTF-2026-00${(state.dtf || []).length + 1}`;
       const tanggal = new Date().toISOString().split('T')[0];
 
+      // Cek peringatan apakah ada item yang melebihi stok fisik toko
+      if (potongStok) {
+        const overStockItems = [];
+        for (const it of items) {
+          if (it.stokId && it.jumlah > 0) {
+            const st = (state.stok || []).find(s => s.id === it.stokId);
+            if (st && parseFloat(it.jumlah) > (parseFloat(st.jumlah) || 0)) {
+              overStockItems.push({
+                nama: st.nama,
+                id: st.id,
+                tersedia: parseFloat(st.jumlah) || 0,
+                diminta: parseFloat(it.jumlah) || 0,
+                satuan: it.satuan || st.satuan || 'meter'
+              });
+            }
+          }
+        }
+
+        if (overStockItems.length > 0) {
+          const detailList = overStockItems.map(o =>
+            `• ${o.nama} (${o.id}): Tersedia ${o.tersedia} ${o.satuan}, Dipesan ${o.diminta} ${o.satuan} (Kurang ${(o.diminta - o.tersedia).toLocaleString('id-ID', { maximumFractionDigits: 2 })} ${o.satuan})`
+          ).join('\n');
+
+          alert(
+            `❌ PEMESANAN TIDAK DAPAT DIPROSES!\n\n` +
+            `Pemesanan melebihi stok fisik yang tersedia di toko:\n\n${detailList}\n\n` +
+            `Silakan kurangi jumlah pesanan sesuai stok yang tersedia atau lakukan restok bahan terlebih dahulu.`
+          );
+          return;
+        }
+      }
+
       // Potong stok fisik untuk setiap item yang terhubung dengan master stok
       if (potongStok) {
         for (const it of items) {
@@ -4668,16 +4770,15 @@
             const itemStok = (state.stok || []).find(s => s.id === it.stokId);
             if (itemStok) {
               const curQty = typeof itemStok.jumlah === 'number' ? itemStok.jumlah : 0;
-              const newQty = Math.max(0, curQty - it.jumlah);
+              const newQty = Math.max(0, curQty - parseFloat(it.jumlah));
               await dbUpdate('stok', it.stokId, { jumlah: newQty });
             }
           }
         }
       }
 
-      // Ringkasan Jasa untuk tabel & ekspor
-      const jasaPrint = items.length === 1 ? items[0].nama : `${items.length} Item Film (${items.map(i => `${i.jumlah}${i.satuan} ${i.nama}`).join(', ')})`;
-      const primaryItem = items[0] || {};
+      const firstItem = items[0];
+      const combinedCatatan = items.map(it => it.catatanDesain).filter(Boolean).join('; ');
 
       const newOrder = {
         id: dtfId,
@@ -4686,37 +4787,38 @@
         pelangganNama: nama,
         pelangganTelepon: telepon,
         items,
-        jasaPrint,
-        stokId: items.length === 1 ? primaryItem.stokId : items.map(i => i.stokId).filter(Boolean).join(', '),
-        stokNama: items.length === 1 ? primaryItem.nama : items.map(i => i.nama).filter(Boolean).join(', '),
-        stokSatuan: primaryItem.satuan || 'meter',
+        jasaPrint: items.length === 1 ? firstItem.nama : `Cetak DTF (${items.length} Item)`,
+        stokId: items.length === 1 ? firstItem.stokId : '',
+        stokNama: items.length === 1 ? firstItem.nama : `Multi-Item DTF (${items.length} Item)`,
+        stokSatuan: items.length === 1 ? firstItem.satuan : 'item',
         qtyStok: totalJumlah,
-        hppSatuan: items.length === 1 ? (primaryItem.hppSatuan || 0) : Math.round(totalModal / (totalJumlah || 1)),
+        hppSatuan: items.length === 1 ? firstItem.hppSatuan : (totalJumlah > 0 ? Math.round(totalModal / totalJumlah) : 0),
         totalModal,
         labaKotor,
         potongStok,
-        satuan: primaryItem.satuan || 'meter',
+        satuan: items.length === 1 ? firstItem.satuan : 'item',
         jumlah: totalJumlah,
-        hargaSatuan: items.length === 1 ? (primaryItem.hargaSatuan || 0) : Math.round(totalBiaya / (totalJumlah || 1)),
+        hargaSatuan: items.length === 1 ? firstItem.hargaSatuan : totalBiaya,
         totalBiaya,
         statusBayar,
         bayar,
         sisa,
         metode,
         statusPengerjaan,
-        catatan: catatanUmum
+        catatan: catatanUmum || combinedCatatan
       };
 
       await dbSave('dtf', dtfId, newOrder);
 
       if (catatKas && bayar > 0 && metode === 'Tunai') {
         const kasId = `KAS-00${state.kas.length + 1}`;
+        const itemDesc = items.length === 1 ? `${firstItem.jumlah} ${firstItem.satuan} ${firstItem.nama}` : `${items.length} item film`;
         await dbSave('kas', kasId, {
           id: kasId,
           tanggal,
           tipe: 'Masuk',
           kategori: 'Order Cetak Film DTF',
-          keterangan: `Bayar DTF #${dtfId} (${nama} - ${items.length} item) via ${metode}`,
+          keterangan: `Bayar DTF #${dtfId} (${nama} - ${itemDesc}) via ${metode}`,
           jumlah: bayar
         });
       }
@@ -4738,7 +4840,7 @@
       }
 
       closeModal();
-      showNotificationToast(`Order Cetak Film DTF #${dtfId} (${items.length} item) berhasil dibuat!`);
+      showNotificationToast(`Order Cetak Film DTF #${dtfId} (${jumlah} ${satuan}) berhasil dibuat!`);
     };
 
     window.openEditDTFModal = function (id) {
@@ -4765,17 +4867,18 @@
 
       const defaultItem = (state.stok || []).find(s =>
         (s.kategori && s.kategori.toLowerCase().includes('dtf')) ||
-        (s.nama && s.nama.toLowerCase().includes('dtf'))
+        (s.nama && s.nama.toLowerCase().includes('dtf')) ||
+        (s.nama && s.nama.toLowerCase().includes('film'))
       ) || ((state.stok || []).length > 0 ? state.stok[0] : null);
 
       const defaultHarga = defaultItem && defaultItem.harga ? defaultItem.harga : 55000;
-      const defaultHpp = defaultItem && defaultItem.hpp ? defaultItem.hpp : 0;
+      const defaultHpp = defaultItem && defaultItem.hpp ? defaultItem.hpp : 18000;
       const defaultStokId = defaultItem ? defaultItem.id : '';
       const isLow = defaultItem ? (defaultItem.jumlah || 0) <= (defaultItem.minStok || 0) : false;
 
       openModal(`
         <form onsubmit="simpanEditDTF(event, '${d.id}')" class="space-y-4 max-h-[85vh] overflow-y-auto pr-1">
-          <!-- Header -->
+          <!-- Header Modal -->
           <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2.5">
             <div class="flex items-center space-x-2">
               <span class="font-mono text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-bold">${d.id}</span>
@@ -4787,18 +4890,19 @@
           </div>
 
           <!-- Bagian 1: Data Pemesan -->
-          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
+          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-3">
             <span class="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 flex items-center space-x-1.5">
               <i data-lucide="user" class="w-4 h-4"></i>
-              <span>1. Data Pemesan</span>
+              <span>1. Data Pemesan / Pelanggan</span>
             </span>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Nama Pemesan *</label>
-                <input type="text" id="dtf-edit-nama" value="${d.pelangganNama}" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500" required />
+                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Nama Pemesan / Pelanggan *</label>
+                <input type="text" id="dtf-edit-nama" value="${d.pelangganNama || ''}" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500" required />
               </div>
               <div>
-                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Nomor WhatsApp / Telp</label>
+                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">No. WhatsApp / Telepon</label>
                 <input type="tel" id="dtf-edit-telp" value="${d.pelangganTelepon || ''}" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
               </div>
             </div>
@@ -4811,18 +4915,16 @@
                 <i data-lucide="layers" class="w-4 h-4"></i>
                 <span>2. Daftar Item Pembuatan Film DTF</span>
               </span>
-              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
-                Multi-Item Aktif
-              </span>
+              <span class="text-[10px] text-slate-400">Multi-Item & Multi-Ukuran Aktif</span>
             </div>
 
-            <!-- Tabel Daftar Item Edit -->
+            <!-- Tabel Daftar Item yang Masuk Nota -->
             <div id="dtf-edit-items-container">
               ${renderDtfItemsTableHtml(window._currentDtfItems, true)}
             </div>
 
-            <!-- Form Tambah Item Film Baru ke Pesanan Ini -->
-            <div class="p-3.5 rounded-xl bg-gradient-to-r from-cyan-500/5 via-blue-500/5 to-slate-50 dark:from-cyan-500/10 dark:via-blue-500/10 dark:to-slate-850 border border-cyan-500/25 space-y-3">
+            <!-- Kotak Form Tambah Item Film Baru -->
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-800/80 border border-cyan-500/30 space-y-3 shadow-sm">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-cyan-700 dark:text-cyan-300 flex items-center space-x-1.5 uppercase tracking-wider">
                   <i data-lucide="plus-circle" class="w-4 h-4"></i>
@@ -4856,6 +4958,12 @@
                     </div>
                   </div>
                 ` : ''}
+              </div>
+
+              <!-- Warning Stok Melebihi (Live Alert) -->
+              <div id="dtf-edit-add-stock-warning" class="hidden p-2.5 rounded-xl bg-amber-500/15 border-2 border-amber-500/50 text-amber-900 dark:text-amber-200 text-xs flex items-center space-x-2">
+                <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500 shrink-0"></i>
+                <span id="dtf-edit-add-stock-warning-text" class="font-bold"></span>
               </div>
 
               <!-- Custom Jasa jika user memilih tanpa stok -->
@@ -4930,13 +5038,13 @@
               </div>
             </div>
 
-            <!-- Ringkasan Akumulasi Pesanan Edit -->
+            <!-- Ringkasan Akumulasi Pesanan -->
             <div class="p-3 rounded-xl bg-gradient-to-r from-cyan-500/10 via-emerald-500/10 to-blue-500/10 border border-cyan-500/30 grid grid-cols-1 sm:grid-cols-3 gap-2 text-center sm:text-left">
               <div>
                 <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold block">1. Total Tagihan (Omset)</span>
-                <span id="dtf-edit-total-preview" class="text-sm sm:text-base font-black text-cyan-600 dark:text-cyan-400 font-mono">${formatRp(d.totalBiaya)}</span>
-                <span id="dtf-edit-calc-formula" class="text-[10px] text-slate-400 font-mono block truncate">${(d.items || []).length} Item Film DTF</span>
-                <input type="hidden" id="dtf-edit-total-val" value="${d.totalBiaya}" />
+                <span id="dtf-edit-total-preview" class="text-sm sm:text-base font-black text-cyan-600 dark:text-cyan-400 font-mono">${formatRp(d.totalBiaya || 0)}</span>
+                <span id="dtf-edit-calc-formula" class="text-[10px] text-slate-400 font-mono block truncate">${window._currentDtfItems.length} Item Film DTF</span>
+                <input type="hidden" id="dtf-edit-total-val" value="${d.totalBiaya || 0}" />
               </div>
 
               <div>
@@ -4949,7 +5057,7 @@
               <div>
                 <div class="flex items-center justify-between sm:justify-start space-x-1.5">
                   <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold block">3. Total Estimasi Laba</span>
-                  <span id="dtf-edit-margin-preview" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500">Margin</span>
+                  <span id="dtf-edit-margin-preview" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500">Margin: ${d.totalBiaya > 0 ? Math.round(((d.totalBiaya - (d.totalModal || 0)) / d.totalBiaya) * 100) : 0}%</span>
                 </div>
                 <span id="dtf-edit-laba-preview" class="text-sm sm:text-base font-black text-emerald-500 font-mono">${formatRp((d.totalBiaya || 0) - (d.totalModal || 0))}</span>
                 <span class="text-[10px] text-slate-400 block">Omset dikurangi modal bahan</span>
@@ -4990,8 +5098,8 @@
               </div>
             </div>
 
-            <div id="dtf-edit-sisa-box" class="p-2.5 rounded-lg border text-xs flex items-center justify-between bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300">
-              <span id="dtf-edit-sisa-text">Sisa Tagihan:</span>
+            <div id="dtf-edit-sisa-box" class="p-2.5 rounded-lg border text-xs flex items-center justify-between ${d.sisa <= 0 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300' : 'bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300'}">
+              <span id="dtf-edit-sisa-text">${d.sisa <= 0 ? 'LUNAS (Tidak ada sisa tagihan)' : 'Sisa Tagihan (Belum Dibayar):'}</span>
               <span id="dtf-edit-sisa-nominal" class="font-bold">${formatRp(d.sisa || 0)}</span>
             </div>
 
@@ -5010,6 +5118,7 @@
           </div>
         </form>
       `);
+      updateDtfAddPreview(true);
       updateGrandTotalDtf(true);
       lucide.createIcons();
     };
@@ -5019,27 +5128,116 @@
       const d = (state.dtf || []).find(item => item.id === id);
       if (!d) return;
 
-      if (!window._currentDtfItems || window._currentDtfItems.length === 0) {
-        alert('Daftar item film tidak boleh kosong!');
+      let newItems = [...(window._currentDtfItems || [])];
+
+      // Jika belum ada item di daftar tapi baris input terisi, otomatis masukkan item tersebut
+      if (newItems.length === 0) {
+        const selectEl = document.getElementById('dtf-edit-add-item-select');
+        const customNamaInput = document.getElementById('dtf-edit-add-custom-nama');
+        const hppHidden = document.getElementById('dtf-edit-add-hpp-hidden');
+        const satuanSelect = document.getElementById('dtf-edit-add-satuan');
+        const jumlahInput = document.getElementById('dtf-edit-add-jumlah');
+        const hargaInput = document.getElementById('dtf-edit-add-harga');
+        const catatanDesainInput = document.getElementById('dtf-edit-add-catatan');
+
+        let stokId = '';
+        let namaItem = '';
+        let hppSatuan = parseFloat(hppHidden?.value) || 0;
+
+        if (selectEl && selectEl.value === '__custom__') {
+          namaItem = (customNamaInput?.value || '').trim() || 'Cetak Film DTF Khusus';
+          stokId = '';
+          hppSatuan = 0;
+        } else if (selectEl) {
+          stokId = selectEl.value;
+          const opt = selectEl.options[selectEl.selectedIndex];
+          namaItem = opt ? (opt.getAttribute('data-nama') || opt.text.split('(')[0].trim()) : 'Bahan Film DTF';
+          const optHpp = parseFloat(opt?.getAttribute('data-hpp'));
+          if (!isNaN(optHpp)) hppSatuan = optHpp;
+        }
+
+        const jumlah = parseFloat(jumlahInput?.value) || 0;
+        if (jumlah > 0) {
+          const satuan = satuanSelect?.value || 'meter';
+          const hargaSatuan = parseFloat(hargaInput?.value) || 0;
+          const catatanDesain = (catatanDesainInput?.value || '').trim();
+          const subtotal = Math.round(jumlah * hargaSatuan);
+          const subtotalModal = Math.round(jumlah * hppSatuan);
+
+          newItems.push({
+            stokId,
+            nama: namaItem,
+            satuan,
+            jumlah,
+            hargaSatuan,
+            subtotal,
+            hppSatuan,
+            subtotalModal,
+            labaKotor: subtotal - subtotalModal,
+            catatanDesain
+          });
+        }
+      }
+
+      if (newItems.length === 0) {
+        alert('Mohon masukkan atau tambahkan minimal 1 item cetak film DTF!');
         return;
       }
 
       const nama = (document.getElementById('dtf-edit-nama')?.value || '').trim();
       const telepon = (document.getElementById('dtf-edit-telp')?.value || '').trim();
 
-      const newItems = [...window._currentDtfItems];
       const newTotalBiaya = newItems.reduce((sum, i) => sum + (i.subtotal || 0), 0);
       const newTotalModal = newItems.reduce((sum, i) => sum + (i.subtotalModal || 0), 0);
       const newLabaKotor = newTotalBiaya - newTotalModal;
       const newTotalJumlah = newItems.reduce((sum, i) => sum + (parseFloat(i.jumlah) || 0), 0);
       const newPotongStok = document.getElementById('dtf-edit-potong-stok')?.checked ?? true;
 
-      // Revert stok item lama yang pernah dipotong
-      if (d.potongStok !== false) {
-        const oldItems = Array.isArray(d.items) && d.items.length > 0
+      const oldItems = d.potongStok !== false
+        ? (Array.isArray(d.items) && d.items.length > 0
           ? d.items
-          : (d.stokId ? [{ stokId: d.stokId, jumlah: d.qtyStok || d.jumlah || 0 }] : []);
+          : (d.stokId ? [{ stokId: d.stokId, jumlah: d.qtyStok || d.jumlah || 0 }] : []))
+        : [];
 
+      // Validasi: Cek apakah ada item yang melebihi stok yang tersedia di toko
+      if (newPotongStok) {
+        const overStockEditItems = [];
+        for (const newIt of newItems) {
+          if (newIt.stokId && newIt.jumlah > 0) {
+            const stItem = (state.stok || []).find(s => s.id === newIt.stokId);
+            const cur = stItem && typeof stItem.jumlah === 'number' ? stItem.jumlah : 0;
+            const oldQty = oldItems
+              .filter(o => o.stokId === newIt.stokId)
+              .reduce((sum, o) => sum + (parseFloat(o.jumlah) || 0), 0);
+            const maxAvailable = cur + oldQty;
+            if (parseFloat(newIt.jumlah) > maxAvailable) {
+              overStockEditItems.push({
+                nama: newIt.nama,
+                id: newIt.stokId,
+                tersedia: maxAvailable,
+                diminta: parseFloat(newIt.jumlah),
+                satuan: newIt.satuan || 'meter'
+              });
+            }
+          }
+        }
+
+        if (overStockEditItems.length > 0) {
+          const detailList = overStockEditItems.map(o =>
+            `• ${o.nama} (${o.id}): Tersedia ${o.tersedia} ${o.satuan}, Dipesan ${o.diminta} ${o.satuan} (Kurang ${(o.diminta - o.tersedia).toLocaleString('id-ID', { maximumFractionDigits: 2 })} ${o.satuan})`
+          ).join('\n');
+
+          alert(
+            `❌ PEMESANAN TIDAK DAPAT DIPROSES!\n\n` +
+            `Pembaruan order melebihi sisa stok fisik di toko:\n\n${detailList}\n\n` +
+            `Silakan kurangi jumlah pesanan sesuai stok yang tersedia.`
+          );
+          return;
+        }
+      }
+
+      // Revert stok item lama yang pernah dipotong
+      if (d.potongStok !== false && oldItems.length > 0) {
         for (const oldIt of oldItems) {
           if (oldIt.stokId && oldIt.jumlah > 0) {
             const stItem = (state.stok || []).find(s => s.id === oldIt.stokId);
@@ -7160,10 +7358,18 @@
                     <th class="p-4">Kategori</th>
                     <th class="p-4">Keterangan</th>
                     <th class="p-4 text-right">Jumlah</th>
+                    <th class="p-4 text-center">Aksi</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-slate-700 text-sm">
-                  ${state.kas.map(k => `
+                  ${(state.kas || []).length === 0 ? `
+                    <tr>
+                      <td colspan="7" class="p-8 text-center text-slate-400">
+                        <i data-lucide="wallet" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
+                        Belum ada catatan mutasi kas masuk / kas keluar.
+                      </td>
+                    </tr>
+                  ` : (state.kas || []).map(k => `
                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
                       <td class="p-4 font-mono font-bold text-cyan-500">${k.id}</td>
                       <td class="p-4 text-xs text-slate-400">${k.tanggal}</td>
@@ -7173,6 +7379,16 @@
                       <td class="p-4 font-medium">${k.kategori}</td>
                       <td class="p-4 text-xs text-slate-500">${k.keterangan}</td>
                       <td class="p-4 text-right font-bold ${k.tipe === 'Masuk' ? 'text-emerald-500' : 'text-rose-500'}">${formatRp(k.jumlah)}</td>
+                      <td class="p-4 text-center">
+                        <div class="flex items-center justify-center space-x-1.5">
+                          <button onclick="openEditKasModal('${k.id}')" class="p-1.5 rounded-lg text-cyan-600 hover:text-cyan-700 hover:bg-cyan-500/10 transition" title="Edit Transaksi Kas">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                          </button>
+                          <button onclick="hapusKas('${k.id}')" class="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-500/10 transition" title="Hapus Transaksi Kas">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   `).join('')}
                 </tbody>
@@ -7186,34 +7402,45 @@
     window.openFormKasModal = function () {
       openModal(`
         <form onsubmit="simpanKasBaru(event)" class="space-y-4">
-          <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 pb-2 flex items-center space-x-2">
-            <i data-lucide="wallet" class="w-5 h-5 text-cyan-500"></i>
-            <span>Catat Mutasi Kas Tunai</span>
-          </h3>
-          <div class="grid grid-cols-2 gap-3">
+          <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2.5">
+            <h3 class="font-bold text-base text-slate-800 dark:text-slate-100 flex items-center space-x-2">
+              <i data-lucide="wallet" class="w-5 h-5 text-cyan-500"></i>
+              <span>Catat Mutasi Kas Tunai</span>
+            </h3>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Jenis Mutasi</label>
-              <select id="kas-tipe" class="w-full text-sm p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-semibold">
+              <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Tanggal Transaksi *</label>
+              <input type="date" id="kas-tanggal" value="${new Date().toISOString().split('T')[0]}" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-semibold focus:outline-none focus:border-cyan-500" required />
+            </div>
+            <div>
+              <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Jenis Mutasi *</label>
+              <select id="kas-tipe" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-semibold">
                 <option value="Masuk">Kas Masuk (+)</option>
                 <option value="Keluar">Kas Keluar (-)</option>
               </select>
             </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Kategori</label>
-              <input type="text" id="kas-kategori" placeholder="Contoh: Modal Pagi / Listrik" class="w-full text-sm p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-medium" required />
+              <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Kategori *</label>
+              <input type="text" id="kas-kategori" placeholder="Contoh: Operasional / Modal Kasir" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-medium" required />
+            </div>
+            <div>
+              <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Nominal Jumlah (Rp) *</label>
+              <div class="relative">
+                <span class="absolute left-2.5 top-2.5 text-xs text-slate-400 font-bold">Rp</span>
+                <input type="number" id="kas-jumlah" min="1" step="500" placeholder="0" class="w-full pl-8 pr-2.5 py-2.5 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-bold" required />
+              </div>
             </div>
           </div>
           <div>
-            <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Keterangan Catatan</label>
-            <input type="text" id="kas-ket" placeholder="Keterangan peruntukan kas..." class="w-full text-sm p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-medium" required />
-          </div>
-          <div>
-            <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Nominal Jumlah (Rp)</label>
-            <input type="number" id="kas-jumlah" placeholder="0" class="w-full text-sm p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-bold" required />
+            <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Keterangan Catatan *</label>
+            <input type="text" id="kas-ket" placeholder="Keterangan peruntukan / sumber kas..." class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-medium" required />
           </div>
           <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end space-x-2">
-            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600 transition">Batal</button>
-            <button type="submit" class="px-4 py-2 rounded-xl text-sm font-semibold bg-cyan-500 hover:bg-cyan-600 text-white transition">Simpan Mutasi</button>
+            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600 transition">Batal</button>
+            <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-600 text-white transition">Simpan Mutasi</button>
           </div>
         </form>
       `);
@@ -7223,16 +7450,131 @@
     window.simpanKasBaru = async function (e) {
       e.preventDefault();
       const id = `KAS-00${state.kas.length + 1}`;
+      const tanggal = document.getElementById('kas-tanggal')?.value || new Date().toISOString().split('T')[0];
+      const tipe = document.getElementById('kas-tipe')?.value;
+      const kategori = (document.getElementById('kas-kategori')?.value || '').trim();
+      const keterangan = (document.getElementById('kas-ket')?.value || '').trim();
+      const jumlah = parseFloat(document.getElementById('kas-jumlah')?.value) || 0;
+
+      if (jumlah <= 0) {
+        alert('Nominal jumlah kas harus lebih dari 0!');
+        return;
+      }
+
       const newKas = {
         id,
-        tanggal: new Date().toISOString().split('T')[0],
-        tipe: document.getElementById('kas-tipe').value,
-        kategori: document.getElementById('kas-kategori').value,
-        keterangan: document.getElementById('kas-ket').value,
-        jumlah: parseFloat(document.getElementById('kas-jumlah').value) || 0
+        tanggal,
+        tipe,
+        kategori,
+        keterangan,
+        jumlah
       };
       await dbSave('kas', id, newKas);
       closeModal();
+      showNotificationToast('Transaksi kas baru berhasil dicatat!');
+    };
+
+    window.openEditKasModal = function (id) {
+      const k = (state.kas || []).find(item => item.id === id);
+      if (!k) {
+        showNotificationToast('Data transaksi kas tidak ditemukan!', 'error');
+        return;
+      }
+
+      openModal(`
+        <form onsubmit="simpanEditKas(event, '${k.id}')" class="space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2.5">
+            <div class="flex items-center space-x-2">
+              <span class="font-mono text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-bold">${k.id}</span>
+              <h3 class="font-bold text-base text-slate-800 dark:text-slate-100">Edit Mutasi Kas Toko</h3>
+            </div>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${k.tipe === 'Masuk' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}">
+              ${k.tipe === 'Masuk' ? 'Kas Masuk (+)' : 'Kas Keluar (-)'}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Tanggal Transaksi *</label>
+              <input type="date" id="kas-edit-tanggal" value="${k.tanggal || new Date().toISOString().split('T')[0]}" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-semibold focus:outline-none focus:border-cyan-500" required />
+            </div>
+            <div>
+              <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Jenis Mutasi *</label>
+              <select id="kas-edit-tipe" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500">
+                <option value="Masuk" ${k.tipe === 'Masuk' ? 'selected' : ''}>Kas Masuk (+)</option>
+                <option value="Keluar" ${k.tipe === 'Keluar' ? 'selected' : ''}>Kas Keluar (-)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Kategori *</label>
+              <input type="text" id="kas-edit-kategori" value="${k.kategori || ''}" placeholder="Contoh: Operasional / Pembayaran" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:border-cyan-500" required />
+            </div>
+            <div>
+              <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Nominal Jumlah (Rp) *</label>
+              <div class="relative">
+                <span class="absolute left-2.5 top-2.5 text-xs text-slate-400 font-bold">Rp</span>
+                <input type="number" id="kas-edit-jumlah" value="${k.jumlah || 0}" min="1" step="500" placeholder="0" class="w-full pl-8 pr-2.5 py-2.5 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500" required />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs text-slate-700 dark:text-slate-200 block mb-1 font-semibold">Keterangan Catatan *</label>
+            <input type="text" id="kas-edit-ket" value="${k.keterangan || ''}" placeholder="Keterangan peruntukan kas..." class="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:border-cyan-500" required />
+          </div>
+
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center">
+            <button type="button" onclick="hapusKas('${k.id}')" class="px-3 py-2 rounded-xl text-xs font-bold text-rose-500 hover:bg-rose-500/10 flex items-center space-x-1.5 transition">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>Hapus Transaksi</span>
+            </button>
+            <div class="flex items-center space-x-2">
+              <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600 transition">Batal</button>
+              <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-600 text-white transition">Simpan Perubahan</button>
+            </div>
+          </div>
+        </form>
+      `);
+      lucide.createIcons();
+    };
+
+    window.simpanEditKas = async function (e, id) {
+      e.preventDefault();
+      const tanggal = document.getElementById('kas-edit-tanggal')?.value;
+      const tipe = document.getElementById('kas-edit-tipe')?.value;
+      const kategori = (document.getElementById('kas-edit-kategori')?.value || '').trim();
+      const keterangan = (document.getElementById('kas-edit-ket')?.value || '').trim();
+      const jumlah = parseFloat(document.getElementById('kas-edit-jumlah')?.value) || 0;
+
+      if (jumlah <= 0) {
+        alert('Nominal jumlah kas harus lebih dari 0!');
+        return;
+      }
+
+      await dbUpdate('kas', id, {
+        tanggal,
+        tipe,
+        kategori,
+        keterangan,
+        jumlah
+      });
+
+      closeModal();
+      showNotificationToast('Transaksi kas berhasil diperbarui!');
+    };
+
+    window.hapusKas = async function (id) {
+      const k = (state.kas || []).find(item => item.id === id);
+      if (!k) return;
+
+      if (confirm(`Hapus catatan transaksi kas #${id} (${k.tipe}: ${formatRp(k.jumlah)})?`)) {
+        await dbDelete('kas', id);
+        closeModal();
+        showNotificationToast('Catatan transaksi kas berhasil dihapus.');
+      }
     };
 
     function renderOperasionalView() {
