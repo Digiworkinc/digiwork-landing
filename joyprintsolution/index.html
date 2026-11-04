@@ -222,7 +222,7 @@
           class="p-4 mx-3 my-3 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
           <div>
             <span class="text-xs text-slate-600 dark:text-slate-300 block font-medium">Hak Akses:</span>
-            <span id="role-badge" class="font-bold text-sm text-cyan-500 capitalize">Admin</span>
+            <span id="role-badge" class="font-bold text-sm text-emerald-500 capitalize">User / Kasir</span>
           </div>
           <button onclick="switchRoleModal()"
             class="text-xs px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold transition flex items-center space-x-1">
@@ -290,7 +290,7 @@
             class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 md:hidden">
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
-          <h2 id="page-title" class="text-lg font-bold text-slate-800 dark:text-slate-100">Dashboard Utama
+          <h2 id="page-title" class="text-lg font-bold text-slate-800 dark:text-slate-100">Kasir / POS
           </h2>
         </div>
 
@@ -913,11 +913,11 @@
     if (!isDarkInitial) {
       document.documentElement.classList.remove('dark');
     }
-    const savedRole = localStorage.getItem('joy_print_role');
-    const initialRole = (savedRole === 'user' || savedRole === 'admin') ? savedRole : 'admin';
+    // Keamanan Hak Akses: Saat pertama masuk / refresh, selalu langsung masuk ke 'user' (Kasir / POS)
+    const initialRole = 'user';
     window.state = {
-      role: initialRole,
-      activeTab: 'dashboard',
+      role: 'user',
+      activeTab: 'pos',
       darkMode: isDarkInitial,
       pelanggan: cachedData.pelanggan ? [...cachedData.pelanggan] : [...initialSeedData.pelanggan],
       stok: cachedData.stok ? [...cachedData.stok] : [...initialSeedData.stok],
@@ -1096,9 +1096,9 @@
     };
 
     window.navItems = [
-      { id: 'dashboard', label: 'Dashboard Utama', icon: 'layout-dashboard', roles: ['admin', 'user'] },
+      { id: 'pos', label: 'Kasir / POS', icon: 'shopping-cart', roles: ['admin', 'user'] },
       { id: 'servis', label: 'Transaksi Servis', icon: 'wrench', roles: ['admin', 'user'] },
-      { id: 'pos', label: 'Penjualan / POS', icon: 'shopping-bag', roles: ['admin', 'user'] },
+      { id: 'dashboard', label: 'Dashboard Utama', icon: 'layout-dashboard', roles: ['admin', 'user'] },
       { id: 'dtf', label: 'Cetak Film DTF', icon: 'layers', roles: ['admin', 'user'] },
       { id: 'stok', label: 'Stok Sparepart & Barang', icon: 'boxes', roles: ['admin', 'user'] },
       { id: 'pelanggan', label: 'Data Pelanggan', icon: 'users', roles: ['admin', 'user'] },
@@ -1716,13 +1716,13 @@
       } catch (e) { }
       const roleBadge = document.getElementById('role-badge');
       if (roleBadge) {
-        roleBadge.innerText = newRole;
+        roleBadge.innerText = newRole === 'admin' ? 'Admin' : 'User / Kasir';
         roleBadge.className = `font-bold text-sm capitalize ${newRole === 'admin' ? 'text-cyan-500' : 'text-emerald-500'}`;
       }
 
       const currentNav = navItems.find(n => n.id === state.activeTab);
       if (currentNav && !currentNav.roles.includes(newRole)) {
-        state.activeTab = 'dashboard';
+        state.activeTab = 'pos';
       }
 
       closeModal();
@@ -10764,7 +10764,7 @@
       if (themeLabel) themeLabel.innerText = state.darkMode ? 'Dark' : 'Light';
       const roleBadge = document.getElementById('role-badge');
       if (roleBadge) {
-        roleBadge.innerText = state.role;
+        roleBadge.innerText = state.role === 'admin' ? 'Admin' : 'User / Kasir';
         roleBadge.className = `font-bold text-sm capitalize ${state.role === 'admin' ? 'text-cyan-500' : 'text-emerald-500'}`;
       }
       initFirebaseSync();
