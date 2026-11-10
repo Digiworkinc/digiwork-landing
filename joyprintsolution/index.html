@@ -296,7 +296,7 @@
 
         <div class="flex items-center space-x-3">
           <!-- Low Stock Indicator Alert -->
-          <button onclick="navigateTo('stok')"
+          <button id="header-stock-bell-btn" onclick="navigateTo('stok')"
             class="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
             title="Peringatan Stok Tipis">
             <i data-lucide="bell" class="w-5 h-5"></i>
@@ -1113,7 +1113,7 @@
       { id: 'pos', label: 'Kasir / POS', icon: 'shopping-cart', roles: ['admin', 'user'] },
       { id: 'servis', label: 'Transaksi Servis', icon: 'wrench', roles: ['admin', 'user'] },
       { id: 'dtf', label: 'Cetak Film DTF', icon: 'layers', roles: ['admin', 'user'] },
-      { id: 'stok', label: 'Stok Sparepart & Barang', icon: 'boxes', roles: ['admin', 'user'] },
+      { id: 'stok', label: 'Stok Sparepart & Barang', icon: 'boxes', roles: ['admin'] },
       { id: 'pelanggan', label: 'Data Pelanggan', icon: 'users', roles: ['admin', 'user'] },
       { id: 'kas', label: 'Kas Masuk & Keluar', icon: 'wallet', roles: ['admin', 'user'] },
       { id: 'dashboard', label: 'Dashboard Ringkasan', icon: 'layout-dashboard', roles: ['admin', 'user'] },
@@ -1747,6 +1747,8 @@
       if (headerBackupBtn) headerBackupBtn.classList.toggle('hidden', !isAdmin);
       if (headerResetBtn) headerResetBtn.classList.toggle('hidden', !isAdmin);
       if (headerLockBtn) headerLockBtn.classList.toggle('hidden', !isAdmin);
+      const headerStockBell = document.getElementById('header-stock-bell-btn');
+      if (headerStockBell) headerStockBell.classList.toggle('hidden', !isAdmin);
 
       // Tombol reset all di sidebar
       const sidebarResetBtn = document.getElementById('sidebar-reset-btn');
@@ -2117,7 +2119,7 @@
                   <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-500"></i>
                   <span>Peringatan Stok Tipis (Re-Order)</span>
                 </h3>
-                <button onclick="navigateTo('stok')" class="text-xs text-cyan-500 font-semibold hover:underline">Kelola Stok</button>
+                <button id="header-stock-bell-btn" onclick="navigateTo('stok')" class="text-xs text-cyan-500 font-semibold hover:underline">Kelola Stok</button>
               </div>
 
               <div class="space-y-3">
