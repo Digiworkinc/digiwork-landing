@@ -379,6 +379,8 @@
       measurementId: "G-DX2ZQYXZ01"
     };
 
+    const appId = typeof __app_id !== 'undefined' ? __app_id : (firebaseConfig.projectId || 'joy-print-solution');
+
     let firebaseApp = null;
     let auth = null;
     let db = null;
@@ -5445,7 +5447,6 @@
       const defaultHpp = defaultItem && defaultItem.hpp ? defaultItem.hpp : 18000;
       const defaultStokId = defaultItem ? defaultItem.id : '';
       const isLow = defaultItem ? (defaultItem.jumlah || 0) <= (defaultItem.minStok || 0) : false;
-      window._dtfEditBayarAutoSync = (d.statusBayar === 'Lunas' || !d.bayar || d.bayar >= (d.totalBiaya || 0));
 
       window._dtfBayarAutoSync = true;
       window._currentDtfItems = [];
@@ -9409,7 +9410,7 @@
         riwayatCicilan.push({
           id: `CICIL-${Date.now()}`,
           tanggal,
-          jumlah: Math.min(bayar, totalBiaya)Awal,
+          jumlah: bayarAwal,
           metode: metodeAwal,
           catatan: catatanAwal || (sisa <= 0 ? 'Pelunasan Penuh' : 'Pembayaran Awal / DP')
         });
@@ -9445,7 +9446,7 @@
             tipe: 'Masuk',
             kategori: sisa <= 0 ? 'Pelunasan Piutang' : 'Cicilan Piutang',
             keterangan: `${sisa <= 0 ? 'Pelunasan' : 'DP/Cicilan'} Piutang #${hpId} (${pihak} - Ref: ${noRef || '-'}) via ${metodeAwal}`,
-            jumlah: Math.min(bayar, totalBiaya)Awal
+            jumlah: bayarAwal
           });
         } else {
           await dbSave('kas', kasId, {
@@ -9454,7 +9455,7 @@
             tipe: 'Keluar',
             kategori: sisa <= 0 ? 'Pelunasan Hutang' : 'Cicilan Hutang',
             keterangan: `${sisa <= 0 ? 'Pelunasan' : 'DP/Cicilan'} Hutang Toko #${hpId} ke ${pihak} (Ref: ${noRef || '-'}) via ${metodeAwal}`,
-            jumlah: Math.min(bayar, totalBiaya)Awal
+            jumlah: bayarAwal
           });
         }
       }
@@ -11284,7 +11285,7 @@
     }
 
     // Initialize sync on page load
-    window.addEventListener('DOMContentLoaded', () => {
+    function initApp() {
       const themeLabel = document.getElementById('theme-label');
       if (themeLabel) themeLabel.innerText = state.darkMode ? 'Dark' : 'Light';
       updateRoleUI();
@@ -11292,7 +11293,13 @@
       initStorageAndSync();
       renderNav();
       renderPage();
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
   </script>
 </body>
 
