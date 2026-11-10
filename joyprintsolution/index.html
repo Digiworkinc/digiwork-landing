@@ -1113,7 +1113,7 @@
       { id: 'pos', label: 'Kasir / POS', icon: 'shopping-cart', roles: ['admin', 'user'] },
       { id: 'servis', label: 'Transaksi Servis', icon: 'wrench', roles: ['admin', 'user'] },
       { id: 'dtf', label: 'Cetak Film DTF', icon: 'layers', roles: ['admin', 'user'] },
-      { id: 'stok', label: 'Stok Sparepart & Barang', icon: 'boxes', roles: ['admin'] },
+      { id: 'stok', label: 'Stok Sparepart & Barang', icon: 'boxes', roles: ['admin', 'user'] },
       { id: 'pelanggan', label: 'Data Pelanggan', icon: 'users', roles: ['admin', 'user'] },
       { id: 'kas', label: 'Kas Masuk & Keluar', icon: 'wallet', roles: ['admin', 'user'] },
       { id: 'dashboard', label: 'Dashboard Ringkasan', icon: 'layout-dashboard', roles: ['admin', 'user'] },
@@ -1747,8 +1747,6 @@
       if (headerBackupBtn) headerBackupBtn.classList.toggle('hidden', !isAdmin);
       if (headerResetBtn) headerResetBtn.classList.toggle('hidden', !isAdmin);
       if (headerLockBtn) headerLockBtn.classList.toggle('hidden', !isAdmin);
-      const headerStockBell = document.getElementById('header-stock-bell-btn');
-      if (headerStockBell) headerStockBell.classList.toggle('hidden', !isAdmin);
 
       // Tombol reset all di sidebar
       const sidebarResetBtn = document.getElementById('sidebar-reset-btn');
@@ -5380,11 +5378,13 @@
 
       // Pembayaran & Sisa
       const bayarInput = document.getElementById(`${prefix}-bayar`);
-      if (!isEdit && window._dtfBayarAutoSync && bayarInput) {
+      const autoSyncKey = isEdit ? '_dtfEditBayarAutoSync' : '_dtfBayarAutoSync';
+      if (window[autoSyncKey] && bayarInput) {
         bayarInput.value = totalOmset;
       }
       const bayar = parseFloat(bayarInput?.value) || 0;
       const sisa = Math.max(0, totalOmset - bayar);
+      const kembalian = Math.max(0, bayar - totalOmset);
 
       const sisaBox = document.getElementById(`${prefix}-sisa-box`);
       const sisaText = document.getElementById(`${prefix}-sisa-text`);
@@ -5392,9 +5392,15 @@
 
       if (sisaBox && sisaText && sisaNominal) {
         if (sisa <= 0) {
-          sisaBox.className = "p-2.5 rounded-lg border text-xs flex items-center justify-between bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300";
-          sisaText.innerText = "LUNAS (Tidak ada sisa tagihan)";
-          sisaNominal.innerText = "Rp 0";
+          if (kembalian > 0) {
+            sisaBox.className = "p-2.5 rounded-lg border text-xs flex items-center justify-between bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300";
+            sisaText.innerText = "LUNAS (Uang Lebih / Kembalian):";
+            sisaNominal.innerText = formatRp(kembalian);
+          } else {
+            sisaBox.className = "p-2.5 rounded-lg border text-xs flex items-center justify-between bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300";
+            sisaText.innerText = "LUNAS (Tidak ada sisa tagihan)";
+            sisaNominal.innerText = "Rp 0";
+          }
         } else if (bayar > 0) {
           sisaBox.className = "p-2.5 rounded-lg border text-xs flex items-center justify-between bg-cyan-500/10 border-cyan-500/30 text-cyan-700 dark:text-cyan-300";
           sisaText.innerText = "DP / TITIP BAYAR (Sisa Piutang):";
@@ -5405,6 +5411,27 @@
           sisaNominal.innerText = formatRp(sisa);
         }
       }
+    };
+
+    window.setDtfBayarPreset = function (type, isEdit = false) {
+      const prefix = isEdit ? 'dtf-edit' : 'dtf';
+      const totalVal = parseFloat(document.getElementById(`${prefix}-total-val`)?.value) || 0;
+      const bayarInput = document.getElementById(`${prefix}-bayar`);
+      const autoSyncKey = isEdit ? '_dtfEditBayarAutoSync' : '_dtfBayarAutoSync';
+
+      if (!bayarInput) return;
+
+      if (type === 'full') {
+        bayarInput.value = totalVal;
+        window[autoSyncKey] = true;
+      } else if (type === 'half') {
+        bayarInput.value = Math.round(totalVal / 2);
+        window[autoSyncKey] = false;
+      } else if (type === 'zero') {
+        bayarInput.value = 0;
+        window[autoSyncKey] = false;
+      }
+      updateGrandTotalDtf(isEdit);
     };
 
     window.openFormDTFModal = function () {
@@ -5418,6 +5445,7 @@
       const defaultHpp = defaultItem && defaultItem.hpp ? defaultItem.hpp : 18000;
       const defaultStokId = defaultItem ? defaultItem.id : '';
       const isLow = defaultItem ? (defaultItem.jumlah || 0) <= (defaultItem.minStok || 0) : false;
+      window._dtfEditBayarAutoSync = (d.statusBayar === 'Lunas' || !d.bayar || d.bayar >= (d.totalBiaya || 0));
 
       window._dtfBayarAutoSync = true;
       window._currentDtfItems = [];
@@ -5624,8 +5652,15 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Total Uang Yang Dibayar (Rp)</label>
-                <input type="number" id="dtf-bayar" step="500" min="0" value="${defaultHarga}" oninput="window._dtfBayarAutoSync = false; updateGrandTotalDtf(false)" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500" required />
+                <div class="flex items-center justify-between mb-1">
+                  <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Total Uang Yang Dibayar (Rp)</label>
+                  <div class="flex items-center space-x-1">
+                    <button type="button" onclick="setDtfBayarPreset('full', false)" class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/10 hover:bg-cyan-500 text-cyan-600 dark:text-cyan-300 hover:text-white font-bold transition" title="Isi otomatis lunas sesuai total tagihan">⚡ Pas</button>
+                    <button type="button" onclick="setDtfBayarPreset('half', false)" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-cyan-500 text-slate-700 dark:text-slate-200 hover:text-white font-semibold transition" title="Isi DP 50%">DP 50%</button>
+                    <button type="button" onclick="setDtfBayarPreset('zero', false)" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-rose-500 text-slate-700 dark:text-slate-200 hover:text-white font-semibold transition" title="Belum bayar (Rp 0)">Rp 0</button>
+                  </div>
+                </div>
+                <input type="number" id="dtf-bayar" step="any" min="0" value="${defaultHarga}" oninput="window._dtfBayarAutoSync = false; updateGrandTotalDtf(false)" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500" placeholder="Bisa masukkan nominal berapapun..." required />
               </div>
               <div>
                 <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Metode Pembayaran</label>
@@ -5872,6 +5907,7 @@
         statusBayar,
         bayar,
         sisa,
+        kembalian: Math.max(0, bayar - totalBiaya),
         metode,
         statusPengerjaan,
         catatan: catatanUmum || combinedCatatan
@@ -5888,7 +5924,7 @@
           tipe: 'Masuk',
           kategori: 'Order Cetak Film DTF',
           keterangan: `Bayar DTF #${dtfId} (${nama} - ${itemDesc}) via ${metode}`,
-          jumlah: bayar
+          jumlah: Math.min(bayar, totalBiaya)
         });
       }
 
@@ -5944,6 +5980,7 @@
       const defaultHpp = defaultItem && defaultItem.hpp ? defaultItem.hpp : 18000;
       const defaultStokId = defaultItem ? defaultItem.id : '';
       const isLow = defaultItem ? (defaultItem.jumlah || 0) <= (defaultItem.minStok || 0) : false;
+      window._dtfEditBayarAutoSync = (d.statusBayar === 'Lunas' || !d.bayar || d.bayar >= (d.totalBiaya || 0));
 
       openModal(`
         <form onsubmit="simpanEditDTF(event, '${d.id}')" class="space-y-4 max-h-[85vh] overflow-y-auto pr-1">
@@ -6146,8 +6183,15 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Total Uang Yang Dibayar (Rp)</label>
-                <input type="number" id="dtf-edit-bayar" step="500" min="0" value="${d.bayar || 0}" oninput="updateGrandTotalDtf(true)" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500" required />
+                <div class="flex items-center justify-between mb-1">
+                  <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Total Uang Yang Dibayar (Rp)</label>
+                  <div class="flex items-center space-x-1">
+                    <button type="button" onclick="setDtfBayarPreset('full', true)" class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/10 hover:bg-cyan-500 text-cyan-600 dark:text-cyan-300 hover:text-white font-bold transition" title="Isi otomatis lunas sesuai total tagihan">⚡ Pas</button>
+                    <button type="button" onclick="setDtfBayarPreset('half', true)" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-cyan-500 text-slate-700 dark:text-slate-200 hover:text-white font-semibold transition" title="Isi DP 50%">DP 50%</button>
+                    <button type="button" onclick="setDtfBayarPreset('zero', true)" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-rose-500 text-slate-700 dark:text-slate-200 hover:text-white font-semibold transition" title="Belum bayar (Rp 0)">Rp 0</button>
+                  </div>
+                </div>
+                <input type="number" id="dtf-edit-bayar" step="any" min="0" value="${d.bayar || 0}" oninput="window._dtfEditBayarAutoSync = false; updateGrandTotalDtf(true)" class="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-cyan-500" placeholder="Bisa masukkan nominal berapapun..." required />
               </div>
               <div>
                 <label class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 block mb-1">Status Pengerjaan</label>
@@ -6358,6 +6402,7 @@
         totalBiaya: newTotalBiaya,
         bayar: bayarBaru,
         sisa,
+        kembalian: Math.max(0, bayarBaru - newTotalBiaya),
         statusBayar,
         statusPengerjaan,
         catatan: catatanUmum
@@ -9364,7 +9409,7 @@
         riwayatCicilan.push({
           id: `CICIL-${Date.now()}`,
           tanggal,
-          jumlah: bayarAwal,
+          jumlah: Math.min(bayar, totalBiaya)Awal,
           metode: metodeAwal,
           catatan: catatanAwal || (sisa <= 0 ? 'Pelunasan Penuh' : 'Pembayaran Awal / DP')
         });
@@ -9400,7 +9445,7 @@
             tipe: 'Masuk',
             kategori: sisa <= 0 ? 'Pelunasan Piutang' : 'Cicilan Piutang',
             keterangan: `${sisa <= 0 ? 'Pelunasan' : 'DP/Cicilan'} Piutang #${hpId} (${pihak} - Ref: ${noRef || '-'}) via ${metodeAwal}`,
-            jumlah: bayarAwal
+            jumlah: Math.min(bayar, totalBiaya)Awal
           });
         } else {
           await dbSave('kas', kasId, {
@@ -9409,7 +9454,7 @@
             tipe: 'Keluar',
             kategori: sisa <= 0 ? 'Pelunasan Hutang' : 'Cicilan Hutang',
             keterangan: `${sisa <= 0 ? 'Pelunasan' : 'DP/Cicilan'} Hutang Toko #${hpId} ke ${pihak} (Ref: ${noRef || '-'}) via ${metodeAwal}`,
-            jumlah: bayarAwal
+            jumlah: Math.min(bayar, totalBiaya)Awal
           });
         }
       }
