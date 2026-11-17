@@ -1119,7 +1119,7 @@
       { id: 'pelanggan', label: 'Data Pelanggan', icon: 'users', roles: ['admin', 'user'] },
       { id: 'kas', label: 'Kas Masuk & Keluar', icon: 'wallet', roles: ['admin', 'user'] },
       { id: 'dashboard', label: 'Dashboard Ringkasan', icon: 'layout-dashboard', roles: ['admin', 'user'] },
-      { id: 'pembelian', label: 'Pembelian Stock', icon: 'truck', roles: ['admin'] },
+      { id: 'pembelian', label: 'Pembelian Stock', icon: 'truck', roles: ['admin', 'user'] },
       { id: 'operasional', label: 'Pengeluaran Operasional', icon: 'receipt', roles: ['admin'] },
       { id: 'hutangpiutang', label: 'Hutang & Piutang', icon: 'file-text', roles: ['admin'] },
       { id: 'laporan', label: 'Laporan Keuangan', icon: 'bar-chart-3', roles: ['admin'] },
@@ -1206,7 +1206,7 @@
                     <i data-lucide="${targetRole === 'user' ? 'check-circle-2' : 'circle'}" class="w-4 h-4 text-emerald-500"></i>
                   </span>
                 </div>
-                <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-1">Terbatas transaksi servis, kasir POS & stok barang.</p>
+                <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-1">Transaksi servis, kasir POS, stok & pembelian stock.</p>
               </div>
             </div>
           </div>
