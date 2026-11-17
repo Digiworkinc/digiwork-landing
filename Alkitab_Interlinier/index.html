@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studi Alkitab Interlinear</title>
+    <!-- Tailwind CSS untuk styling beserta plugin typography untuk merender teks AI -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <!-- Google Fonts untuk tipografi yang lebih baik, terutama font untuk bahasa Ibrani dan Yunani -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Ezra+SIL&family=Galatia+SIL&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Gray-100 */
+        }
+        
+        /* Font khusus untuk teks Ibrani dan Yunani agar tampil lebih baik */
+        .hebrew-text {
+            font-family: 'Ezra SIL', 'Times New Roman', serif;
+            direction: rtl;
+        }
+        
+        .greek-text {
+            font-family: 'Galatia SIL', 'Times New Roman', serif;
+        }
+
+        /* Styling kustom untuk tooltip/popover penjelasan kata */
+        .word-container {
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .word-container:hover {
+            background-color: #e5e7eb; /* Gray-200 */
+            border-radius: 0.25rem;
+        }
+
+        .word-details {
+            display: none;
+            position: absolute;
+            z-index: 50;
+            background-color: white;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+            width: max-content;
+            max-width: 300px;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Panah kecil untuk tooltip */
+        .word-details::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: white transparent transparent transparent;
+        }
+
+        .word-container:hover .word-details,
+        .word-container.active .word-details {
+            display: block;
+        }
+    </style>
+</head>
+<body class="text-gray-800 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-indigo-700 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <h1 class="text-2xl font-bold tracking-tight">Theologia Interlinear</h1>
+            </div>
+            <nav class="hidden md:block">
+                <ul class="flex space-x-6 text-sm font-medium">
+                    <li><a href="#" class="hover:text-indigo-200 transition">Beranda</a></li>
+                    <li><a href="#" class="hover:text-indigo-200 transition">Tentang</a></li>
+                    <li><a href="#" class="hover:text-indigo-200 transition">Panduan Studi</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Konten Utama -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
+        
+        <!-- Kolom Kiri: Navigasi/Pencarian Ayat -->
+        <aside class="w-full md:w-1/4 bg-white rounded-lg shadow-sm p-4 h-fit border border-gray-200">
+            <h2 class="text-lg font-semibold mb-4 text-indigo-800 border-b pb-2">Pilih Bagian</h2>
+            
+            <div class="space-y-4">
+                <!-- Dropdown Pemilihan Kitab -->
+                <div>
+                    <label for="book-select" class="block text-sm font-medium text-gray-700 mb-1">Kitab</label>
+                    <select id="book-select" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+                        <!-- Opsi kitab akan disuntikkan oleh JavaScript -->
+                    </select>
+                </div>
+
+                <!-- Input Pasal & Ayat -->
+                <div class="flex gap-2">
+                    <div class="w-1/2">
+                        <label for="chapter-input" class="block text-sm font-medium text-gray-700 mb-1">Pasal</label>
+                        <input type="number" id="chapter-input" value="1" min="1" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+                    </div>
+                    <div class="w-1/2">
+                        <label for="verse-input" class="block text-sm font-medium text-gray-700 mb-1">Ayat</label>
+                        <input type="number" id="verse-input" value="1" min="1" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+                    </div>
+                </div>
+
+                <button id="load-verse-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out flex justify-center items-center gap-2">
+                    <span>Tampilkan Ayat</span>
+                </button>
+            </div>
+
+            <div class="mt-8 pt-4 border-t border-gray-200">
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Petunjuk:</h3>
+                <p class="text-xs text-gray-600 leading-relaxed">
+                    Pilih kitab, pasal, dan ayat, lalu klik "Tampilkan". Jika ayat belum ada di memori, <strong>AI akan bekerja mengambil dan menyusun teks interlinear secara real-time</strong>. Arahkan kursor pada kata untuk analisis morfologi.
+                </p>
+            </div>
+        </aside>
+
+        <!-- Kolom Kanan: Tampilan Interlinear -->
+        <section class="w-full md:w-3/4 bg-white rounded-lg shadow-sm p-6 border border-gray-200 relative min-h-[500px]">
+            
+            <!-- Overlay Loading untuk Menyusun Ayat -->
+            <div id="verse-loading-overlay" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm z-40 flex flex-col items-center justify-center rounded-lg border border-indigo-100">
+                <div class="relative w-20 h-20">
+                    <div class="absolute inset-0 border-4 border-indigo-200 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+                </div>
+                <h3 class="mt-6 text-lg font-semibold text-indigo-900">Menyusun Data Interlinear...</h3>
+                <p class="text-sm text-gray-500 mt-2 max-w-sm text-center">AI sedang menerjemahkan, menganalisis tata bahasa (parsing), dan mengambil nomor Strongs dari bahasa asli.</p>
+            </div>
+
+            <!-- Header Tampilan Ayat -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-gray-200 gap-4">
+                <div>
+                    <h2 id="verse-title" class="text-2xl font-bold text-gray-900">Yohanes 1:1</h2>
+                    <p class="text-sm text-gray-500 mt-1">Naskah Asli & Terjemahan Bahasa Indonesia</p>
+                </div>
+                
+                <!-- Toggle untuk jenis tampilan -->
+                <div class="flex bg-gray-100 p-1 rounded-lg">
+                    <button id="btn-view-interlinear" class="px-3 py-1 text-sm font-medium bg-white rounded shadow-sm text-indigo-700 transition">Interlinear</button>
+                    <button id="btn-view-parallel" class="px-3 py-1 text-sm font-medium text-gray-500 hover:text-gray-700 transition">Paralel</button>
+                </div>
+            </div>
+
+            <!-- Teks Terjemahan Resmi (TB - Terjemahan Baru LAI sebagai referensi) -->
+            <div class="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                <span class="text-xs font-semibold uppercase text-gray-500 tracking-wider mb-2 block">Terjemahan Indonesia (Referensi)</span>
+                <p id="reference-translation" class="text-lg text-gray-800 leading-relaxed">
+                    Pada mulanya adalah Firman; Firman itu bersama-sama dengan Allah dan Firman itu adalah Allah.
+                </p>
+            </div>
+
+            <!-- Kontainer Teks Interlinear -->
+            <div id="view-interlinear" class="mb-4 block">
+                <span id="interlinear-direction-label" class="text-xs font-semibold uppercase text-gray-500 tracking-wider mb-4 block">Analisis Interlinear (Baca Kiri ke Kanan untuk Yunani)</span>
+                
+                <!-- Flex container yang membungkus kata-kata -->
+                <div id="interlinear-container" class="flex flex-wrap gap-x-6 gap-y-10 items-end justify-start">
+                    <!-- Kata-kata akan disuntikkan ke sini melalui JavaScript -->
+                </div>
+            </div>
+
+            <!-- Kontainer Teks Paralel -->
+            <div id="view-parallel" class="mb-4 hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Teks Asli</h3>
+                    <p id="parallel-original" class="text-2xl leading-loose"></p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Terjemahan Harafiah</h3>
+                    <p id="parallel-translation" class="text-lg leading-relaxed text-gray-800"></p>
+                </div>
+            </div>
+
+            <!-- Area untuk menampilkan detail ekstra jika diperlukan (opsional) -->
+            <div id="grammar-notes" class="mt-12 pt-6 border-t border-gray-200 hidden">
+                <h3 class="text-lg font-medium text-gray-900 mb-3">Catatan Tata Bahasa & Teologi</h3>
+                <div class="prose prose-indigo text-sm text-gray-600 max-w-none">
+                    <p id="grammar-notes-content"></p>
+                </div>
+            </div>
+
+            <!-- Area Analisis AI -->
+            <div id="ai-analysis-section" class="mt-8 pt-6 border-t border-gray-200">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+                    <h3 class="text-lg font-medium text-gray-900 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Analisis Konteks & Referensi Silang
+                    </h3>
+                    <button id="btn-analyze-ai" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-md text-sm transition shadow-sm flex items-center gap-2 w-full sm:w-auto justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        Tanya AI
+                    </button>
+                </div>
+                
+                <!-- Indikator Loading AI -->
+                <div id="ai-loading" class="hidden flex items-center justify-center gap-3 text-purple-700 p-6 bg-purple-50 rounded-lg border border-purple-100">
+                    <svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-sm font-medium">Otak AI sedang menggali konteks dan menyusun referensi...</span>
+                </div>
+                
+                <!-- Hasil Analisis AI -->
+                <div id="ai-content" class="hidden prose prose-sm sm:prose-base prose-indigo max-w-none text-gray-800 bg-white p-6 rounded-lg border border-purple-200 shadow-sm relative overflow-hidden">
+                    <!-- Aksen visual -->
+                    <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-purple-500 to-indigo-500"></div>
+                    <div id="ai-content-inner"></div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-6 text-center text-sm mt-auto">
+        <p>&copy; 2026 Theologia Interlinear - Alat Bantu Studi Pendidikan Teologi.</p>
+        <p class="text-gray-400 mt-1">Dibuat untuk analisis naskah asli dengan penjelasan bahasa Indonesia.</p>
+    </footer>
+
+    <!-- Pesan Notifikasi (Custom Alert) -->
+    <div id="toast-notification" class="fixed bottom-4 right-4 bg-indigo-600 text-white px-6 py-3 rounded shadow-lg transform transition-transform duration-300 translate-y-full opacity-0 z-50 flex items-center gap-3 pointer-events-none">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span id="toast-message" class="text-sm font-medium">Pesan di sini</span>
+    </div>
+
+    <script>
+        // --- DATA STATIS & CACHE ---
+        // Kita menyimpan data awal agar muat pertama cepat. Ayat baru akan di-cache ke sini.
+        let verseData = {
+            'jhn_1_1': {
+                title: 'Yohanes 1:1',
+                language: 'greek', // kiri-ke-kanan
+                reference: 'Pada mulanya adalah Firman; Firman itu bersama-sama dengan Allah dan Firman itu adalah Allah.',
+                notes: 'Penggunaan "Logos" (Firman) merujuk pada konsep pra-eksistensi Kristus. Perhatikan bahwa di klausa ketiga (kaì Theòs ên ho Lógos), ketiadaan artikel "ho" di depan "Theos" menekankan hakikat keilahian Firman, bukan menyamakan pribadi Firman secara identik dengan pribadi Bapa.',
+                words: [
+                    {
+                        original: 'Ἐν',
+                        transliteration: 'En',
+                        translation: 'Pada',
+                        parsing: 'Preposisi (Preposition)',
+                        strongs: 'G1722',
+                        root: 'ἐν (en)',
+                        meaning: 'di dalam, pada, di antara'
+                    },
+                    {
+                        original: 'ἀρχῇ',
+                        transliteration: 'archē',
+                        translation: 'mulanya',
+                        parsing: 'Kata Benda - Datif Tunggal Feminin (Noun - Dative Singular Feminine)',
+                        strongs: 'G746',
+                        root: 'ἀρχή (archē)',
+                        meaning: 'permulaan, asal, penguasa'
+                    },
+                    {
+                        original: 'ἦν',
+                        transliteration: 'ēn',
+                        translation: 'adalah',
+                        parsing: 'Kata Kerja - Indikatif Imperfek Aktif Orang ke-3 Tunggal (Verb - Indicative Imperfect Active 3rd Person Singular)',
+                        strongs: 'G1510',
+                        root: 'εἰμί (eimi)',
+                        meaning: 'aku ada, eksis'
+                    },
+                    {
+                        original: 'ὁ',
+                        transliteration: 'ho',
+                        translation: 'sang',
+                        parsing: 'Artikel - Nominatif Tunggal Maskulin (Article - Nominative Singular Masculine)',
+                        strongs: 'G3588',
+                        root: 'ὁ, ἡ, τό (ho, hē, to)',
+                        meaning: 'itu (menunjukkan spesifikasi)'
+                    },
+                    {
+                        original: 'λόγος,',
+                        transliteration: 'logos',
+                        translation: 'Firman,',
+                        parsing: 'Kata Benda - Nominatif Tunggal Maskulin (Noun - Nominative Singular Masculine)',
+                        strongs: 'G3056',
+                        root: 'λόγος (logos)',
+                        meaning: 'perkataan, firman, alasan, konsep'
+                    },
+                    {
+                        original: 'καὶ',
+                        transliteration: 'kai',
+                        translation: 'dan',
+                        parsing: 'Kata Sambung (Conjunction)',
+                        strongs: 'G2532',
+                        root: 'καί (kai)',
+                        meaning: 'dan, juga, bahkan'
+                    },
+                    {
+                        original: 'ὁ',
+                        transliteration: 'ho',
+                        translation: 'sang',
+                        parsing: 'Artikel - Nominatif Tunggal Maskulin (Article - Nominative Singular Masculine)',
+                        strongs: 'G3588',
+                        root: 'ὁ, ἡ, τό (ho, hē, to)',
+                        meaning: 'itu'
+                    },
+                    {
+                        original: 'λόγος',
+                        transliteration: 'logos',
+                        translation: 'Firman',
+                        parsing: 'Kata Benda - Nominatif Tunggal Maskulin (Noun - Nominative Singular Masculine)',
+                        strongs: 'G3056',
+                        root: 'λόγος (logos)',
+                        meaning: 'perkataan, firman'
+                    },
+                    {
+                        original: 'ἦν',
+                        transliteration: 'ēn',
+                        translation: '(itu) ada',
+                        parsing: 'Kata Kerja - Indikatif Imperfek Aktif Orang ke-3 Tunggal (Verb - Indicative Imperfect Active 3rd Person Singular)',
+                        strongs: 'G1510',
+                        root: 'εἰμί (eimi)',
+                        meaning: 'aku ada'
+                    },
+                    {
+                        original: 'πρὸς',
+                        transliteration: 'pros',
+                        translation: 'bersama-sama dengan',
+                        parsing: 'Preposisi (Preposition)',
+                        strongs: 'G4314',
+                        root: 'πρός (pros)',
+                        meaning: 'menuju, berhadapan dengan, bersama'
+                    },
+                    {
+                        original: 'τὸν',
+                        transliteration: 'ton',
+                        translation: 'sang',
+                        parsing: 'Artikel - Akusatif Tunggal Maskulin (Article - Accusative Singular Masculine)',
+                        strongs: 'G3588',
+                        root: 'ὁ, ἡ, τό (ho, hē, to)',
+                        meaning: 'itu'
+                    },
+                    {
+                        original: 'θεόν,',
+                        transliteration: 'theon',
+                        translation: 'Allah,',
+                        parsing: 'Kata Benda - Akusatif Tunggal Maskulin (Noun - Accusative Singular Masculine)',
+                        strongs: 'G2316',
+                        root: 'θεός (theos)',
+                        meaning: 'Tuhan, Allah'
+                    },
+                    {
+                        original: 'καὶ',
+                        transliteration: 'kai',
+                        translation: 'dan',
+                        parsing: 'Kata Sambung (Conjunction)',
+                        strongs: 'G2532',
+                        root: 'καί (kai)',
+                        meaning: 'dan'
+                    },
+                    {
+                        original: 'θεὸς',
+                        transliteration: 'theos',
+                        translation: 'Allah',
+                        parsing: 'Kata Benda - Nominatif Tunggal Maskulin (Noun - Nominative Singular Masculine)',
+                        strongs: 'G2316',
+                        root: 'θεός (theos)',
+                        meaning: 'Tuhan, Allah'
+                    },
+                    {
+                        original: 'ἦν',
+                        transliteration: 'ēn',
+                        translation: 'adalah',
+                        parsing: 'Kata Kerja - Indikatif Imperfek Aktif Orang ke-3 Tunggal (Verb - Indicative Imperfect Active 3rd Person Singular)',
+                        strongs: 'G1510',
+                        root: 'εἰμί (eimi)',
+                        meaning: 'aku ada'
+                    },
+                    {
+                        original: 'ὁ',
+                        transliteration: 'ho',
+                        translation: 'sang',
+                        parsing: 'Artikel - Nominatif Tunggal Maskulin (Article - Nominative Singular Masculine)',
+                        strongs: 'G3588',
+                        root: 'ὁ, ἡ, τό (ho, hē, to)',
+                        meaning: 'itu'
+                    },
+                    {
+                        original: 'λόγος.',
+                        transliteration: 'logos.',
+                        translation: 'Firman.',
+                        parsing: 'Kata Benda - Nominatif Tunggal Maskulin (Noun - Nominative Singular Masculine)',
+                        strongs: 'G3056',
+                        root: 'λόγος (logos)',
+                        meaning: 'perkataan, firman'
+                    }
+                ]
+            },
+            'gen_1_1': {
+                title: 'Kejadian 1:1',
+                language: 'hebrew', // kanan-ke-kiri
+                reference: 'Pada mulanya Allah menciptakan langit dan bumi.',
+                notes: 'Kata "Bereshit" (Pada mulanya) tidak memiliki penentu sandang (the), mengindikasikan permulaan mutlak. Kata kerja "Bara" (menciptakan) dalam Alkitab selalu digunakan dengan subjek Allah (Penciptaan ex nihilo/dari ketiadaan). Kata "Elohim" adalah bentuk jamak, yang sering diartikan sebagai jamak keagungan (plural of majesty).',
+                words: [
+                    {
+                        original: 'בְּרֵאשִׁ֖ית',
+                        transliteration: 'bə·rê·šîṯ',
+                        translation: 'Pada mulanya',
+                        parsing: 'Preposisi "be" (di/pada) + Kata Benda Feminim Tunggal Absolut (Preposition + Noun Feminine Singular Absolute)',
+                        strongs: 'H7225',
+                        root: 'רֵאשִׁית (reshith)',
+                        meaning: 'permulaan, awal, yang pertama'
+                    },
+                    {
+                        original: 'בָּרָ֣א',
+                        transliteration: 'bā·rā',
+                        translation: '(Ia) menciptakan',
+                        parsing: 'Kata Kerja - Qal Perfek Orang ke-3 Tunggal Maskulin (Verb - Qal Perfect 3rd Person Singular Masculine)',
+                        strongs: 'H1254',
+                        root: 'בָּרָא (bara)',
+                        meaning: 'menciptakan, membentuk (biasanya tindakan Ilahi)'
+                    },
+                    {
+                        original: 'אֱלֹהִ֑ים',
+                        transliteration: '’ĕ·lō·hîm',
+                        translation: 'Allah',
+                        parsing: 'Kata Benda - Maskulin Jamak Absolut (Noun - Masculine Plural Absolute)',
+                        strongs: 'H430',
+                        root: 'אֱלוֹהַּ (eloah)',
+                        meaning: 'Tuhan, penguasa tertinggi, dewa-dewa'
+                    },
+                    {
+                        original: 'אֵ֥ת',
+                        transliteration: '’êṯ',
+                        translation: '(penanda objek langsung)',
+                        parsing: 'Partikel Penanda Objek Langsung (Particle Direct Object Marker)',
+                        strongs: 'H853',
+                        root: 'אֵת (eth)',
+                        meaning: 'tidak ada terjemahan langsung, menandai objek yang dikenai pekerjaan'
+                    },
+                    {
+                        original: 'הַשָּׁמַ֖יִם',
+                        transliteration: 'haš·šā·ma·yim',
+                        translation: 'langit',
+                        parsing: 'Artikel "ha" (sang/itu) + Kata Benda Maskulin Jamak Absolut (Article + Noun Masculine Plural Absolute)',
+                        strongs: 'H8064',
+                        root: 'שָׁמַיִם (shamayim)',
+                        meaning: 'langit, surga, angkasa'
+                    },
+                    {
+                        original: 'וְאֵ֥ת',
+                        transliteration: 'wə·’êṯ',
+                        translation: 'dan (objek)',
+                        parsing: 'Kata Sambung "waw" (dan) + Partikel Penanda Objek (Conjunction + Particle Direct Object Marker)',
+                        strongs: 'H853',
+                        root: 'אֵת (eth)',
+                        meaning: 'dan'
+                    },
+                    {
+                        original: 'הָאָֽרֶץ׃',
+                        transliteration: 'hā·’ā·reṣ.',
+                        translation: 'bumi.',
+                        parsing: 'Artikel "ha" (sang/itu) + Kata Benda Feminim Tunggal Absolut (Article + Noun Feminine Singular Absolute)',
+                        strongs: 'H776',
+                        root: 'אֶרֶץ (erets)',
+                        meaning: 'bumi, tanah, daratan'
+                    }
+                ]
+            },
+            'jhn_1_2': {
+                title: 'Yohanes 1:2',
+                language: 'greek',
+                reference: 'Ia pada mulanya bersama-sama dengan Allah.',
+                notes: 'Ayat ini menegaskan kembali keberadaan Firman (Logos) bersama Allah (Bapa) sejak kekekalan, memperkuat pernyataan di ayat 1.',
+                words: [
+                    { original: 'οὗτος', transliteration: 'houtos', translation: 'Ia', parsing: 'Kata Ganti Penunjuk (Demonstrative Pronoun)', strongs: 'G3778', root: 'οὗτος (houtos)', meaning: 'ini, ia' },
+                    { original: 'ἦν', transliteration: 'ēn', translation: 'ada', parsing: 'Kata Kerja - Indikatif Imperfek Aktif Orang ke-3 Tunggal', strongs: 'G1510', root: 'εἰμί (eimi)', meaning: 'aku ada' },
+                    { original: 'ἐν', transliteration: 'en', translation: 'pada', parsing: 'Preposisi', strongs: 'G1722', root: 'ἐν (en)', meaning: 'di dalam, pada' },
+                    { original: 'ἀρχῇ', transliteration: 'archē', translation: 'mulanya', parsing: 'Kata Benda - Datif Tunggal Feminin', strongs: 'G746', root: 'ἀρχή (archē)', meaning: 'permulaan' },
+                    { original: 'πρὸς', transliteration: 'pros', translation: 'bersama-sama dengan', parsing: 'Preposisi', strongs: 'G4314', root: 'πρός (pros)', meaning: 'menuju, bersama' },
+                    { original: 'τὸν', transliteration: 'ton', translation: 'sang', parsing: 'Artikel - Akusatif Tunggal Maskulin', strongs: 'G3588', root: 'ὁ (ho)', meaning: 'itu' },
+                    { original: 'θεόν.', transliteration: 'theon.', translation: 'Allah.', parsing: 'Kata Benda - Akusatif Tunggal Maskulin', strongs: 'G2316', root: 'θεός (theos)', meaning: 'Tuhan, Allah' }
+                ]
+            }
+        };
+
+        // DAFTAR 66 KITAB ALKITAB
+        const bibleBooks = [
+            // Perjanjian Lama (PL) - Ibrani
+            { id: 'gen', name: 'Kejadian', lang: 'hebrew', test: 'PL' }, { id: 'exo', name: 'Keluaran', lang: 'hebrew', test: 'PL' },
+            { id: 'lev', name: 'Imamat', lang: 'hebrew', test: 'PL' }, { id: 'num', name: 'Bilangan', lang: 'hebrew', test: 'PL' },
+            { id: 'deu', name: 'Ulangan', lang: 'hebrew', test: 'PL' }, { id: 'jos', name: 'Yosua', lang: 'hebrew', test: 'PL' },
+            { id: 'jdg', name: 'Hakim-hakim', lang: 'hebrew', test: 'PL' }, { id: 'rut', name: 'Rut', lang: 'hebrew', test: 'PL' },
+            { id: '1sa', name: '1 Samuel', lang: 'hebrew', test: 'PL' }, { id: '2sa', name: '2 Samuel', lang: 'hebrew', test: 'PL' },
+            { id: '1ki', name: '1 Raja-raja', lang: 'hebrew', test: 'PL' }, { id: '2ki', name: '2 Raja-raja', lang: 'hebrew', test: 'PL' },
+            { id: '1ch', name: '1 Tawarikh', lang: 'hebrew', test: 'PL' }, { id: '2ch', name: '2 Tawarikh', lang: 'hebrew', test: 'PL' },
+            { id: 'ezr', name: 'Ezra', lang: 'hebrew', test: 'PL' }, { id: 'neh', name: 'Nehemia', lang: 'hebrew', test: 'PL' },
+            { id: 'est', name: 'Ester', lang: 'hebrew', test: 'PL' }, { id: 'job', name: 'Ayub', lang: 'hebrew', test: 'PL' },
+            { id: 'psa', name: 'Mazmur', lang: 'hebrew', test: 'PL' }, { id: 'pro', name: 'Amsal', lang: 'hebrew', test: 'PL' },
+            { id: 'ecc', name: 'Pengkhotbah', lang: 'hebrew', test: 'PL' }, { id: 'sng', name: 'Kidung Agung', lang: 'hebrew', test: 'PL' },
+            { id: 'isa', name: 'Yesaya', lang: 'hebrew', test: 'PL' }, { id: 'jer', name: 'Yeremia', lang: 'hebrew', test: 'PL' },
+            { id: 'lam', name: 'Ratapan', lang: 'hebrew', test: 'PL' }, { id: 'ezk', name: 'Yehezkiel', lang: 'hebrew', test: 'PL' },
+            { id: 'dan', name: 'Daniel', lang: 'hebrew', test: 'PL' }, { id: 'hos', name: 'Hosea', lang: 'hebrew', test: 'PL' },
+            { id: 'jol', name: 'Yoel', lang: 'hebrew', test: 'PL' }, { id: 'amo', name: 'Amos', lang: 'hebrew', test: 'PL' },
+            { id: 'oba', name: 'Obaja', lang: 'hebrew', test: 'PL' }, { id: 'jon', name: 'Yunus', lang: 'hebrew', test: 'PL' },
+            { id: 'mic', name: 'Mikha', lang: 'hebrew', test: 'PL' }, { id: 'nam', name: 'Nahum', lang: 'hebrew', test: 'PL' },
+            { id: 'hab', name: 'Habakuk', lang: 'hebrew', test: 'PL' }, { id: 'zep', name: 'Zefanya', lang: 'hebrew', test: 'PL' },
+            { id: 'hag', name: 'Hagai', lang: 'hebrew', test: 'PL' }, { id: 'zec', name: 'Zakharia', lang: 'hebrew', test: 'PL' },
+            { id: 'mal', name: 'Maleakhi', lang: 'hebrew', test: 'PL' },
+            // Perjanjian Baru (PB) - Yunani
+            { id: 'mat', name: 'Matius', lang: 'greek', test: 'PB' }, { id: 'mrk', name: 'Markus', lang: 'greek', test: 'PB' },
+            { id: 'luk', name: 'Lukas', lang: 'greek', test: 'PB' }, { id: 'jhn', name: 'Yohanes', lang: 'greek', test: 'PB' },
+            { id: 'act', name: 'Kisah Para Rasul', lang: 'greek', test: 'PB' }, { id: 'rom', name: 'Roma', lang: 'greek', test: 'PB' },
+            { id: '1co', name: '1 Korintus', lang: 'greek', test: 'PB' }, { id: '2co', name: '2 Korintus', lang: 'greek', test: 'PB' },
+            { id: 'gal', name: 'Galatia', lang: 'greek', test: 'PB' }, { id: 'eph', name: 'Efesus', lang: 'greek', test: 'PB' },
+            { id: 'php', name: 'Filipi', lang: 'greek', test: 'PB' }, { id: 'col', name: 'Kolose', lang: 'greek', test: 'PB' },
+            { id: '1th', name: '1 Tesalonika', lang: 'greek', test: 'PB' }, { id: '2th', name: '2 Tesalonika', lang: 'greek', test: 'PB' },
+            { id: '1ti', name: '1 Timotius', lang: 'greek', test: 'PB' }, { id: '2ti', name: '2 Timotius', lang: 'greek', test: 'PB' },
+            { id: 'tit', name: 'Titus', lang: 'greek', test: 'PB' }, { id: 'phm', name: 'Filemon', lang: 'greek', test: 'PB' },
+            { id: 'heb', name: 'Ibrani', lang: 'greek', test: 'PB' }, { id: 'jas', name: 'Yakobus', lang: 'greek', test: 'PB' },
+            { id: '1pe', name: '1 Petrus', lang: 'greek', test: 'PB' }, { id: '2pe', name: '2 Petrus', lang: 'greek', test: 'PB' },
+            { id: '1jo', name: '1 Yohanes', lang: 'greek', test: 'PB' }, { id: '2jo', name: '2 Yohanes', lang: 'greek', test: 'PB' },
+            { id: '3jo', name: '3 Yohanes', lang: 'greek', test: 'PB' }, { id: 'jud', name: 'Yudas', lang: 'greek', test: 'PB' },
+            { id: 'rev', name: 'Wahyu', lang: 'greek', test: 'PB' }
+        ];
+
+        // --- ELEMEN DOM ---
+        const bookSelect = document.getElementById('book-select');
+        const chapterInput = document.getElementById('chapter-input');
+        const verseInput = document.getElementById('verse-input');
+        const loadBtn = document.getElementById('load-verse-btn');
+        
+        const verseTitleEl = document.getElementById('verse-title');
+        const referenceTranslationEl = document.getElementById('reference-translation');
+        
+        const viewInterlinear = document.getElementById('view-interlinear');
+        const viewParallel = document.getElementById('view-parallel');
+        const interlinearContainer = document.getElementById('interlinear-container');
+        const interlinearDirectionLabel = document.getElementById('interlinear-direction-label');
+        const parallelOriginal = document.getElementById('parallel-original');
+        const parallelTranslation = document.getElementById('parallel-translation');
+        
+        const btnViewInterlinear = document.getElementById('btn-view-interlinear');
+        const btnViewParallel = document.getElementById('btn-view-parallel');
+
+        const grammarNotesSection = document.getElementById('grammar-notes');
+        const grammarNotesContent = document.getElementById('grammar-notes-content');
+        
+        // Elemen DOM untuk Fitur AI
+        const btnAnalyzeAi = document.getElementById('btn-analyze-ai');
+        const aiLoading = document.getElementById('ai-loading');
+        const aiContent = document.getElementById('ai-content');
+        const aiContentInner = document.getElementById('ai-content-inner');
+        
+        const verseLoadingOverlay = document.getElementById('verse-loading-overlay');
+        const toastNotification = document.getElementById('toast-notification');
+        const toastMessage = document.getElementById('toast-message');
+
+        // State View Aktif
+        let currentView = 'interlinear';
+        let currentVerseData = null;
+
+        // --- FUNGSI UI BANTUAN ---
+        
+        function showToast(message) {
+            toastMessage.textContent = message;
+            toastNotification.classList.remove('translate-y-full', 'opacity-0');
+            toastNotification.classList.remove('bg-red-600');
+            toastNotification.classList.add('bg-indigo-600');
+            
+            setTimeout(() => {
+                toastNotification.classList.add('translate-y-full', 'opacity-0');
+            }, 4000); 
+        }
+        
+        function showErrorToast(message) {
+            toastMessage.textContent = message;
+            toastNotification.classList.remove('translate-y-full', 'opacity-0', 'bg-indigo-600');
+            toastNotification.classList.add('bg-red-600');
+            
+            setTimeout(() => {
+                toastNotification.classList.add('translate-y-full', 'opacity-0');
+            }, 4000); 
+        }
+
+        // Inisialisasi Opsi Kitab
+        function populateBooks() {
+            bookSelect.innerHTML = '';
+            
+            const groupPL = document.createElement('optgroup');
+            groupPL.label = "Perjanjian Lama (Ibrani)";
+            
+            const groupPB = document.createElement('optgroup');
+            groupPB.label = "Perjanjian Baru (Yunani)";
+            
+            bibleBooks.forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.id;
+                option.textContent = book.name;
+                
+                if(book.test === 'PL') groupPL.appendChild(option);
+                else groupPB.appendChild(option);
+            });
+            
+            bookSelect.appendChild(groupPL);
+            bookSelect.appendChild(groupPB);
+            
+            // Set default ke Yohanes
+            bookSelect.value = 'jhn';
+        }
+
+        function switchView(viewName) {
+            currentView = viewName;
+            if (viewName === 'interlinear') {
+                viewInterlinear.classList.remove('hidden');
+                viewInterlinear.classList.add('block');
+                viewParallel.classList.remove('grid');
+                viewParallel.classList.add('hidden');
+                
+                // Update button styles
+                btnViewInterlinear.classList.replace('text-gray-500', 'text-indigo-700');
+                btnViewInterlinear.classList.replace('hover:text-gray-700', 'bg-white');
+                btnViewInterlinear.classList.add('shadow-sm');
+                
+                btnViewParallel.classList.replace('text-indigo-700', 'text-gray-500');
+                btnViewParallel.classList.replace('bg-white', 'hover:text-gray-700');
+                btnViewParallel.classList.remove('shadow-sm');
+            } else {
+                viewInterlinear.classList.remove('block');
+                viewInterlinear.classList.add('hidden');
+                viewParallel.classList.remove('hidden');
+                viewParallel.classList.add('grid');
+                
+                // Update button styles
+                btnViewParallel.classList.replace('text-gray-500', 'text-indigo-700');
+                btnViewParallel.classList.replace('hover:text-gray-700', 'bg-white');
+                btnViewParallel.classList.add('shadow-sm');
+                
+                btnViewInterlinear.classList.replace('text-indigo-700', 'text-gray-500');
+                btnViewInterlinear.classList.replace('bg-white', 'hover:text-gray-700');
+                btnViewInterlinear.classList.remove('shadow-sm');
+            }
+        }
+
+        btnViewInterlinear.addEventListener('click', () => switchView('interlinear'));
+        btnViewParallel.addEventListener('click', () => switchView('parallel'));
+
+        // --- LOGIKA UTAMA ---
+
+        function renderVerse(data) {
+            currentVerseData = data;
+            
+            // Sembunyikan hasil AI sebelumnya saat pindah ayat
+            aiContent.classList.add('hidden');
+            aiContentInner.innerHTML = '';
+            
+            // Update Header
+            verseTitleEl.textContent = data.title;
+            referenceTranslationEl.textContent = data.reference;
+            
+            // Bersihkan container sebelumnya
+            interlinearContainer.innerHTML = '';
+            
+            // Set arah teks dan properti flex berdasarkan bahasa
+            const isHebrew = data.language === 'hebrew';
+            
+            if (isHebrew) {
+                interlinearContainer.style.flexDirection = 'row-reverse'; // Kanan ke kiri untuk Ibrani
+                interlinearDirectionLabel.textContent = "Analisis Interlinear (Baca Kanan ke Kiri untuk Ibrani)";
+                parallelOriginal.dir = "rtl";
+                parallelOriginal.className = "text-2xl leading-loose hebrew-text text-right";
+            } else {
+                interlinearContainer.style.flexDirection = 'row'; // Kiri ke kanan untuk Yunani
+                interlinearDirectionLabel.textContent = "Analisis Interlinear (Baca Kiri ke Kanan untuk Yunani)";
+                parallelOriginal.dir = "ltr";
+                parallelOriginal.className = "text-2xl leading-loose greek-text text-left";
+            }
+
+            let originalTextArray = [];
+            let translationTextArray = [];
+
+            // Render setiap kata
+            data.words.forEach((wordInfo, index) => {
+                // Untuk Mode Paralel
+                originalTextArray.push(wordInfo.original);
+                translationTextArray.push(wordInfo.translation);
+                
+                // Untuk Mode Interlinear
+                const wordElement = document.createElement('div');
+                wordElement.className = 'word-container flex flex-col items-center p-2 min-w-[60px]';
+                
+                // Kelas font spesifik
+                const originalFontClass = isHebrew ? 'hebrew-text text-3xl' : 'greek-text text-2xl';
+
+                // Struktur internal kata (Bawah ke Atas: Indo -> Transliterasi -> Asli)
+                wordElement.innerHTML = `
+                    <div class="text-xs text-indigo-700 font-semibold mb-1 text-center">${wordInfo.translation}</div>
+                    <div class="text-xs text-gray-500 italic mb-2 text-center">${wordInfo.transliteration}</div>
+                    <div class="${originalFontClass} text-gray-900 text-center font-bold">${wordInfo.original}</div>
+                    
+                    <!-- Popover Detail -->
+                    <div class="word-details text-left">
+                        <div class="border-b pb-2 mb-2">
+                            <span class="${originalFontClass} text-xl">${wordInfo.original}</span>
+                            <span class="text-gray-500 text-sm ml-2">(${wordInfo.transliteration})</span>
+                        </div>
+                        <div class="space-y-2 text-sm text-gray-700">
+                            <p><strong>Akar Kata:</strong> <span class="${isHebrew ? 'hebrew-text text-lg' : 'greek-text text-lg'}">${wordInfo.root}</span></p>
+                            <p><strong>Arti Dasar:</strong> ${wordInfo.meaning}</p>
+                            <p><strong>Parsing:</strong> <br><span class="text-indigo-600 text-xs">${wordInfo.parsing}</span></p>
+                            <p><strong>No. Strong:</strong> <span class="text-blue-500 font-mono">${wordInfo.strongs}</span></p>
+                        </div>
+                    </div>
+                `;
+
+                // Interaksi klik untuk mobile (agar popover tetap terbuka)
+                wordElement.addEventListener('click', function(e) {
+                    // Tutup popover lain
+                    document.querySelectorAll('.word-container').forEach(el => {
+                        if (el !== wordElement) el.classList.remove('active');
+                    });
+                    wordElement.classList.toggle('active');
+                    e.stopPropagation();
+                });
+
+                interlinearContainer.appendChild(wordElement);
+            });
+
+            // Set Teks Mode Paralel
+            if(isHebrew) {
+                // Ibrani ditulis dari kanan ke kiri, array perlu dibalik agar secara DOM urutannya benar jika pakai spasi
+                parallelOriginal.textContent = originalTextArray.reverse().join(' ');
+            } else {
+                parallelOriginal.textContent = originalTextArray.join(' ');
+            }
+            parallelTranslation.innerHTML = translationTextArray.join(' ').replace(/\(/g, '<span class="text-gray-400 text-sm">(').replace(/\)/g, ')</span>');
+
+            // Tampilkan Catatan jika ada
+            if (data.notes) {
+                grammarNotesContent.textContent = data.notes;
+                grammarNotesSection.classList.remove('hidden');
+            } else {
+                grammarNotesSection.classList.add('hidden');
+            }
+        }
+
+        btnAnalyzeAi.addEventListener('click', async () => {
+            if (!currentVerseData) return;
+            
+            // Siapkan UI untuk loading
+            aiContent.classList.add('hidden');
+            aiLoading.classList.remove('hidden');
+            btnAnalyzeAi.disabled = true;
+            btnAnalyzeAi.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const reference = currentVerseData.title;
+            const text = currentVerseData.reference;
+            
+            try {
+                const htmlResponse = await fetchGeminiAnalysis(reference, text);
+                aiContentInner.innerHTML = htmlResponse;
+                aiContent.classList.remove('hidden');
+            } catch (error) {
+                showToast("Koneksi ke AI gagal. Silakan coba beberapa saat lagi.");
+                console.error("AI Error:", error);
+            } finally {
+                // Kembalikan UI ke normal
+                aiLoading.classList.add('hidden');
+                btnAnalyzeAi.disabled = false;
+                btnAnalyzeAi.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        });
+
+        async function fetchGeminiAnalysis(reference, text) {
+            // Memanfaatkan Gemini API melalui infrastruktur Canvas yang menyediakannya secara runtime
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            
+            const prompt = `Bertindaklah sebagai teolog dan ahli eksegesis Alkitab yang profesional.
+Pengguna saat ini sedang mempelajari teks interlinear dari ayat: ${reference} 
+Teks terjemahannya: "${text}"
+
+Tugas Anda:
+1. Berikan "Analisis Konteks" (Historis, Budaya, atau Sastra) maksimal 2 paragraf padat.
+2. Berikan "Referensi Silang" (Cross-References) berupa 3-4 ayat lain yang sangat relevan secara teologis dengan ayat ini. Jelaskan secara singkat mengapa ayat tersebut terhubung.
+
+ATURAN OUTPUT:
+- Balas MURNI menggunakan tag HTML saja. JANGAN gunakan blok markdown (\`\`\`html).
+- Gunakan tag <h3>, <p>, <ul>, <li>, <strong> untuk hierarki visual yang rapi.
+- Gunakan bahasa Indonesia yang baku, mendalam secara akademis, namun mudah dimengerti.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                // Menggunakan eksponensial backoff secara natural atau timeout jika diperlukan
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            const result = await response.json();
+            
+            if (result.candidates && result.candidates[0] && result.candidates[0].content) {
+                let htmlText = result.candidates[0].content.parts[0].text;
+                // Membersihkan sisa backticks markdown jika AI masih menyertakannya secara keliru
+                htmlText = htmlText.replace(/```html\n?/g, '').replace(/```\n?/g, '');
+                return htmlText;
+            } else {
+                throw new Error("Struktur respons tidak valid dari AI.");
+            }
+        }
+
+        // Fungsi Ajaib: Meminta AI Menyusun Interlinear dalam format JSON
+        async function buildInterlinearWithAI(bookName, chapter, verse, language) {
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            
+            const prompt = `Berperanlah sebagai ahli Alkitab bahasa asli (Ibrani dan Yunani).
+Tugas Anda adalah membuat data teks interlinear untuk ayat: ${bookName} ${chapter}:${verse}.
+Gunakan Terjemahan Baru (TB) bahasa Indonesia untuk teks referensinya.
+
+PENTING: Output Anda HARUS berupa JSON murni sesuai format di bawah ini. Jangan berikan teks pembuka atau penutup markdown.
+{
+  "title": "${bookName} ${chapter}:${verse}",
+  "language": "${language}",
+  "reference": "[Terjemahan utuh bahasa Indonesia]",
+  "notes": "[Catatan singkat tentang grammar, konteks atau teologi ayat ini]",
+  "words": [
+    {
+      "original": "[Kata asli Ibrani/Yunani]",
+      "transliteration": "[Transliterasi alphabet latin]",
+      "translation": "[Terjemahan literal kata ini]",
+      "parsing": "[Detail tata bahasa, misal: Kata Benda - Nominatif, dll]",
+      "strongs": "[Nomor Strong, misal: G1234 / H1234]",
+      "root": "[Akar kata asal]",
+      "meaning": "[Arti dasar]"
+    }
+  ]
+}
+Catatan Tambahan: Jika bahasa="${language}" adalah hebrew (Ibrani), urutan array "words" HARUS merepresentasikan dari Kanan ke Kiri (kata pertama dalam teks Ibrani diletakkan di indeks pertama array, meskipun dibaca dari kanan). Pastikan penulisan Ibrani/Yunani menggunakan aksara yang tepat beserta tanda bacanya.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json" // Memaksa AI mengembalikan JSON valid
+                }
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            const result = await response.json();
+            
+            if (result.candidates && result.candidates[0] && result.candidates[0].content) {
+                const jsonText = result.candidates[0].content.parts[0].text;
+                return JSON.parse(jsonText);
+            } else {
+                throw new Error("Gagal mengambil data ayat dari AI.");
+            }
+        }
+
+        // Tutup popover saat mengklik di luar area kata
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.word-container')) {
+                document.querySelectorAll('.word-container').forEach(el => {
+                    el.classList.remove('active');
+                });
+            }
+        });
+
+        // Tangani tombol Tampilkan Ayat
+        loadBtn.addEventListener('click', async () => {
+            const bookId = bookSelect.value;
+            const chapter = chapterInput.value;
+            const verse = verseInput.value;
+            
+            const key = `${bookId}_${chapter}_${verse}`;
+            
+            if (verseData[key]) {
+                // Jika data ada di cache/statis, langsung tampilkan
+                renderVerse(verseData[key]);
+                showToast(`Memuat ${verseData[key].title} dari memori lokal.`);
+            } else {
+                // Jika belum ada, panggil AI untuk membuatkannya!
+                const selectedBook = bibleBooks.find(b => b.id === bookId);
+                const bookName = selectedBook.name;
+                const language = selectedBook.lang;
+                
+                try {
+                    // Tampilkan UI Loading
+                    verseLoadingOverlay.classList.remove('hidden');
+                    loadBtn.disabled = true;
+                    loadBtn.classList.add('opacity-50');
+                    
+                    showToast(`Menugaskan AI mencari naskah asli ${bookName} ${chapter}:${verse}...`);
+                    
+                    // Tarik data dari AI
+                    const newVerseData = await buildInterlinearWithAI(bookName, chapter, verse, language);
+                    
+                    // Simpan ke cache agar pencarian berikutnya cepat
+                    verseData[key] = newVerseData;
+                    
+                    // Render UI
+                    renderVerse(newVerseData);
+                    
+                } catch (error) {
+                    console.error("Interlinear Generation Error:", error);
+                    showErrorToast(`Gagal menyusun data untuk ${bookName} ${chapter}:${verse}. Coba lagi nanti.`);
+                } finally {
+                    // Sembunyikan UI Loading
+                    verseLoadingOverlay.classList.add('hidden');
+                    loadBtn.disabled = false;
+                    loadBtn.classList.remove('opacity-50');
+                }
+            }
+        });
+
+        // Inisialisasi saat pertama kali dimuat (Muat Yohanes 1:1)
+        window.addEventListener('DOMContentLoaded', () => {
+            populateBooks();
+            renderVerse(verseData['jhn_1_1']);
+        });
+
+    </script>
+</body>
+</html>
