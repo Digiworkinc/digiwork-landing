@@ -3716,7 +3716,17 @@
                           <button type="button" onclick="openEditCartItemModal(${idx})" class="font-bold text-xs text-left text-slate-800 dark:text-slate-100 hover:text-cyan-600 dark:hover:text-cyan-400 transition break-words flex items-center space-x-1" title="Klik untuk mengedit rincian item"><span>${item.nama}</span><i data-lucide="edit-3" class="w-3 h-3 text-slate-400 shrink-0"></i></button>
                         ${item.isIndent ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500 text-white shrink-0">INDENT</span>' : ''}
                       </div>
-                      <div class="flex items-center space-x-1.5 text-[11px] mt-0.5 flex-wrap"><span class="text-cyan-600 dark:text-cyan-400 font-semibold">${formatRp(item.harga)}</span>${item.satuan ? `<span class="text-slate-400 text-[10px]">/${item.satuan}</span>` : ''}${item.hargaOriginal && item.hargaOriginal !== item.harga ? `<span class="text-[10px] text-slate-400 line-through">${formatRp(item.hargaOriginal)}</span><span class="text-[9px] px-1 py-0.2 rounded font-bold bg-emerald-500/10 text-emerald-500">Kustom</span>` : ''}<span class="text-slate-400 text-[10px]">• Sub:</span><span class="font-bold text-slate-800 dark:text-slate-100">${formatRp(item.harga * item.qty)}</span></div>${item.catatan ? `<p class="text-[10px] text-slate-500 dark:text-slate-400 italic mt-0.5 truncate" title="${item.catatan}"><i data-lucide="file-text" class="w-3 h-3 inline mr-0.5 text-cyan-500"></i>${item.catatan}</p>` : ''}
+                      <div class="flex items-center space-x-1.5 text-[11px] mt-1 flex-wrap">
+                        <div class="inline-flex items-center space-x-1 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-600 shadow-sm" title="Ketik untuk edit harga jual langsung">
+                          <span class="text-[10px] text-slate-400 font-bold">@Rp</span>
+                          <input type="number" min="0" step="500" value="${item.harga}" onchange="setCartPriceDirect(${idx}, this.value)" onkeydown="if(event.key==='Enter') this.blur();" class="w-20 text-[11px] font-bold text-cyan-600 dark:text-cyan-400 bg-transparent text-right focus:outline-none" title="Ketik harga jual satuan langsung (Tekan Enter untuk simpan)" />
+                          ${item.satuan ? `<span class="text-slate-400 text-[10px]">/${item.satuan}</span>` : ''}
+                        </div>
+                        ${item.hargaOriginal && item.hargaOriginal !== item.harga ? `<span class="text-[10px] text-slate-400 line-through">${formatRp(item.hargaOriginal)}</span><span class="text-[9px] px-1 py-0.2 rounded font-bold bg-emerald-500/10 text-emerald-500">Kustom</span>` : ''}
+                        <span class="text-slate-400 text-[10px]">• Sub:</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-100">${formatRp(item.harga * item.qty)}</span>
+                      </div>
+                      ${item.catatan ? `<p class="text-[10px] text-slate-500 dark:text-slate-400 italic mt-0.5 truncate" title="${item.catatan}"><i data-lucide="file-text" class="w-3 h-3 inline mr-0.5 text-cyan-500"></i>${item.catatan}</p>` : ''}
                     </div>
                     <div class="flex items-center space-x-1 shrink-0">
                       <button onclick="updateCartQty(${idx}, -1)" class="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-xs transition">-</button>
@@ -3765,28 +3775,36 @@
                 <span class="text-2xl font-black text-cyan-600 dark:text-cyan-400">${formatRp(totalBelanja)}</span>
               </div>
 
-              <!-- Uang Diterima & Kembalian (Jika Tunai) -->
-              ${state.posCustomer.metode === 'Tunai' ? `
-                <div class="space-y-2">
-                  <div class="flex items-center justify-between">
-                    <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Uang Diterima (Rp):</label>
-                    <div class="flex items-center space-x-1">
-                      <button type="button" onclick="setPosCashPreset('pas', ${totalBelanja})" class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-cyan-500 hover:text-white transition font-semibold">Uang Pas</button>
-                      <button type="button" onclick="setPosCashPreset(50000, ${totalBelanja})" class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-cyan-500 hover:text-white transition font-semibold">50rb</button>
-                      <button type="button" onclick="setPosCashPreset(100000, ${totalBelanja})" class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-cyan-500 hover:text-white transition font-semibold">100rb</button>
-                      <button type="button" onclick="setPosCashPreset(200000, ${totalBelanja})" class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-cyan-500 hover:text-white transition font-semibold">200rb</button>
-                    </div>
-                  </div>
-                  <input type="number" id="pos-cash-input" value="${uangBayar || ''}" oninput="updatePosUangDiterima(this.value, ${totalBelanja})" placeholder="0" class="w-full text-sm font-bold p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
-                  
-                  <div class="flex justify-between items-center text-xs px-1">
-                    <span class="text-slate-500 dark:text-slate-400 font-semibold">Kembalian:</span>
-                    <span id="pos-kembalian-display" class="font-extrabold text-sm ${kembalian >= 0 ? 'text-emerald-500' : 'text-rose-500'}">
-                      ${formatRp(Math.max(0, kembalian))} ${kembalian < 0 ? `(Kurang ${formatRp(Math.abs(kembalian))})` : ''}
-                    </span>
+              <!-- Uang Dibayar & Status Pembayaran (Mendukung Bayar Sebagian / DP / Hutang) -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                    Uang Dibayar / Diterima (Rp):
+                  </label>
+                  <div class="flex items-center space-x-1 flex-wrap gap-y-1">
+                    <button type="button" onclick="setPosCashPreset('pas', ${totalBelanja})" class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-cyan-500 hover:text-white transition font-semibold" title="Bayar Lunas Penuh">⚡ Pas</button>
+                    <button type="button" onclick="setPosCashPreset('dp50', ${totalBelanja})" class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500 hover:text-white transition font-semibold" title="Bayar DP 50%">DP 50%</button>
+                    <button type="button" onclick="setPosCashPreset('hutang', ${totalBelanja})" class="text-[10px] px-2 py-0.5 rounded bg-rose-500/15 text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white transition font-semibold" title="Hutang Penuh / Tempo (Bayar Rp 0)">Rp 0 (Hutang)</button>
+                    <button type="button" onclick="setPosCashPreset(50000, ${totalBelanja})" class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-cyan-500 hover:text-white transition font-semibold">50rb</button>
+                    <button type="button" onclick="setPosCashPreset(100000, ${totalBelanja})" class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-cyan-500 hover:text-white transition font-semibold">100rb</button>
                   </div>
                 </div>
-              ` : ''}
+                <div class="relative">
+                  <span class="absolute left-3 top-2.5 text-xs text-slate-400 font-bold">Rp</span>
+                  <input type="number" id="pos-cash-input" value="${uangBayar !== undefined ? uangBayar : totalBelanja}" min="0" step="any" oninput="updatePosUangDiterima(this.value, ${totalBelanja})" placeholder="0" class="w-full pl-9 pr-3 py-2 text-sm font-bold rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
+                </div>
+                
+                <!-- Status Pembayaran & Kembalian / Sisa Hutang Box -->
+                <div id="pos-status-bayar-box" class="p-2.5 rounded-lg border flex items-center justify-between text-xs transition ${kembalian >= 0 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300' : 'bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300'}">
+                  <div class="flex items-center space-x-1.5 font-bold">
+                    <i data-lucide="${kembalian >= 0 ? 'check-circle-2' : 'alert-circle'}" class="w-4 h-4 shrink-0"></i>
+                    <span id="pos-status-bayar-label">${kembalian >= 0 ? 'Status: LUNAS' : (uangBayar > 0 ? 'Status: BAYAR SEBAGIAN / DP' : 'Status: HUTANG PENUH')}</span>
+                  </div>
+                  <span id="pos-kembalian-display" class="font-extrabold text-sm ${kembalian >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}">
+                    ${kembalian >= 0 ? `Kembalian: ${formatRp(kembalian)}` : `Kurang / Hutang: ${formatRp(Math.abs(kembalian))}`}
+                  </span>
+                </div>
+              </div>
 
               <!-- Tombol Selesaikan & Cetak Struk -->
               <button type="button" onclick="prosesCheckoutPOS()" ${state.cart.length === 0 ? 'disabled' : ''} class="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 disabled:opacity-50 text-white font-bold text-sm shadow-lg shadow-cyan-500/25 transition flex items-center justify-center space-x-2">
@@ -3897,10 +3915,24 @@
       const bayar = parseFloat(amount) || 0;
       state.posCustomer.uangDiterima = bayar;
       const kembalian = bayar - total;
+      const box = document.getElementById('pos-status-bayar-box');
+      const label = document.getElementById('pos-status-bayar-label');
       const display = document.getElementById('pos-kembalian-display');
+
       if (display) {
-        display.className = `font-extrabold text-sm ${kembalian >= 0 ? 'text-emerald-500' : 'text-rose-500'}`;
-        display.innerText = `${formatRp(Math.max(0, kembalian))} ${kembalian < 0 ? `(Kurang ${formatRp(Math.abs(kembalian))})` : ''}`;
+        display.className = `font-extrabold text-sm ${kembalian >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`;
+        display.innerText = kembalian >= 0 ? `Kembalian: ${formatRp(kembalian)}` : `Kurang / Hutang: ${formatRp(Math.abs(kembalian))}`;
+      }
+
+      if (box && label) {
+        if (kembalian >= 0) {
+          box.className = "p-2.5 rounded-lg border flex items-center justify-between text-xs transition bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300";
+          label.innerHTML = '<i data-lucide="check-circle-2" class="w-4 h-4 inline mr-1 text-emerald-500"></i>Status: LUNAS';
+        } else {
+          box.className = "p-2.5 rounded-lg border flex items-center justify-between text-xs transition bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300";
+          label.innerHTML = `<i data-lucide="alert-circle" class="w-4 h-4 inline mr-1 text-rose-500"></i>Status: ${bayar > 0 ? 'BAYAR SEBAGIAN / DP' : 'HUTANG PENUH'}`;
+        }
+        if (window.lucide) lucide.createIcons();
       }
     };
 
@@ -3908,6 +3940,10 @@
       let bayar = 0;
       if (preset === 'pas') {
         bayar = total;
+      } else if (preset === 'dp50') {
+        bayar = Math.round(total / 2);
+      } else if (preset === 'hutang') {
+        bayar = 0;
       } else {
         bayar = preset;
       }
@@ -4149,6 +4185,23 @@
       renderPage();
     };
 
+    window.setCartPriceDirect = function (idx, val) {
+      const item = state.cart[idx];
+      if (!item) return;
+      const newHarga = Math.max(0, parseFloat(val) || 0);
+      const stokItem = state.stok.find(b => b.id === item.id);
+      if (!item.hargaOriginal) {
+        item.hargaOriginal = stokItem ? stokItem.harga : item.harga;
+      }
+      item.harga = newHarga;
+
+      const totalBelanja = state.cart.reduce((sum, it) => sum + (it.harga * it.qty), 0);
+      if (state.posCustomer.metode === 'Tunai' && (!state.posCustomer.uangDiterima || state.posCustomer.uangDiterima < totalBelanja)) {
+        state.posCustomer.uangDiterima = totalBelanja;
+      }
+      renderPage();
+    };
+
     window.clearCart = function () {
       if (state.cart.length === 0) return;
       if (confirm('Yakin ingin mengosongkan semua item dalam keranjang belanja?')) {
@@ -4368,10 +4421,26 @@
       const teleponPembeli = (cust.telepon || '').trim();
       const alamatPembeli = (cust.alamat || '').trim();
       const metode = cust.metode || 'Tunai';
-      const uangDiterima = typeof cust.uangDiterima === 'number' && cust.uangDiterima > 0 ? cust.uangDiterima : total;
 
-      if (metode === 'Tunai' && uangDiterima < total) {
-        alert(`Uang diterima (${formatRp(uangDiterima)}) kurang dari total tagihan (${formatRp(total)})!`);
+      const cashInputEl = document.getElementById('pos-cash-input');
+      const uangDiterima = cashInputEl ? (parseFloat(cashInputEl.value) || 0) : (typeof cust.uangDiterima === 'number' ? cust.uangDiterima : total);
+
+      const sisaHutang = Math.max(0, total - uangDiterima);
+      const kembalian = Math.max(0, uangDiterima - total);
+      const statusBayar = sisaHutang <= 0 ? 'Lunas' : (uangDiterima > 0 ? 'Sebagian / DP' : 'Belum Bayar');
+
+      // Validasi: Jika pelanggan membayar sebagian atau berhutang, wajib menyertakan Nama Pelanggan
+      if (sisaHutang > 0 && (!namaPembeli || namaPembeli.toLowerCase() === 'umum / cash')) {
+        alert(
+          '⚠️ NAMA PELANGGAN WAJIB DIISI!\n\n' +
+          `Transaksi ini memiliki kekurangan/sisa hutang sebesar ${formatRp(sisaHutang)}.\n` +
+          'Mohon lengkapi Nama Pembeli agar piutang tercatat dengan tertib di menu Hutang & Piutang.'
+        );
+        const nameInput = document.getElementById('pos-cust-nama');
+        if (nameInput) {
+          nameInput.focus();
+          nameInput.classList.add('border-rose-500', 'ring-2', 'ring-rose-500/20');
+        }
         return;
       }
 
@@ -4416,7 +4485,6 @@
       }
 
       const trxId = `TRX-2026-00${state.penjualan.length + 1}`;
-      const kembalian = Math.max(0, uangDiterima - total);
       const tglTrx = document.getElementById('pos-tanggal-input')?.value || state.posCustomer.tanggal || new Date().toISOString().split('T')[0];
       const isIndentTrx = !!(state.posCustomer.isIndent || state.cart.some(i => i.isIndent));
 
@@ -4434,6 +4502,8 @@
         metode,
         bayar: uangDiterima,
         kembalian,
+        sisa: sisaHutang,
+        statusBayar,
         isIndent: isIndentTrx,
         statusIndent: isIndentTrx ? 'Menunggu Stok' : null
       };
@@ -4451,20 +4521,37 @@
       // Catat ke transaksi penjualan
       await dbSave('penjualan', trxId, newPenjualan);
 
-      // Jika tunai, otomatis catat pemasukan di Kas Toko
-      if (metode === 'Tunai') {
+      // Jika tunai dan ada uang masuk, catat penerimaan riil ke Kas Toko
+      if (metode === 'Tunai' && uangDiterima > 0) {
         const kasId = `KAS-00${state.kas.length + 1}`;
         await dbSave('kas', kasId, {
           id: kasId,
           tanggal: tglTrx,
           tipe: 'Masuk',
           kategori: isIndentTrx ? 'Penjualan Indent POS' : 'Penjualan POS',
-          keterangan: `Penjualan Kasir #${trxId} (${namaPembeli}) ${isIndentTrx ? '[INDENT]' : ''}`,
-          jumlah: total
+          keterangan: `Penjualan Kasir #${trxId} (${namaPembeli}) [${statusBayar}]`,
+          jumlah: Math.min(uangDiterima, total)
         });
       }
 
-      // Cetak struk penjualan
+      // Jika ada kekurangan hutang / bayar sebagian, otomatis catat ke Hutang & Piutang (Piutang Pelanggan)
+      if (sisaHutang > 0) {
+        const hpId = `HP-00${state.hutangpiutang.length + 1}`;
+        await dbSave('hutangpiutang', hpId, {
+          id: hpId,
+          jenis: 'Piutang',
+          pihak: namaPembeli,
+          noRef: trxId,
+          tanggal: tglTrx,
+          totalTagihan: total,
+          terbayar: uangDiterima,
+          jumlah: sisaHutang,
+          jatuhTempo: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          status: 'Belum Lunas'
+        });
+      }
+
+      // Cetak struk penjualan dengan informasi bayar & sisa hutang
       cetakNotaPOS(newPenjualan);
 
       // Reset keranjang & form pembeli
@@ -4512,6 +4599,9 @@
     function cetakNotaPOS(trx) {
       const isIndent = !!(trx.isIndent || (Array.isArray(trx.items) && trx.items.some(i => i.isIndent)));
       const printArea = document.getElementById('printable-area');
+      const sisaHutang = typeof trx.sisa === 'number' ? trx.sisa : Math.max(0, (trx.total || 0) - (trx.bayar || 0));
+      const statusBayar = trx.statusBayar || (sisaHutang <= 0 ? 'Lunas' : ((trx.bayar || 0) > 0 ? 'Sebagian / DP' : 'Belum Bayar'));
+
       printArea.innerHTML = `
         <div style="width: 280px; font-size: 11px; margin: 0 auto; font-family: monospace;">
           <h2 style="text-align:center; font-weight:bold; margin-bottom: 2px;">JOY PRINT SOLUTION</h2>
@@ -4530,7 +4620,7 @@
           ${trx.pelangganAlamat && trx.pelangganAlamat !== '-' ? `<p style="margin:2px 0;">Alamat: ${trx.pelangganAlamat}</p>` : ''}
           <p style="margin:2px 0;">Metode: <strong>${trx.metode}</strong> ${isIndent ? '| <strong style="color:#d97706;">INDENT</strong>' : ''}</p>
           <hr style="border-top:1px dashed #000;" />
-          ${trx.items.map(i => `
+          ${(trx.items || []).map(i => `
             <div style="display:flex; justify-content:space-between; margin: 2px 0;">
               <span>${i.nama} (x${i.qty}) ${i.isIndent ? '<strong style="color:#d97706;">[INDENT]</strong>' : ''}</span>
               <span>${formatRp(i.subtotal)}</span>
@@ -4539,17 +4629,31 @@
           `).join('')}
           <hr style="border-top:1px dashed #000;" />
           <p style="display:flex; justify-content:space-between; font-weight:bold; margin: 3px 0;">
-            <span>TOTAL:</span>
+            <span>TOTAL TAGIHAN:</span>
             <span>${formatRp(trx.total)}</span>
           </p>
           <p style="display:flex; justify-content:space-between; margin: 2px 0;">
             <span>Bayar (${trx.metode}):</span>
             <span>${formatRp(trx.bayar)}</span>
           </p>
-          <p style="display:flex; justify-content:space-between; margin: 2px 0;">
-            <span>Kembalian:</span>
-            <span>${formatRp(trx.kembalian)}</span>
-          </p>
+          ${(trx.kembalian || 0) > 0 ? `
+            <p style="display:flex; justify-content:space-between; margin: 2px 0;">
+              <span>Kembalian:</span>
+              <span>${formatRp(trx.kembalian)}</span>
+            </p>
+          ` : ''}
+          ${sisaHutang > 0 ? `
+            <div style="border: 1px dashed #000; padding: 4px; margin: 4px 0; text-align: center;">
+              <p style="margin:0; font-size:10px; font-weight:bold;">*** TRANSAKSI BELUM LUNAS ***</p>
+              <p style="margin:2px 0; display:flex; justify-content:space-between; font-weight:bold; font-size:11px;">
+                <span>KEKURANGAN / SISA HUTANG:</span>
+                <span>${formatRp(sisaHutang)}</span>
+              </p>
+              <p style="margin:2px 0 0 0; font-size:9px;">Status: ${statusBayar} • Jatuh Tempo 14 Hari</p>
+            </div>
+          ` : `
+            <p style="text-align:right; font-weight:bold; font-size:10px; margin: 3px 0;">*** STATUS: LUNAS ***</p>
+          `}
           ${isIndent ? `
             <hr style="border-top:1px dashed #000;" />
             <p style="text-align:center; font-size:9px; margin: 4px 0; color: #555;">
@@ -4599,6 +4703,11 @@
                   <div class="text-right">
                     <span class="text-sm font-extrabold text-cyan-600 dark:text-cyan-400">${formatRp(trx.total)}</span>
                     <span class="text-[10px] text-emerald-500 block">Laba: ${formatRp(trx.labaKotor)}</span>
+                    ${(trx.sisa && trx.sisa > 0) ? `
+                      <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 block mt-1">
+                        Hutang: ${formatRp(trx.sisa)}
+                      </span>
+                    ` : '<span class="px-2 py-0.2 rounded text-[9px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 block mt-1">✓ Lunas</span>'}
                     ${trx.isIndent ? `
                       <button onclick="toggleStatusIndentPOS('${trx.id}')" class="text-[10px] font-bold px-2 py-0.5 rounded mt-1 transition ${trx.statusIndent === 'Selesai / Terpenuhi' ? 'bg-emerald-500/20 text-emerald-600 hover:bg-emerald-500 hover:text-white' : 'bg-amber-500/20 text-amber-600 hover:bg-amber-500 hover:text-white'}" title="Klik untuk ubah status barang tiba/selesai">
                         ${trx.statusIndent === 'Selesai / Terpenuhi' ? '✓ Stok Terpenuhi' : '⏳ Menunggu Stok'}
